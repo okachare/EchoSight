@@ -32,6 +32,9 @@ This workspace (`GeTi CSAM/`) acts as the **interface and debug hub** between th
 - [x] Workspace set up as debug/analysis interface
 - [x] NVL CSAM images collected
 - [x] Custom TIFF→JPEG conversion script written (CSAM output → Geti input)
+- [x] TiffSplitter script moved into workspace (`TiffSplitter/TiffSplitter.py`) and pushed to GitHub
+- [x] Image integrity verified: ARL_Test.TIFF (66 frames, 8-bit, 517×281px) — all 66 PNG and JPEG outputs confirmed valid
+- [x] Decision: use **PNG** for Geti training (lossless, preserves palette exactly)
 - [ ] Organize images into dataset folder structure (WIP)
 - [ ] Define specific defect classes / annotation schema
 - [ ] Annotate images in Geti (WIP)
@@ -89,4 +92,4 @@ This workspace (`GeTi CSAM/`) acts as the **interface and debug hub** between th
 
 ---
 
-*Last updated: 2026-08-11 15:30 — NVL images collected. TIFF→JPEG conversion script done. Data org, annotation, training, and debugging all WIP. Awaiting run logs.*
+*Last updated: 2026-08-11 16:30 — Image integrity confirmed. 66-frame TIFF splits cleanly to PNG/JPEG. PNG chosen as training format. Dataset organization next.*

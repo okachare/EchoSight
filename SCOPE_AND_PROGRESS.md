@@ -79,7 +79,8 @@ Q3 2026 (Jul – Sep)
 | Define defect classes to detect | ⬜ Pending | — | e.g. void, delamination, crack |
 | Perform initial CSAM scans of NovaLake samples | ✅ Done | 2026-08-11 | NVL CSAM images collected |
 | Collect sufficient images for training (target: 50–200+) | ✅ Done | 2026-08-11 | Images in hand |
-| Convert CSAM .tiff output to JPEG for Geti input | ✅ Done | 2026-08-11 | Custom script written and working |
+| Convert CSAM .tiff output to JPEG for Geti input | ✅ Done | 2026-08-11 | Custom script written — `TiffSplitter/TiffSplitter.py` |
+| Verify TiffSplitter output integrity | ✅ Done | 2026-08-11 | 8-bit, 66 frames, PNG lossless — cleared for Geti |
 | Organize images into dataset folder structure | 🟡 WIP | 2026-08-11 | Organization in progress |
 
 ### Phase 3 — Annotation
@@ -187,4 +188,4 @@ Q3 2026 (Jul – Sep)
 
 ---
 
-*Last updated: 2026-08-11 — NVL CSAM images collected. Custom TIFF→JPEG conversion script written. Data organization, annotation, model training, and debugging all WIP. Geti running on PVA SAM501. Awaiting first run logs to be dropped into workspace.*
+*Last updated: 2026-08-11 — Image integrity verified. TiffSplitter output cleared for Geti (PNG format recommended). Dataset organization next.*

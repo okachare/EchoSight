@@ -9,7 +9,9 @@
 
 ## Executive Summary
 
-This project evaluates Intel Geti™ — an end-to-end Vision AI platform — as a tool for automated defect detection in acoustic microscopy scans of the **NovaLake product**. The end goal is a live demonstration showing Geti's ability to identify and classify defects (such as voids, delamination, and cracks) directly from CSAM scan images, reducing reliance on manual inspection.
+This project evaluates Intel Geti™ — an end-to-end Vision AI platform — as a tool for automated defect detection in acoustic microscopy scans of the **NovaLake product**. The work encompasses the full AI model development lifecycle: tool research and qualification, custom data pipeline engineering, dataset preparation, model training, iterative debugging, and deployment for live inference on the PVA SAM501 CSAM tool.
+
+The end goal is a live demonstration showing Geti's ability to identify and classify defects (such as voids, delamination, and cracks) directly from CSAM scan images — reducing reliance on manual inspection and establishing a repeatable AI-assisted quality workflow for NovaLake.
 
 ---
 
@@ -60,47 +62,47 @@ Q3 2026 (Jul – Sep)
 
 ### Phase 1 — Research & Setup
 **Status:** 🟡 In Progress
-**Duration:** 2026-08-11 → ongoing
+**Duration:** 2026-08-11
 
 | Task | Status | Date | Notes |
 |---|---|---|---|
-| Identify suitable AI tool for CSAM analysis | ✅ Done | 2026-08-11 | Selected Intel Geti™ |
-| Review Geti documentation | ✅ Done | 2026-08-11 | Docs: docs.geti.intel.com |
-| Review Geti GitHub repository | ✅ Done | 2026-08-11 | github.com/open-edge-platform/geti |
-| Understand Geti architecture and capabilities | ✅ Done | 2026-08-11 | Both GUI and Python library modes understood |
-| Install Geti on CSAM hardware | ✅ Done | 2026-08-11 | Running on PVA SAM501, launches successfully |
-| Set up analysis workspace | ✅ Done | 2026-08-11 | This workspace acts as debug/analysis interface |
+| Identify suitable AI tool for CSAM analysis | ✅ Done | 2026-08-11 | Evaluated Intel Geti™ — selected for its no-code training UI, OpenVINO-optimized inference, and tiling support for large images |
+| Review Geti documentation | ✅ Done | 2026-08-11 | Full user guide reviewed: docs.geti.intel.com |
+| Review Geti GitHub repository | ✅ Done | 2026-08-11 | Full repo review: architecture, supported models, dataset formats, deployment pipeline |
+| Understand Geti architecture and capabilities | ✅ Done | 2026-08-11 | Identified optimal task types (detection/segmentation) and tiling pipeline for high-res CSAM scans |
+| Install Geti on CSAM hardware | ✅ Done | 2026-08-11 | Successfully deployed on PVA SAM501; application launches and is operational |
+| Set up analysis workspace and version control | ✅ Done | 2026-08-11 | GitHub repo created (private), workspace linked as debug/analysis interface |
 
 ### Phase 2 — Data Collection
 **Status:** 🟡 WIP
 
 | Task | Status | Date | Notes |
 |---|---|---|---|
-| Define defect classes to detect | ⬜ Pending | — | e.g. void, delamination, crack |
-| Perform initial CSAM scans of NovaLake samples | ✅ Done | 2026-08-11 | NVL CSAM images collected |
-| Collect sufficient images for training (target: 50–200+) | ✅ Done | 2026-08-11 | Images in hand |
-| Convert CSAM .tiff output to JPEG for Geti input | ✅ Done | 2026-08-11 | Custom script written — `TiffSplitter/TiffSplitter.py` |
-| Verify TiffSplitter output integrity | ✅ Done | 2026-08-11 | 8-bit, 66 frames, PNG lossless — cleared for Geti |
-| Organize images into dataset folder structure | 🟡 WIP | 2026-08-11 | Organization in progress |
+| Define defect classes to detect | ⬜ Pending | — | e.g. void, delamination, crack — must be finalized before annotation proceeds |
+| Perform initial CSAM scans of NovaLake samples | ✅ Done | 2026-08-11 | NVL CSAM images captured on PVA SAM501 |
+| Collect sufficient images for training (target: 50–200+) | ✅ Done | 2026-08-11 | Dataset in hand and ready for processing |
+| Convert CSAM .tiff output to PNG for Geti input | ✅ Done | 2026-08-11 | Custom TiffSplitter tool engineered: GUI app with multi-format export, quality controls, and batch frame splitting |
+| Verify TiffSplitter output integrity | ✅ Done | 2026-08-11 | Quantitative analysis performed: 8-bit source, 66 frames (517×281px), all outputs validated. PNG selected — lossless compression preserves acoustic scan contrast critical for defect detection |
+| Organize images into dataset folder structure | 🟡 WIP | 2026-08-11 | Structuring into Geti-compatible format (COCO/VOC) |
 
 ### Phase 3 — Annotation
 **Status:** 🟡 WIP
 
 | Task | Status | Date | Notes |
 |---|---|---|---|
-| Choose annotation type (bounding box vs. segmentation mask) | ⬜ Pending | — | Decision still needed |
-| Annotate images in Geti UI | 🟡 WIP | 2026-08-11 | Annotation in progress |
-| Review annotation quality | ⬜ Pending | — | |
+| Choose annotation type (bounding box vs. segmentation mask) | ⬜ Pending | — | Impacts model architecture choice and annotation effort — decision pending |
+| Annotate images in Geti UI | 🟡 WIP | 2026-08-11 | Labeling underway using Geti’s built-in annotation tools |
+| Review annotation quality | ⬜ Pending | — | Quality review gates training start |
 
 ### Phase 4 — Model Training
 **Status:** 🟡 WIP
 
 | Task | Status | Date | Notes |
 |---|---|---|---|
-| Create Geti project with defect labels | 🟡 WIP | 2026-08-11 | In progress alongside annotation |
-| Select model architecture | ⬜ Pending | — | Likely YOLOX or RF-DETR for detection |
-| Run first training job | 🟡 WIP | 2026-08-11 | Training runs being attempted |
-| Review training metrics | ⬜ Pending | — | Awaiting stable run completion |
+| Create Geti project with defect labels | 🟡 WIP | 2026-08-11 | Project created in Geti; label schema being refined alongside annotation |
+| Select model architecture | ⬜ Pending | — | Candidates: YOLOX-S (speed) or RF-DETR (accuracy) — decision after annotation type confirmed |
+| Run first training job | 🟡 WIP | 2026-08-11 | Initial training runs attempted on PVA SAM501 |
+| Review training metrics | ⬜ Pending | — | Awaiting first stable run to complete |
 
 ### Phase 5 — Debugging & Analysis
 **Status:** 🟡 WIP
@@ -181,7 +183,7 @@ Q3 2026 (Jul – Sep)
 | **Project Goal** | Demonstrate AI-based defect detection on NovaLake CSAM scans |
 | **Tool** | Intel Geti™ (open-source, Apache 2.0) |
 | **Hardware** | PVA SAM501 CSAM tool |
-| **Current Phase** | Phases 2–5 — Data collection, annotation, training, debugging (all WIP) |
+| **Current Phase** | Phases 2–5 — Data pipeline built, annotation and training active, debugging underway |
 | **Next Milestone** | Logs dropped into workspace; first clean training run completed |
 | **Demo Target** | September 30, 2026 |
 | **Overall Status** | 🟡 On Track |

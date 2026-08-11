@@ -1,0 +1,42 @@
+# Raw scan data — large binary files, do not commit
+*.tiff
+*.tif
+*.raw
+
+# Converted images — regeneratable from script, keep repo light
+*.jpg
+*.jpeg
+*.png
+*.bmp
+
+# Geti project data and model weights — large binaries
+data/
+models/
+*.xml
+*.bin
+*.onnx
+*.pt
+*.pth
+
+# Geti logs and run artifacts — drop into workspace for analysis but don't commit
+logs/
+runs/
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
+
+# Environment
+.env
+*.env
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -2,6 +2,7 @@
 **Project:** Geti AI-Assisted Defect Detection on NovaLake Product
 **Tool:** Intel Geti™ on PVA SAM501 Confocal Scanning Acoustic Microscope (CSAM)
 **Owner:** Omkar
+**Project Start:** July 14, 2026
 **Target Deadline:** End of Q3 2026 (September 30, 2026)
 **Report Last Updated:** 2026-08-11
 
@@ -47,13 +48,16 @@ A successful demo will show:
 ```
 Q3 2026 (Jul – Sep)
 │
-├── Jul 2026 ─── Research, tool evaluation, installation
+├── Jul 14, 2026 ─── Project kicked off
 │
-├── Aug 2026 ─── [NOW] Data collection, annotation, first training run
-│                       ↑ Currently here
-├── Sep 2026 ─── Fine-tuning, results analysis, demo preparation
+├── Jul 14–Aug 11 ── Research, tool evaluation, installation, data pipeline
+│                    TiffSplitter built, images collected & verified
 │
-└── Sep 30, 2026 ─── DEMO DEADLINE
+├── Aug 2026 ─────── [NOW] Dataset organization, annotation, first training runs
+│                              ↑ Currently here
+├── Sep 2026 ─────── Fine-tuning, results analysis, demo preparation
+│
+└── Sep 30, 2026 ── DEMO DEADLINE
 ```
 
 ---
@@ -66,11 +70,11 @@ Q3 2026 (Jul – Sep)
 
 | Task | Status | Date | Notes |
 |---|---|---|---|
-| Identify suitable AI tool for CSAM analysis | ✅ Done | 2026-08-11 | Evaluated Intel Geti™ — selected for its no-code training UI, OpenVINO-optimized inference, and tiling support for large images |
-| Review Geti documentation | ✅ Done | 2026-08-11 | Full user guide reviewed: docs.geti.intel.com |
-| Review Geti GitHub repository | ✅ Done | 2026-08-11 | Full repo review: architecture, supported models, dataset formats, deployment pipeline |
-| Understand Geti architecture and capabilities | ✅ Done | 2026-08-11 | Identified optimal task types (detection/segmentation) and tiling pipeline for high-res CSAM scans |
-| Install Geti on CSAM hardware | ✅ Done | 2026-08-11 | Successfully deployed on PVA SAM501; application launches and is operational |
+| Identify suitable AI tool for CSAM analysis | ✅ Done | 2026-07-14 | Evaluated Intel Geti™ — selected for its no-code training UI, OpenVINO-optimized inference, and tiling support for large images |
+| Review Geti documentation | ✅ Done | 2026-07-14 | Full user guide reviewed: docs.geti.intel.com |
+| Review Geti GitHub repository | ✅ Done | 2026-07-14 | Full repo review: architecture, supported models, dataset formats, deployment pipeline |
+| Understand Geti architecture and capabilities | ✅ Done | 2026-07-14 | Identified optimal task types (detection/segmentation) and tiling pipeline for high-res CSAM scans |
+| Install Geti on CSAM hardware | ✅ Done | ~2026-07-21 | Successfully deployed on PVA SAM501; application launches and is operational |
 | Set up analysis workspace and version control | ✅ Done | 2026-08-11 | GitHub repo created (private), workspace linked as debug/analysis interface |
 
 ### Phase 2 — Data Collection
@@ -79,9 +83,9 @@ Q3 2026 (Jul – Sep)
 | Task | Status | Date | Notes |
 |---|---|---|---|
 | Define defect classes to detect | ⬜ Pending | — | e.g. void, delamination, crack — must be finalized before annotation proceeds |
-| Perform initial CSAM scans of NovaLake samples | ✅ Done | 2026-08-11 | NVL CSAM images captured on PVA SAM501 |
-| Collect sufficient images for training (target: 50–200+) | ✅ Done | 2026-08-11 | Dataset in hand and ready for processing |
-| Convert CSAM .tiff output to PNG for Geti input | ✅ Done | 2026-08-11 | Custom TiffSplitter tool engineered: GUI app with multi-format export, quality controls, and batch frame splitting |
+| Perform initial CSAM scans of NovaLake samples | ✅ Done | ~2026-07-28 | NVL CSAM images captured on PVA SAM501 |
+| Collect sufficient images for training (target: 50–200+) | ✅ Done | ~2026-07-28 | Dataset in hand and ready for processing |
+| Convert CSAM .tiff output to PNG for Geti input | ✅ Done | ~2026-08-04 | Custom TiffSplitter tool engineered: GUI app with multi-format export, quality controls, and batch frame splitting |
 | Verify TiffSplitter output integrity | ✅ Done | 2026-08-11 | Quantitative analysis performed: 8-bit source, 66 frames (517×281px), all outputs validated. PNG selected — lossless compression preserves acoustic scan contrast critical for defect detection |
 | Organize images into dataset folder structure | 🟡 WIP | 2026-08-11 | Structuring into Geti-compatible format (COCO/VOC) |
 

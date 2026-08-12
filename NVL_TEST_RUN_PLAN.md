@@ -61,57 +61,151 @@
 
 ---
 
-## Phase 4b — Inference
+## Phase 4b — Inference & Verification
 
-### Step 6 — Review model metrics in Geti
-In the **Models** tab, open the trained model and check:
-- **mAP@0.5** — primary accuracy metric; target >50% for a useful model
-- **mAP@0.75** — stricter overlap threshold; useful for tight mask quality
-- **Precision** — of all predictions, how many were actually delamination?
-- **Recall** — of all real delamination instances, how many did the model find?
-- **Per-subset scores** — check if val/test scores are close to training scores (large gap = overfitting)
+### Step 6 — Collect run artifacts
+Before reviewing anything:
+- Copy training log from Geti's jobs folder → save to `Debug/RunNVL01/jobs/`
+- Screenshot the training result card (model name, mAP, date, dataset size) → `Debug/RunNVL01/RunNVL01_result.PNG`
+- Screenshot the Model metrics tab (all numbers visible) → `Debug/RunNVL01/RunNVL01_metrics.PNG`
+- Screenshot the Training parameters tab → `Debug/RunNVL01/RunNVL01_params.PNG`
+- Screenshot the Training datasets tab (split distribution) → `Debug/RunNVL01/RunNVL01_dataset.PNG`
 
-### Step 7 — Run predictions on new images
-- Go to **Annotate** tab
-- Upload **2–3 new NVL images** that were NOT in the training set
-- Click **Predict** on each image
-- Geti will overlay predicted masks using the trained model
-- Assess:
-  - Are masks landing on actual delamination?
-  - Are there obvious false positives (mask on clean area)?
-  - Are real defects being missed (false negatives)?
-- Screenshot results and save to `Debug/RunNVL01/`
+---
+
+### Step 7 — Read and interpret model metrics
+
+Go to **Models** tab → click the trained model → open **Model metrics** tab.
+
+#### 7a — Check the headline numbers
+
+| Metric | Where to find it | What to check |
+|---|---|---|
+| mAP@0.5 | Top of metrics tab | Primary score — is it >20%? >30%? |
+| mAP@0.75 | Top of metrics tab | Gap vs mAP@0.5 — large gap = sloppy masks |
+| mAR@1 | Top of metrics tab | Is model finding any defect at all on first guess? |
+| mAR@100 | Top of metrics tab | Upper bound of recall — how many defects can it find at all? |
+
+Record all values in the Run Log table at the bottom of this document.
+
+#### 7b — Check training vs validation gap (overfitting check)
+
+Geti shows separate scores for training and validation subsets. Compare:
+
+```
+Healthy (generalizing well):      Overfitting:
+  Training mAP:   65%               Training mAP:   88%
+  Validation mAP: 58%    ✓          Validation mAP: 21%    ✗ — big gap
+  Gap: 7% — acceptable              Gap: 67% — model memorized training data
+```
+
+**If gap > 20%:** Model is overfitting. Fix = add more diverse images before retraining.  
+**If both are low:** Model hasn't learned enough. Fix = add more images.  
+**If both are reasonable:** Proceed to inference.
+
+#### 7c — Read the training curves
+
+Scroll down in the metrics tab to see the curves:
+
+- **Loss curve:** Should go down smoothly then flatten. If it never dropped → model didn't learn.
+- **LR curve:** Should step down 1–2 times. If it stayed flat → scheduler never fired (loss may have plateaued immediately).
+- **Training time:** Note how many epochs ran before early stopping fired. If it stopped at epoch 15–20 → patience too low or learning rate issue.
+
+Screenshot the curves → `Debug/RunNVL01/RunNVL01_curves.PNG`
+
+---
+
+### Step 8 — Run predictions on unseen images (visual verification)
+
+This is the most important step — numbers alone don't tell the full story.
+
+#### 8a — Select test images
+- Pick **5 images that were NOT in the training set** — these should be new NVL scans
+- Include a mix: some with obvious delamination, some with subtle delamination, optionally 1 clean image
+- Save them locally first so you can compare prediction vs reality side-by-side
+
+#### 8b — Run predictions in Geti
+- Go to **Annotate** tab in your project
+- Upload the 5 test images
+- For each image, click **Predict** (the auto-annotate button, usually a sparkle/wand icon)
+- Geti runs the trained model and overlays predicted masks on the image
+- Do **not** Submit yet — just observe
+
+#### 8c — Evaluate each prediction visually
+
+For each image, ask these questions and record your observations:
+
+| Question | Good sign | Bad sign |
+|---|---|---|
+| Is the mask on an actual delamination area? | Yes — mask matches the defect | No — mask is on a clean region (false positive) |
+| Does the mask shape match the defect boundary? | Tight polygon around the defect | Loose blob covering non-defect area |
+| Are all visible delamination spots detected? | Yes | Some defects missed (false negative) |
+| Is the confidence score reasonable? | >50% for real defects | <30% on obvious defects = weak model |
+| Any predictions on completely wrong areas? | None | Masks appearing on wire bonds, edges, etc. |
+
+Screenshot each prediction (before accepting/rejecting) → `Debug/RunNVL01/Predict_img01.PNG` etc.
+
+#### 8d — Score your visual inspection
+
+After reviewing all 5 images, summarize:
+
+```
+Example scoring:
+  Image 1: 2 defects present → model found 2 ✓, 0 false positives ✓  → PASS
+  Image 2: 1 defect present  → model found 1 ✓, 1 false positive ✗   → PARTIAL
+  Image 3: 3 defects present → model found 1 ✓, missed 2 ✗           → FAIL
+  Image 4: 0 defects present → model found 0 ✓                       → PASS
+  Image 5: 2 defects present → model found 2 ✓, 0 false positives ✓  → PASS
+
+  Visual score: 3 PASS / 1 PARTIAL / 1 FAIL → acceptable for first run
+```
+
+Record your visual score in the Run Log.
+
+---
+
+### Step 9 — Make a go/no-go decision
+
+Based on metrics + visual inspection, decide what to do next:
+
+| Result | Decision | Action |
+|---|---|---|
+| mAP@0.5 >30%, visuals look reasonable | **Go** — proceed to fine-tuning | Accept/correct predictions, add to dataset, retrain |
+| mAP@0.5 10–30%, visuals show some signal | **Conditional go** — more data needed | Annotate 20 more images, retrain, compare |
+| mAP@0.5 <10%, visuals show random predictions | **No-go** — investigate | Check annotation quality; review training curves; consider tighter polygons |
+| Large train/val gap (>20%) | **Overfit** | Add diverse images before retraining; don't fine-tune yet |
 
 ---
 
 ## Phase 4c — Fine-tuning
 
-### Step 8 — Accept / correct / reject predictions
-For each predicted image:
-- **Accept** predictions that look correct
-- **Correct** predictions that are close but need adjustment (reshape polygon)
-- **Reject** predictions that are completely wrong
-- Submit — accepted/corrected images are added back into the training dataset
+### Step 10 — Accept / correct / reject predictions
+For each predicted image from Step 8:
+- **Accept** predictions that look correct — mask matches real delamination
+- **Correct** predictions that are close but need adjustment — reshape the polygon to tighten it
+- **Reject** predictions that are completely wrong — removes them so the model doesn't learn bad examples
+- Click **Submit** — accepted/corrected images are added back into the training dataset and will be included in the next training run
 
-### Step 9 — Add more images if needed
+### Step 11 — Add more images if needed
 If mAP@0.5 is below ~30% after the first run:
 - Annotate additional NVL images (target: work toward 50–100 total)
-- Use the predict-review-correct loop to annotate faster (Geti pre-fills, you just verify)
-- Re-train and compare mAP vs the previous run
+- Use the predict-review-correct loop to annotate faster — Geti pre-fills the masks, you just verify and correct
+- Aim to add images that show defect types the model currently misses (hard examples)
 
-### Step 10 — Retrain and compare
-- Repeat Steps 4–9 until model quality is acceptable for demo
-- Log each training run into a new `Debug/RunNVL0X/` folder
-- Record mAP@0.5 per run in the table below
+### Step 12 — Retrain and compare
+- Repeat Steps 4–9 for each new training run
+- Save each run into a new folder: `Debug/RunNVL02/`, `Debug/RunNVL03/`, etc.
+- Record mAP@0.5 and visual score per run in the Run Log table below
+- Stop iterating when mAP@0.5 >50% and visual inspection passes consistently
 
 ---
 
 ## Run Log
 
-| Run | Date | Images | Model | mAP@0.5 | Notes |
-|---|---|---|---|---|---|
-| Smoke Test | 2026-08-12 | 5 (delamination only) | RF-DETR-Seg-M | ~1% | Pipeline smoke test — not a real model |
-| NVL Test Run 01 | — | 30 (delamination only) | RF-DETR-Seg-M | — | Planned weekend 2026-08-16/17 |
+| Run | Date | Images | Model | mAP@0.5 | Train/Val gap | Visual score | Notes |
+|---|---|---|---|---|---|---|---|
+| Smoke Test | 2026-08-12 | 5 (delamination only) | RF-DETR-Seg-M | ~1% | — | N/A | Pipeline smoke test — not a real model |
+| NVL Test Run 01 | — | 30 (delamination only) | RF-DETR-Seg-M | — | — | — | Planned weekend 2026-08-16/17 |
 
 ---
 

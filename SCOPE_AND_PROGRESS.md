@@ -33,13 +33,14 @@ A successful demo will show:
 | Phase | Description | Status |
 |---|---|---|
 | 1. Research & Setup | Literature review, tool evaluation, installation | ✅ Complete |
-| 2. Data Collection | Acquire and organize NovaLake CSAM scan images | 🟡 WIP |
+| 2. Data Collection | Acquire and organize NovaLake CSAM scan images | ✅ Complete |
 | 3. Annotation | Label defects in images using Geti's annotation tools | 🟡 WIP |
-| 4. Model Training | Train initial defect detection model in Geti | 🟡 WIP |
+| 4a. NVL Test Run — Training | Train RF-DETR-Seg-M on 30 NVL images (delamination) | ⬜ Planned |
+| 4b. NVL Test Run — Inference | Evaluate model; run predictions on new NVL images | ⬜ Planned |
+| 4c. NVL Test Run — Fine-tuning | Iterate: improve annotations, add data, retrain | ⬜ Planned |
 | 5. Debugging & Analysis | Review training logs, diagnose issues, improve dataset | ✅ Complete |
-| 6. Fine-tuning | Iterate on model with improved labels/data/hyperparameters | ⬜ Not Started |
-| 7. Results Analysis | Evaluate final model metrics; prepare demo materials | ⬜ Not Started |
-| 8. Demo | Present live defect detection on NovaLake scans to management | ⬜ Not Started |
+| 6. Results Analysis | Evaluate final model metrics; prepare demo materials | ⬜ Not Started |
+| 7. Demo | Present live defect detection on NovaLake scans to management | ⬜ Not Started |
 
 ---
 
@@ -60,7 +61,10 @@ Q3 2026 (Jul – Sep)
 │                    RF-DETR-Seg-M, 5 images, 1% mAP (smoke test).
 │                    Pipeline proven end-to-end. OpenVINO FP16 export: 66 MB.
 │
-├── Aug 2026 ─────── [NOW] Model evaluation & inference learning → scale up dataset
+├── Aug 16–17, 2026 ─ **NVL Test Run** — 30 NVL images, delamination class
+│                    Training → Inference → Fine-tuning
+│
+├── Aug 2026 ─────── [NOW] Annotating 30 NVL images → NVL Test Run start
 │                              ↑ Currently here
 ├── Sep 2026 ─────── Fine-tuning, results analysis, demo preparation
 │
@@ -85,16 +89,17 @@ Q3 2026 (Jul – Sep)
 | Set up analysis workspace and version control | ✅ Done | 2026-08-11 | GitHub repo created (private), workspace linked as debug/analysis interface |
 
 ### Phase 2 — Data Collection
-**Status:** 🟡 WIP
+**Status:** ✅ Complete
+**Duration:** 2026-07-28 – 2026-08-12
 
 | Task | Status | Date | Notes |
 |---|---|---|---|
-| Define defect classes to detect | 🟡 WIP | 2026-08-12 | Starting with `delamination` only for smoke test; additional classes (void, crack) to be added for full NVL run |
+| Define defect classes to detect | 🟡 WIP | 2026-08-12 | Starting with `delamination` for first real run; additional classes (void, crack) to be added in later iterations |
 | Perform initial CSAM scans of NovaLake samples | ✅ Done | ~2026-07-28 | NVL CSAM images captured on PVA SAM501 |
-| Collect sufficient images for training (target: 50–200+) | ✅ Done | ~2026-07-28 | Dataset in hand and ready for processing |
+| Collect sufficient images for training (target: 50–200+) | ✅ Done | 2026-08-12 | 30 NVL images collected and organised; ready for annotation |
 | Convert CSAM .tiff output to PNG for Geti input | ✅ Done | ~2026-08-04 | Custom TiffSplitter tool engineered: GUI app with multi-format export, quality controls, and batch frame splitting |
 | Verify TiffSplitter output integrity | ✅ Done | 2026-08-11 | Quantitative analysis performed: 8-bit source, 66 frames (517×281px), all outputs validated. PNG selected — lossless compression preserves acoustic scan contrast critical for defect detection |
-| Organize images into dataset folder structure | ✅ Done | 2026-08-12 | Images uploaded directly into Geti project — Geti manages internal dataset structure |
+| Organize images into dataset folder structure | ✅ Done | 2026-08-12 | Images upload directly into Geti project — no external folder structure needed |
 
 ### Phase 3 — Annotation
 **Status:** 🟡 WIP
@@ -105,15 +110,33 @@ Q3 2026 (Jul – Sep)
 | Annotate images in Geti UI | 🟡 WIP | 2026-08-12 | 5 images annotated for smoke test; full NVL dataset annotation pending |
 | Review annotation quality | 🟡 WIP | 2026-08-12 | Smoke test annotations confirmed valid; full quality review pending for NVL dataset |
 
-### Phase 4 — Model Training
-**Status:** 🟡 WIP
+### Phase 4a — NVL Test Run: Training
+**Status:** ⬜ Planned (weekend 2026-08-16/17)
 
 | Task | Status | Date | Notes |
 |---|---|---|---|
-| Create Geti project with defect labels | ✅ Done | 2026-08-12 | New project created: Instance Segmentation, single class `delamination` |
-| Select model architecture | ✅ Done | 2026-08-12 | **RF-DETR-Seg-M** selected — balanced speed/accuracy, OpenVINO-optimized |
-| Run first training job | ✅ Done | 2026-08-12 | First clean run completed — 5 images, CPU, ~37 min, 705 MB model, OpenVINO FP16 export 66 MB |
-| Review training metrics | 🟡 WIP | 2026-08-12 | Smoke test mAP@0.5: ~1% — expected with 5 images; meaningful metrics require full NVL dataset |
+| Upload 30 NVL defect images to Geti | ⬜ Pending | — | All defect images; no clean/"No object" images for this run |
+| Annotate all 30 images with delamination polygon masks | ⬜ Pending | — | One polygon per defect instance; multiple polygons per image if needed |
+| Train RF-DETR-Seg-M (70/20/10 split, all Unassigned) | ⬜ Pending | — | Default settings; 200 epochs, early stopping; CPU |
+| Collect and analyse training log | ⬜ Pending | — | Drop log into `Debug/RunNVL01/` |
+
+### Phase 4b — NVL Test Run: Inference
+**Status:** ⬜ Planned
+
+| Task | Status | Date | Notes |
+|---|---|---|---|
+| Review model metrics in Geti (mAP, precision, recall) | ⬜ Pending | — | Baseline performance on 30-image dataset |
+| Run predictions on new unseen NVL images | ⬜ Pending | — | Use Geti Annotate → Predict on images not in training set |
+| Review prediction quality visually | ⬜ Pending | — | Are masks landing on real delamination? Any false positives? |
+
+### Phase 4c — NVL Test Run: Fine-tuning
+**Status:** ⬜ Planned
+
+| Task | Status | Date | Notes |
+|---|---|---|---|
+| Accept/correct/reject Geti predictions to expand dataset | ⬜ Pending | — | Use predict-review-correct loop to build annotations faster |
+| Add more NVL images if mAP is low | ⬜ Pending | — | Target 50–100+ annotated images for meaningful accuracy |
+| Retrain and compare mAP vs baseline | ⬜ Pending | — | Iterate until model quality is demo-ready |
 
 ### Phase 5 — Debugging & Analysis
 **Status:** ✅ Complete
@@ -125,16 +148,7 @@ Q3 2026 (Jul – Sep)
 | Analyse training loss curves and accuracy | ✅ Done | 2026-08-12 | Root cause identified and fixed; first successful run metrics captured (smoke test) |
 | Identify data or model issues | ✅ Done | 2026-08-12 | Root cause: `"No object"` images in val/test split produce empty bbox tensors → crash. Fix: all images in every split must have at least one annotated shape |
 
-### Phase 6 — Fine-tuning
-**Status:** ⬜ Not Started
-
-| Task | Status | Date | Notes |
-|---|---|---|---|
-| Improve annotations or add more data | ⬜ Pending | — | |
-| Adjust model/hyperparameters | ⬜ Pending | — | |
-| Re-train and compare metrics | ⬜ Pending | — | |
-
-### Phase 7 — Results Analysis
+### Phase 6 — Results Analysis
 **Status:** ⬜ Not Started
 
 | Task | Status | Date | Notes |
@@ -143,7 +157,7 @@ Q3 2026 (Jul – Sep)
 | Prepare visual examples of detections | ⬜ Pending | — | |
 | Prepare demo presentation materials | ⬜ Pending | — | |
 
-### Phase 8 — Demo
+### Phase 7 — Demo
 **Status:** ⬜ Not Started
 
 | Task | Status | Date | Notes |
@@ -196,11 +210,11 @@ Q3 2026 (Jul – Sep)
 | **Project Goal** | Demonstrate AI-based defect detection on NovaLake CSAM scans |
 | **Tool** | Intel Geti™ (open-source, Apache 2.0) |
 | **Hardware** | PVA SAM501 CSAM tool |
-| **Current Phase** | Phases 3–4 — Smoke test complete; learning model evaluation & inference; scaling up to full NVL dataset |
-| **Next Milestone** | Learn Geti model evaluation + inference → annotate 50+ NVL images → first real training run |
+| **Current Phase** | Phase 3 annotation + Phase 4a NVL Test Run (Training) — planned for weekend 2026-08-16/17 |
+| **Next Milestone** | Annotate 30 NVL images → NVL Test Run Training complete → Inference review |
 | **Demo Target** | September 30, 2026 |
 | **Overall Status** | 🟡 On Track |
 
 ---
 
-*Last updated: 2026-08-12 — First successful training run completed. RF-DETR-Seg-M, 5 defect images (delamination), CPU, ~37 min, mAP@0.5 ~1% (smoke test). OpenVINO FP16 export generated (66 MB). Pipeline proven end-to-end. Next: learn model evaluation & inference in Geti, then scale up to full NVL dataset.*
+*Last updated: 2026-08-12 — Smoke test complete. NVL Test Run planned for weekend (Aug 16–17): 30 NVL defect images, delamination class, RF-DETR-Seg-M. Three phases: Training → Inference → Fine-tuning.*

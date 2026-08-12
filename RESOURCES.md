@@ -198,4 +198,4 @@ GET    /api/projects/<id>/pipeline/metrics   ← latency, throughput
 
 ---
 
-*Last updated: 2026-08-11*
+*Last updated: 2026-08-12*

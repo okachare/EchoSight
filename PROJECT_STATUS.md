@@ -109,4 +109,4 @@
 
 ---
 
-*Last updated: 2026-08-12 — Smoke test complete. NVL data collected (30 images). Full training manual and NVL Test Run plan documented. Weekend plan: annotate 30 NVL images → train RF-DETR-Seg-M → inference review.*
+*Last updated: 2026-08-12 EOD — Smoke test complete. NVL data collected (30 images). All planning docs finalised: NVL_TEST_RUN_PLAN.md (12 steps across Training/Inference/Fine-tuning), GETI_TRAINING_MANUAL.md (full reference manual). Ready for NVL Test Run 01 weekend 2026-08-16/17.*

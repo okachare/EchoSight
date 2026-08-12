@@ -217,4 +217,4 @@ Q3 2026 (Jul – Sep)
 
 ---
 
-*Last updated: 2026-08-12 — Smoke test complete. NVL Test Run planned for weekend (Aug 16–17): 30 NVL defect images, delamination class, RF-DETR-Seg-M. Three phases: Training → Inference → Fine-tuning.*
+*Last updated: 2026-08-12 — Smoke test complete. NVL data collected (30 images). Full training manual, NVL Test Run plan (with detailed inference & verification steps), and model parameters guide documented. Weekend plan: annotate 30 NVL images → train RF-DETR-Seg-M → inference review → fine-tune.*

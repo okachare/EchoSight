@@ -29,7 +29,7 @@
 ### Step 2 — Upload images
 - Upload all **30 NVL defect images** (PNG format from TiffSplitter)
 - Do **not** include clean/good-unit images — getitune crashes when "No object" images land in val/test split
-- Leave all images as **Unassigned** after upload
+- Leave all images as **Unassigned** after upload — this means do not manually set Training/Validation/Testing on any image; Geti will auto-distribute them when training starts
 
 ### Step 3 — Annotate all 30 images
 - Open **Annotate** tab
@@ -48,7 +48,7 @@
 - **Advanced Settings → Data Management:**
   - Split: Training 70% / Validation 20% / Test 10% (default)
   - Expected distribution with 30 images: Training=21, Validation=6, Test=3
-  - Confirm **Unassigned: 0** before proceeding — all images must be assigned
+  - Geti auto-distributes all "Unassigned" images when you open this dialog — confirm **Unassigned: 0** before proceeding, meaning Geti has placed all 30 images into subsets and none are left floating
 - **Advanced Settings → Training:** leave all defaults (200 epochs, early stopping patience 15, LR 0.0001)
 - **Device:** CPU (no GPU on SAM501)
 - Click **Start**

@@ -45,17 +45,23 @@
 - Model: RF-DETR-Seg-M, CPU training, ~37 min, 200 max epochs (early stopping)
 - Result: 705 MB model, OpenVINO FP16 export 66 MB, mAP@0.5 ~1% (expected — smoke test only)
 - **Pipeline proven end-to-end**: upload → annotate → train → export ✔
-- Next: learn Geti model evaluation + inference, then scale up to full NVL dataset
+
+**2026-08-12 — NVL data collection complete**
+- 30 NVL defect images collected and organised
+- Ready for annotation and training this weekend
+
+**2026-08-12 — Documentation complete**
+- `NVL_TEST_RUN_PLAN.md` — step-by-step plan for NVL Test Run (Training → Inference → Fine-tuning)
+- `GETI_TRAINING_MANUAL.md` — full training manual: concepts, metrics, parameters, troubleshooting, run records
 
 ---
 
 ## Currently WIP
 
-- [ ] Learn Geti model evaluation UI — understand metrics, confusion matrix, per-class scores
-- [ ] Learn Geti inference — run predictions on new images before starting real NVL run
-- [ ] Decide full defect class list for NVL (delamination + void + crack?)
-- [ ] Annotate 50+ NVL images with full class schema
-- [ ] First real training run on full NVL dataset
+- [ ] Annotate 30 NVL images with delamination polygon masks (weekend 2026-08-16/17)
+- [ ] NVL Test Run 01 — train RF-DETR-Seg-M on 30 images, target mAP >30%
+- [ ] Inference review — run predictions on unseen NVL images
+- [ ] Lock full defect class list (delamination + void + crack?)
 
 ---
 
@@ -80,11 +86,11 @@
 
 ## Next Steps (in order)
 
-1. Learn Geti model evaluation UI (metrics, confusion matrix, score breakdown)
-2. Learn Geti inference — run predictions on a new image
-3. Lock full defect class list for NVL run
-4. Annotate 50+ NVL images with polygon masks
-5. First real training run — target meaningful mAP
+1. Annotate 30 NVL defect images with delamination polygon masks
+2. Run NVL Test Run 01 — RF-DETR-Seg-M, 30 images
+3. Review metrics + run inference on unseen images
+4. Fine-tune: predict → review → correct → retrain loop
+5. Lock additional defect classes (void, crack) and expand dataset
 
 ---
 
@@ -92,16 +98,15 @@
 
 | File | What it is |
 |---|---|
-| `TiffSplitter/TiffSplitter.py` | TIFF ? PNG/JPEG splitter tool |
-| `SCOPE_AND_PROGRESS.md` | Management report � phases, timeline, challenges |
-| `RESOURCES.md` | Geti reference � models, API, install commands |
-| `PROJECT_STATUS.md` | This file � engineering notes |
-
----
-
+| `TiffSplitter/TiffSplitter.py` | TIFF → PNG/JPEG splitter tool |
+| `SCOPE_AND_PROGRESS.md` | Management report — phases, timeline, challenges |
+| `RESOURCES.md` | Geti reference — models, API, install commands |
+| `PROJECT_STATUS.md` | This file — engineering notes |
+| `NVL_TEST_RUN_PLAN.md` | Step-by-step plan for NVL Test Run weekend |
+| `GETI_TRAINING_MANUAL.md` | Full training manual: metrics, parameters, troubleshooting |
 | `Debug/Run081125/jobs/` | 12 failed training logs from July 24 – Aug 11 |
-| `Debug/Run081226/` | First successful run artifacts, screenshots, 1 failed log |
+| `Debug/Run081226/` | Smoke test run artifacts (logs, screenshots, 1 failed + 1 successful) |
 
 ---
 
-*Last updated: 2026-08-12 — First clean training run done. Pipeline proven. Next: evaluation + inference learning, then full NVL dataset.*
+*Last updated: 2026-08-12 — Smoke test complete. NVL data collected (30 images). Full training manual and NVL Test Run plan documented. Weekend plan: annotate 30 NVL images → train RF-DETR-Seg-M → inference review.*

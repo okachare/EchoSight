@@ -40,14 +40,14 @@
 - Workaround: defect-only dataset (no clean/negative images) until getitune fixes this
 
 **2026-08-12 — First clean training run completed**
-- New Geti project: Instance Segmentation, single class `delamination`
+- New Geti project: Instance Segmentation, single class `delamination` (smoke test)
 - 5 defect images, all polygon-annotated, no "No object" samples
 - Model: RF-DETR-Seg-M, CPU training, ~37 min, 200 max epochs (early stopping)
 - Result: 705 MB model, OpenVINO FP16 export 66 MB, mAP@0.5 ~1% (expected — smoke test only)
 - **Pipeline proven end-to-end**: upload → annotate → train → export ✔
 
 **2026-08-12 — NVL data collection complete**
-- 30 NVL defect images collected and organised
+- 20 NVL defect images selected from the collected and organised dataset for NVL Test Run 01
 - Ready for annotation and training this weekend
 
 **2026-08-12 — Documentation complete**
@@ -58,10 +58,10 @@
 
 ## Currently WIP
 
-- [ ] Annotate 30 NVL images with delamination polygon masks (weekend 2026-08-16/17)
-- [ ] NVL Test Run 01 — train RF-DETR-Seg-M on 30 images, target mAP >30%
+- [x] Annotate 20 NVL images with `anomaly` polygon masks — completed 2026-08-14, approximately 39 minutes (10:32–11:11)
+- [ ] NVL Test Run 01 — Mask R-CNN Swin-T training in progress; started 2026-08-14 at approximately 11:18
 - [ ] Inference review — run predictions on unseen NVL images
-- [ ] Lock full defect class list (delamination + void + crack?)
+- [ ] Map the temporary `anomaly` label to final defect classes (delamination, void, crack?)
 
 ---
 
@@ -69,7 +69,7 @@
 
 | Decision | Why it matters |
 |---|---|
-| Full defect class list for NVL? (delamination + void + crack?) | Everything downstream depends on this — lock it down before annotating 50+ images |
+| Final meaning of temporary `anomaly` label? (delamination, void, crack?) | Determines whether the first NVL model is a generic anomaly detector or a class-specific defect model |
 | How many NVL frames are useful vs noise? | Not all 66 frames per TIFF will have defects — need selection criteria |
 | Will demo be live on SAM501 or separate machine? | Affects OpenVINO export target and deployment steps |
 | How to include clean/"No object" images? | getitune limitation — needs investigation or workaround |
@@ -86,8 +86,7 @@
 
 ## Next Steps (in order)
 
-1. Annotate 30 NVL defect images with delamination polygon masks
-2. Run NVL Test Run 01 — RF-DETR-Seg-M, 30 images
+1. Run NVL Test Run 01 — RF-DETR-Seg-M, 20 images
 3. Review metrics + run inference on unseen images
 4. Fine-tune: predict → review → correct → retrain loop
 5. Lock additional defect classes (void, crack) and expand dataset
@@ -109,4 +108,4 @@
 
 ---
 
-*Last updated: 2026-08-12 EOD — Smoke test complete. NVL data collected (30 images). All planning docs finalised: NVL_TEST_RUN_PLAN.md (12 steps across Training/Inference/Fine-tuning), GETI_TRAINING_MANUAL.md (full reference manual). Ready for NVL Test Run 01 weekend 2026-08-16/17.*
+*Last updated: 2026-08-14 — Annotation complete for 20 NVL images using temporary `anomaly` label (approximately 39 minutes, 10:32–11:11). Next: train RF-DETR-Seg-M.*

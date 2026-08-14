@@ -3,7 +3,7 @@
 **Project:** Geti AI-Assisted Defect Detection on NovaLake  
 **Run Name:** NVL Test Run  
 **Planned Date:** 2026-08-16/17 (weekend)  
-**Goal:** Train first real delamination detection model on 30 NVL CSAM images and validate inference quality  
+**Goal:** Train first real anomaly detection model on 20 NVL CSAM images and validate inference quality  
 
 ---
 
@@ -11,8 +11,8 @@
 
 | Phase | Activity | Target Outcome |
 |---|---|---|
-| **4a — Training** | Annotate 30 images → train RF-DETR-Seg-M | Clean training run, mAP baseline established |
-| **4b — Inference** | Review metrics → predict on new images | Confirm model detects delamination on unseen images |
+| **4a — Training** | Annotate 20 images → train RF-DETR-Seg-M | Clean training run, mAP baseline established |
+| **4b — Inference** | Review metrics → predict on new images | Confirm model detects anomalies on unseen images |
 | **4c — Fine-tuning** | Correct predictions → retrain → compare mAP | Improved accuracy; repeat until demo-ready |
 
 ---
@@ -24,31 +24,37 @@
 - Click **Create New Project**
 - Task type: **Instance Segmentation**
 - Project name: `NVL_TestRun_01` (or similar)
-- Label: add `delamination` only (single class for this run)
+- Label: add `anomaly` only (temporary single class for this run)
 
 ### Step 2 — Upload images
-- Upload all **30 NVL defect images** (PNG format from TiffSplitter)
+- Upload all **20 NVL defect images** (PNG format from TiffSplitter)
 - Do **not** include clean/good-unit images — getitune crashes when "No object" images land in val/test split
 - Leave all images as **Unassigned** after upload — this means do not manually set Training/Validation/Testing on any image; Geti will auto-distribute them when training starts
 
-### Step 3 — Annotate all 30 images
+### Step 3 — Annotate all 20 images ✅ Complete
+- **Completed:** 2026-08-14, approximately 10:32–11:11 (39 minutes)
+- **Result:** 20/20 images submitted with `anomaly` polygon annotations
 - Open **Annotate** tab
 - For each image:
   - Select the **Polygon tool** (left toolbar)
-  - Select label: **Delamination**
-  - Trace the delamination boundary tightly — follow the defect edge, not a loose outline
-  - If an image has **multiple delamination spots**, draw a **separate polygon for each one**
+  - Select label: **Anomaly**
+  - Trace the anomaly boundary tightly — follow the defect edge, not a loose outline
+  - If an image has **multiple anomaly spots**, draw a **separate polygon for each one**
   - Click **Submit** after each image
-- Work through all 30 images before starting training — do not train on partial annotations
-- All 30 images should show a green checkmark (✓) in the filmstrip when done
+- Work through all 20 images before starting training — do not train on partial annotations
+- All 20 images should show a green checkmark (✓) in the filmstrip when done
 
-### Step 4 — Configure training
+### Step 4 — Configure training ✅ Started
+- **Training start:** 2026-08-14 at approximately 11:18
+- **Run:** Mask R-CNN Swin-T, 20 images, temporary `anomaly` label
+- **Monitoring:** system and process utilization logging active
 - Click **Train Model**
 - **Model:** RF-DETR-Seg-M (Balance preset) — do not use XL for this run (CPU is too slow)
 - **Advanced Settings → Data Management:**
   - Split: Training 70% / Validation 20% / Test 10% (default)
-  - Expected distribution with 30 images: Training=21, Validation=6, Test=3
-  - Geti auto-distributes all "Unassigned" images when you open this dialog — confirm **Unassigned: 0** before proceeding, meaning Geti has placed all 30 images into subsets and none are left floating
+  - Expected distribution with 20 images: approximately Training=14, Validation=4, Test=2
+  - Geti may round subset counts; confirm each subset has at least one image
+  - Geti auto-distributes all "Unassigned" images when you open this dialog — confirm **Unassigned: 0** before proceeding, meaning Geti has placed all 20 images into subsets and none are left floating
 - **Advanced Settings → Training:** leave all defaults (200 epochs, early stopping patience 15, LR 0.0001)
 - **Device:** CPU (no GPU on SAM501)
 - Click **Start**
@@ -121,7 +127,7 @@ This is the most important step — numbers alone don't tell the full story.
 
 #### 8a — Select test images
 - Pick **5 images that were NOT in the training set** — these should be new NVL scans
-- Include a mix: some with obvious delamination, some with subtle delamination, optionally 1 clean image
+- Include a mix: some with obvious anomalies, some with subtle anomalies, optionally 1 clean image
 - Save them locally first so you can compare prediction vs reality side-by-side
 
 #### 8b — Run predictions in Geti
@@ -137,9 +143,9 @@ For each image, ask these questions and record your observations:
 
 | Question | Good sign | Bad sign |
 |---|---|---|
-| Is the mask on an actual delamination area? | Yes — mask matches the defect | No — mask is on a clean region (false positive) |
+| Is the mask on an actual anomaly area? | Yes — mask matches the defect | No — mask is on a clean region (false positive) |
 | Does the mask shape match the defect boundary? | Tight polygon around the defect | Loose blob covering non-defect area |
-| Are all visible delamination spots detected? | Yes | Some defects missed (false negative) |
+| Are all visible anomaly spots detected? | Yes | Some defects missed (false negative) |
 | Is the confidence score reasonable? | >50% for real defects | <30% on obvious defects = weak model |
 | Any predictions on completely wrong areas? | None | Masks appearing on wire bonds, edges, etc. |
 
@@ -181,7 +187,7 @@ Based on metrics + visual inspection, decide what to do next:
 
 ### Step 10 — Accept / correct / reject predictions
 For each predicted image from Step 8:
-- **Accept** predictions that look correct — mask matches real delamination
+- **Accept** predictions that look correct — mask matches the real anomaly
 - **Correct** predictions that are close but need adjustment — reshape the polygon to tighten it
 - **Reject** predictions that are completely wrong — removes them so the model doesn't learn bad examples
 - Click **Submit** — accepted/corrected images are added back into the training dataset and will be included in the next training run
@@ -205,7 +211,7 @@ If mAP@0.5 is below ~30% after the first run:
 | Run | Date | Images | Model | mAP@0.5 | Train/Val gap | Visual score | Notes |
 |---|---|---|---|---|---|---|---|
 | Smoke Test | 2026-08-12 | 5 (delamination only) | RF-DETR-Seg-M | ~1% | — | N/A | Pipeline smoke test — not a real model |
-| NVL Test Run 01 | — | 30 (delamination only) | RF-DETR-Seg-M | — | — | — | Planned weekend 2026-08-16/17 |
+| NVL Test Run 01 | — | 20 (anomaly only) | RF-DETR-Seg-M | — | — | — | Planned weekend 2026-08-16/17 |
 
 ---
 

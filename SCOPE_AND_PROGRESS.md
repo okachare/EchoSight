@@ -35,7 +35,7 @@ A successful demo will show:
 | 1. Research & Setup | Literature review, tool evaluation, installation | ✅ Complete |
 | 2. Data Collection | Acquire and organize NovaLake CSAM scan images | ✅ Complete |
 | 3. Annotation | Label defects in images using Geti's annotation tools | 🟡 WIP |
-| 4a. NVL Test Run — Training | Train RF-DETR-Seg-M on 30 NVL images (delamination) | ⬜ Planned |
+| 4a. NVL Test Run — Training | Train RF-DETR-Seg-M on 20 NVL images (`anomaly`) | ⬜ Planned |
 | 4b. NVL Test Run — Inference | Evaluate model; run predictions on new NVL images | ⬜ Planned |
 | 4c. NVL Test Run — Fine-tuning | Iterate: improve annotations, add data, retrain | ⬜ Planned |
 | 5. Debugging & Analysis | Review training logs, diagnose issues, improve dataset | ✅ Complete |
@@ -61,10 +61,10 @@ Q3 2026 (Jul – Sep)
 │                    RF-DETR-Seg-M, 5 images, 1% mAP (smoke test).
 │                    Pipeline proven end-to-end. OpenVINO FP16 export: 66 MB.
 │
-├── Aug 16–17, 2026 ─ **NVL Test Run** — 30 NVL images, delamination class
+├── Aug 16–17, 2026 ─ **NVL Test Run** — 20 NVL images, temporary `anomaly` class
 │                    Training → Inference → Fine-tuning
 │
-├── Aug 2026 ─────── [NOW] Annotating 30 NVL images → NVL Test Run start
+├── Aug 2026 ─────── [NOW] Annotating 20 NVL images → NVL Test Run start
 │                              ↑ Currently here
 ├── Sep 2026 ─────── Fine-tuning, results analysis, demo preparation
 │
@@ -94,9 +94,9 @@ Q3 2026 (Jul – Sep)
 
 | Task | Status | Date | Notes |
 |---|---|---|---|
-| Define defect classes to detect | 🟡 WIP | 2026-08-12 | Starting with `delamination` for first real run; additional classes (void, crack) to be added in later iterations |
+| Define defect classes to detect | 🟡 WIP | 2026-08-14 | Using temporary `anomaly` label for first real run; map to final classes (delamination, void, crack) later |
 | Perform initial CSAM scans of NovaLake samples | ✅ Done | ~2026-07-28 | NVL CSAM images captured on PVA SAM501 |
-| Collect sufficient images for training (target: 50–200+) | ✅ Done | 2026-08-12 | 30 NVL images collected and organised; ready for annotation |
+| Collect sufficient images for training (target: 50–200+) | ✅ Done | 2026-08-12 | 20 NVL images selected from the collected and organised dataset; ready for annotation |
 | Convert CSAM .tiff output to PNG for Geti input | ✅ Done | ~2026-08-04 | Custom TiffSplitter tool engineered: GUI app with multi-format export, quality controls, and batch frame splitting |
 | Verify TiffSplitter output integrity | ✅ Done | 2026-08-11 | Quantitative analysis performed: 8-bit source, 66 frames (517×281px), all outputs validated. PNG selected — lossless compression preserves acoustic scan contrast critical for defect detection |
 | Organize images into dataset folder structure | ✅ Done | 2026-08-12 | Images upload directly into Geti project — no external folder structure needed |
@@ -115,9 +115,9 @@ Q3 2026 (Jul – Sep)
 
 | Task | Status | Date | Notes |
 |---|---|---|---|
-| Upload 30 NVL defect images to Geti | ⬜ Pending | — | All defect images; no clean/"No object" images for this run |
-| Annotate all 30 images with delamination polygon masks | ⬜ Pending | — | One polygon per defect instance; multiple polygons per image if needed |
-| Train RF-DETR-Seg-M (70/20/10 split, all Unassigned) | ⬜ Pending | — | Default settings; 200 epochs, early stopping; CPU |
+| Upload 20 NVL defect images to Geti | ⬜ Pending | — | All defect images; no clean/"No object" images for this run |
+| Annotate all 20 images with `anomaly` polygon masks | ✅ Done | 2026-08-14 | 20/20 submitted; approximately 39 minutes (10:32–11:11) |
+| Train Mask R-CNN Swin-T (70/20/10 split, all Unassigned) | 🟡 WIP | 2026-08-14 | Started approximately 11:18; batch size 4, 200 epochs, early stopping, CPU; utilization monitoring active |
 | Collect and analyse training log | ⬜ Pending | — | Drop log into `Debug/RunNVL01/` |
 
 ### Phase 4b — NVL Test Run: Inference
@@ -125,9 +125,9 @@ Q3 2026 (Jul – Sep)
 
 | Task | Status | Date | Notes |
 |---|---|---|---|
-| Review model metrics in Geti (mAP, precision, recall) | ⬜ Pending | — | Baseline performance on 30-image dataset |
+| Review model metrics in Geti (mAP, precision, recall) | ⬜ Pending | — | Baseline performance on 20-image dataset |
 | Run predictions on new unseen NVL images | ⬜ Pending | — | Use Geti Annotate → Predict on images not in training set |
-| Review prediction quality visually | ⬜ Pending | — | Are masks landing on real delamination? Any false positives? |
+| Review prediction quality visually | ⬜ Pending | — | Are masks landing on real anomalies? Any false positives? |
 
 ### Phase 4c — NVL Test Run: Fine-tuning
 **Status:** ⬜ Planned
@@ -172,7 +172,7 @@ Q3 2026 (Jul – Sep)
 ### Open Decisions
 | # | Decision Needed | Impact |
 |---|---|---|
-| 1 | What defect classes to include beyond `delamination` for full NVL run? (voids, cracks?) | Defines annotation scope and label schema for Phase 3 rework |
+| 1 | What defect classes does the temporary `anomaly` label represent? (delamination, voids, cracks?) | Defines annotation scope and label schema for the next iteration |
 | 2 | How many labeled images can we collect before Q3 end? | Determines model quality ceiling — target 50–200+ |
 | 3 | Will demo be live on SAM501 or on a separate machine? | Affects export/deployment approach |
 | 4 | How to correctly include "No object" / clean images in training? | Needs investigation — current workaround is defect-only dataset |
@@ -211,10 +211,10 @@ Q3 2026 (Jul – Sep)
 | **Tool** | Intel Geti™ (open-source, Apache 2.0) |
 | **Hardware** | PVA SAM501 CSAM tool |
 | **Current Phase** | Phase 3 annotation + Phase 4a NVL Test Run (Training) — planned for weekend 2026-08-16/17 |
-| **Next Milestone** | Annotate 30 NVL images → NVL Test Run Training complete → Inference review |
+| **Next Milestone** | NVL Test Run Training complete → Inference review |
 | **Demo Target** | September 30, 2026 |
 | **Overall Status** | 🟡 On Track |
 
 ---
 
-*Last updated: 2026-08-12 — Smoke test complete. NVL data collected (30 images). Full training manual, NVL Test Run plan (with detailed inference & verification steps), and model parameters guide documented. Weekend plan: annotate 30 NVL images → train RF-DETR-Seg-M → inference review → fine-tune.*
+*Last updated: 2026-08-14 — Annotation complete for 20 NVL images using temporary `anomaly` label (approximately 39 minutes, 10:32–11:11). Next: NVL Test Run training.*

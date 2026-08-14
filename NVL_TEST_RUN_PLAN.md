@@ -11,7 +11,7 @@
 
 | Phase | Activity | Target Outcome |
 |---|---|---|
-| **4a — Training** | Annotate 20 images → train RF-DETR-Seg-M | Clean training run, mAP baseline established |
+| **4a — Training** | Annotate 20 images → train Mask R-CNN Swin-T | Clean training run, mAP baseline established |
 | **4b — Inference** | Review metrics → predict on new images | Confirm model detects anomalies on unseen images |
 | **4c — Fine-tuning** | Correct predictions → retrain → compare mAP | Improved accuracy; repeat until demo-ready |
 
@@ -49,7 +49,7 @@
 - **Run:** Mask R-CNN Swin-T, 20 images, temporary `anomaly` label
 - **Monitoring:** system and process utilization logging active
 - Click **Train Model**
-- **Model:** RF-DETR-Seg-M (Balance preset) — do not use XL for this run (CPU is too slow)
+- **Model:** Mask R-CNN Swin-T — selected as the comparison model for this run; CPU training is active
 - **Advanced Settings → Data Management:**
   - Split: Training 70% / Validation 20% / Test 10% (default)
   - Expected distribution with 20 images: approximately Training=14, Validation=4, Test=2
@@ -211,7 +211,7 @@ If mAP@0.5 is below ~30% after the first run:
 | Run | Date | Images | Model | mAP@0.5 | Train/Val gap | Visual score | Notes |
 |---|---|---|---|---|---|---|---|
 | Smoke Test | 2026-08-12 | 5 (delamination only) | RF-DETR-Seg-M | ~1% | — | N/A | Pipeline smoke test — not a real model |
-| NVL Test Run 01 | — | 20 (anomaly only) | RF-DETR-Seg-M | — | — | — | Planned weekend 2026-08-16/17 |
+| NVL Test Run 01 | 2026-08-14 | 20 (anomaly only) | Mask R-CNN Swin-T | — | — | — | Training still running at approximately 16:29; collect results after completion |
 
 ---
 

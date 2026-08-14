@@ -59,7 +59,7 @@
 ## Currently WIP
 
 - [x] Annotate 20 NVL images with `anomaly` polygon masks — completed 2026-08-14, approximately 39 minutes (10:32–11:11)
-- [ ] NVL Test Run 01 — Mask R-CNN Swin-T training in progress; started 2026-08-14 at approximately 11:18
+- [ ] NVL Test Run 01 — Mask R-CNN Swin-T training still in progress as of approximately 16:29; started 2026-08-14 at approximately 11:18
 - [ ] Inference review — run predictions on unseen NVL images
 - [ ] Map the temporary `anomaly` label to final defect classes (delamination, void, crack?)
 
@@ -86,7 +86,8 @@
 
 ## Next Steps (in order)
 
-1. Run NVL Test Run 01 — RF-DETR-Seg-M, 20 images
+1. Finish NVL Test Run 01 — Mask R-CNN Swin-T, 20 images
+2. Collect the Geti log, screenshots, and utilization CSVs
 3. Review metrics + run inference on unseen images
 4. Fine-tune: predict → review → correct → retrain loop
 5. Lock additional defect classes (void, crack) and expand dataset
@@ -108,4 +109,4 @@
 
 ---
 
-*Last updated: 2026-08-14 — Annotation complete for 20 NVL images using temporary `anomaly` label (approximately 39 minutes, 10:32–11:11). Next: train RF-DETR-Seg-M.*
+*Last updated: 2026-08-14 at approximately 16:29 — 20 NVL images annotated and Mask R-CNN Swin-T training still in progress. Next: collect the completed run artifacts and metrics.*

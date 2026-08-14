@@ -4,7 +4,7 @@
 **Owner:** Omkar
 **Project Start:** July 14, 2026
 **Target Deadline:** End of Q3 2026 (September 30, 2026)
-**Report Last Updated:** 2026-08-12
+**Report Last Updated:** 2026-08-14
 
 ---
 
@@ -34,8 +34,8 @@ A successful demo will show:
 |---|---|---|
 | 1. Research & Setup | Literature review, tool evaluation, installation | ✅ Complete |
 | 2. Data Collection | Acquire and organize NovaLake CSAM scan images | ✅ Complete |
-| 3. Annotation | Label defects in images using Geti's annotation tools | 🟡 WIP |
-| 4a. NVL Test Run — Training | Train RF-DETR-Seg-M on 20 NVL images (`anomaly`) | ⬜ Planned |
+| 3. Annotation | Label defects in images using Geti's annotation tools | ✅ Complete |
+| 4a. NVL Test Run — Training | Train Mask R-CNN Swin-T on 20 NVL images (`anomaly`) | 🟡 WIP |
 | 4b. NVL Test Run — Inference | Evaluate model; run predictions on new NVL images | ⬜ Planned |
 | 4c. NVL Test Run — Fine-tuning | Iterate: improve annotations, add data, retrain | ⬜ Planned |
 | 5. Debugging & Analysis | Review training logs, diagnose issues, improve dataset | ✅ Complete |
@@ -61,10 +61,10 @@ Q3 2026 (Jul – Sep)
 │                    RF-DETR-Seg-M, 5 images, 1% mAP (smoke test).
 │                    Pipeline proven end-to-end. OpenVINO FP16 export: 66 MB.
 │
-├── Aug 16–17, 2026 ─ **NVL Test Run** — 20 NVL images, temporary `anomaly` class
-│                    Training → Inference → Fine-tuning
+├── Aug 14, 2026 ─── Annotated 20 NVL images; started Mask R-CNN Swin-T training
+│                    on CPU with utilization monitoring; training still running
 │
-├── Aug 2026 ─────── [NOW] Annotating 20 NVL images → NVL Test Run start
+├── Aug 2026 ─────── [NOW] NVL Test Run 01 training → artifact collection
 │                              ↑ Currently here
 ├── Sep 2026 ─────── Fine-tuning, results analysis, demo preparation
 │
@@ -210,11 +210,11 @@ Q3 2026 (Jul – Sep)
 | **Project Goal** | Demonstrate AI-based defect detection on NovaLake CSAM scans |
 | **Tool** | Intel Geti™ (open-source, Apache 2.0) |
 | **Hardware** | PVA SAM501 CSAM tool |
-| **Current Phase** | Phase 3 annotation + Phase 4a NVL Test Run (Training) — planned for weekend 2026-08-16/17 |
+| **Current Phase** | Phase 4a NVL Test Run (Training) — Mask R-CNN Swin-T still running |
 | **Next Milestone** | NVL Test Run Training complete → Inference review |
 | **Demo Target** | September 30, 2026 |
 | **Overall Status** | 🟡 On Track |
 
 ---
 
-*Last updated: 2026-08-14 — Annotation complete for 20 NVL images using temporary `anomaly` label (approximately 39 minutes, 10:32–11:11). Next: NVL Test Run training.*
+*Last updated: 2026-08-14 at approximately 16:29 — Annotation complete for 20 NVL images; Mask R-CNN Swin-T training still running. Next: collect run artifacts and metrics.*

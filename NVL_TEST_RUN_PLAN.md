@@ -44,10 +44,10 @@
 - Work through all 20 images before starting training — do not train on partial annotations
 - All 20 images should show a green checkmark (✓) in the filmstrip when done
 
-### Step 4 — Configure training ✅ Started
-- **Training start:** 2026-08-14 at approximately 11:18
+### Step 4 — Configure training ✅ Complete
+- **Training window:** 2026-08-14 11:11:40 to 2026-08-15 03:04:20 (approximately 15 hours 53 minutes)
 - **Run:** Mask R-CNN Swin-T, 20 images, temporary `anomaly` label
-- **Monitoring:** system and process utilization logging active
+- **Result:** completed through epoch 140; Geti then exported and evaluated PyTorch, OpenVINO FP16, and ONNX FP16 variants
 - Click **Train Model**
 - **Model:** Mask R-CNN Swin-T — selected as the comparison model for this run; CPU training is active
 - **Advanced Settings → Data Management:**
@@ -60,10 +60,10 @@
 - Click **Start**
 
 ### Step 5 — Collect training log
-- After training completes (or fails), copy the log file from Geti's jobs folder
-- Save into: `Debug/RunNVL01/jobs/`
-- Save a screenshot of the training result card as `RunNVL01_result.PNG`
-- Drop both into the workspace for analysis
+- **Complete:** preserved run artifacts are in `Debug/NVL_Geti_Run/`
+- Training job log: `train-c8cd0980-84e1-4aea-b700-5fd185a88c3c.log`
+- Model workspace: `getitune-workspace-aa5aafdc-1098-4fdc-99a2-e762d61a85e6/`
+- Resource monitoring: `geti-training-utilization.csv` and `geti-training-utilization-processes.csv`
 
 ---
 
@@ -71,7 +71,7 @@
 
 ### Step 6 — Collect run artifacts
 Before reviewing anything:
-- Copy training log from Geti's jobs folder → save to `Debug/RunNVL01/jobs/`
+- **Complete:** training log, model workspace, copied project files, and both utilization CSVs are preserved in `Debug/NVL_Geti_Run/`
 - Screenshot the training result card (model name, mAP, date, dataset size) → `Debug/RunNVL01/RunNVL01_result.PNG`
 - Screenshot the Model metrics tab (all numbers visible) → `Debug/RunNVL01/RunNVL01_metrics.PNG`
 - Screenshot the Training parameters tab → `Debug/RunNVL01/RunNVL01_params.PNG`
@@ -211,7 +211,7 @@ If mAP@0.5 is below ~30% after the first run:
 | Run | Date | Images | Model | mAP@0.5 | Train/Val gap | Visual score | Notes |
 |---|---|---|---|---|---|---|---|
 | Smoke Test | 2026-08-12 | 5 (delamination only) | RF-DETR-Seg-M | ~1% | — | N/A | Pipeline smoke test — not a real model |
-| NVL Test Run 01 | 2026-08-14 | 20 (anomaly only) | Mask R-CNN Swin-T | — | — | — | Training still running at approximately 16:29; collect results after completion |
+| NVL Test Run 01 | 2026-08-14/15 | 20 (anomaly only; 14/4/2 split) | Mask R-CNN Swin-T | 46.53% | Not available in preserved metrics | Pending | Completed after 140 epochs in ~15h 53m; test mAP=22.82%, mAP@0.75=14.85%, mAR@1=15.71%, mAR@100=28.57%; OpenVINO and ONNX exports created |
 
 ---
 

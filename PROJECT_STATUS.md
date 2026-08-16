@@ -59,7 +59,8 @@
 ## Currently WIP
 
 - [x] Annotate 20 NVL images with `anomaly` polygon masks — completed 2026-08-14, approximately 39 minutes (10:32–11:11)
-- [ ] NVL Test Run 01 — Mask R-CNN Swin-T training still in progress as of approximately 16:29; started 2026-08-14 at approximately 11:18
+- [x] NVL Test Run 01 — Mask R-CNN Swin-T training completed 2026-08-15 at 03:04 after approximately 15 hours 53 minutes; 140 epochs, 14/4/2 train/validation/test split, OpenVINO FP16 and ONNX FP16 exports created
+- [x] Run artifacts — training log, copied project/model files, and resource-monitor CSVs preserved in `Debug/NVL_Geti_Run/`
 - [ ] Inference review — run predictions on unseen NVL images
 - [ ] Map the temporary `anomaly` label to final defect classes (delamination, void, crack?)
 
@@ -86,9 +87,9 @@
 
 ## Next Steps (in order)
 
-1. Finish NVL Test Run 01 — Mask R-CNN Swin-T, 20 images
-2. Collect the Geti log, screenshots, and utilization CSVs
-3. Review metrics + run inference on unseen images
+1. Review the completed NVL Test Run 01 metrics: test mAP=22.82%, mAP@0.5=46.53%, mAP@0.75=14.85%, mAR@1=15.71%, and mAR@100=28.57%
+2. Run inference on unseen NVL images and capture prediction screenshots
+3. Visually score predicted masks and make the go/conditional-go/no-go decision
 4. Fine-tune: predict → review → correct → retrain loop
 5. Lock additional defect classes (void, crack) and expand dataset
 
@@ -106,7 +107,8 @@
 | `GETI_TRAINING_MANUAL.md` | Full training manual: metrics, parameters, troubleshooting |
 | `Debug/Run081125/jobs/` | 12 failed training logs from July 24 – Aug 11 |
 | `Debug/Run081226/` | Smoke test run artifacts (logs, screenshots, 1 failed + 1 successful) |
+| `Debug/NVL_Geti_Run/` | Completed NVL Test Run 01 artifacts: logs, model exports, copied project files, and utilization CSVs |
 
 ---
 
-*Last updated: 2026-08-14 at approximately 16:29 — 20 NVL images annotated and Mask R-CNN Swin-T training still in progress. Next: collect the completed run artifacts and metrics.*
+*Last updated: 2026-08-15 — NVL Test Run 01 completed successfully after 140 epochs. Next: inference review on unseen NVL images and visual scoring.*

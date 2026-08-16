@@ -4,7 +4,7 @@
 **Owner:** Omkar
 **Project Start:** July 14, 2026
 **Target Deadline:** End of Q3 2026 (September 30, 2026)
-**Report Last Updated:** 2026-08-14
+**Report Last Updated:** 2026-08-15
 
 ---
 
@@ -35,8 +35,8 @@ A successful demo will show:
 | 1. Research & Setup | Literature review, tool evaluation, installation | ✅ Complete |
 | 2. Data Collection | Acquire and organize NovaLake CSAM scan images | ✅ Complete |
 | 3. Annotation | Label defects in images using Geti's annotation tools | ✅ Complete |
-| 4a. NVL Test Run — Training | Train Mask R-CNN Swin-T on 20 NVL images (`anomaly`) | 🟡 WIP |
-| 4b. NVL Test Run — Inference | Evaluate model; run predictions on new NVL images | ⬜ Planned |
+| 4a. NVL Test Run — Training | Train Mask R-CNN Swin-T on 20 NVL images (`anomaly`) | ✅ Complete |
+| 4b. NVL Test Run — Inference | Evaluate model; run predictions on new NVL images | 🟡 WIP |
 | 4c. NVL Test Run — Fine-tuning | Iterate: improve annotations, add data, retrain | ⬜ Planned |
 | 5. Debugging & Analysis | Review training logs, diagnose issues, improve dataset | ✅ Complete |
 | 6. Results Analysis | Evaluate final model metrics; prepare demo materials | ⬜ Not Started |
@@ -61,10 +61,10 @@ Q3 2026 (Jul – Sep)
 │                    RF-DETR-Seg-M, 5 images, 1% mAP (smoke test).
 │                    Pipeline proven end-to-end. OpenVINO FP16 export: 66 MB.
 │
-├── Aug 14, 2026 ─── Annotated 20 NVL images; started Mask R-CNN Swin-T training
-│                    on CPU with utilization monitoring; training still running
+├── Aug 14–15, 2026 ─ Annotated 20 NVL images; completed Mask R-CNN Swin-T CPU
+│                    training after 140 epochs (~15h 53m); OpenVINO and ONNX exports created
 │
-├── Aug 2026 ─────── [NOW] NVL Test Run 01 training → artifact collection
+├── Aug 2026 ─────── [NOW] NVL Test Run 01 metrics review → unseen-image inference
 │                              ↑ Currently here
 ├── Sep 2026 ─────── Fine-tuning, results analysis, demo preparation
 │
@@ -102,30 +102,30 @@ Q3 2026 (Jul – Sep)
 | Organize images into dataset folder structure | ✅ Done | 2026-08-12 | Images upload directly into Geti project — no external folder structure needed |
 
 ### Phase 3 — Annotation
-**Status:** 🟡 WIP
+**Status:** ✅ Complete
 
 | Task | Status | Date | Notes |
 |---|---|---|---|
 | Choose annotation type (bounding box vs. segmentation mask) | ✅ Done | 2026-08-12 | **Instance Segmentation (polygon masks)** selected — better captures irregular defect shapes |
-| Annotate images in Geti UI | 🟡 WIP | 2026-08-12 | 5 images annotated for smoke test; full NVL dataset annotation pending |
-| Review annotation quality | 🟡 WIP | 2026-08-12 | Smoke test annotations confirmed valid; full quality review pending for NVL dataset |
+| Annotate images in Geti UI | ✅ Done | 2026-08-14 | 20/20 NVL images submitted with `anomaly` polygon masks; approximately 39 minutes |
+| Review annotation quality | ✅ Done | 2026-08-14 | All 20 images were user-verified before training |
 
 ### Phase 4a — NVL Test Run: Training
-**Status:** ⬜ Planned (weekend 2026-08-16/17)
+**Status:** ✅ Complete
 
 | Task | Status | Date | Notes |
 |---|---|---|---|
-| Upload 20 NVL defect images to Geti | ⬜ Pending | — | All defect images; no clean/"No object" images for this run |
+| Upload 20 NVL defect images to Geti | ✅ Done | 2026-08-14 | All defect images; no clean/"No object" images for this run |
 | Annotate all 20 images with `anomaly` polygon masks | ✅ Done | 2026-08-14 | 20/20 submitted; approximately 39 minutes (10:32–11:11) |
-| Train Mask R-CNN Swin-T (70/20/10 split, all Unassigned) | 🟡 WIP | 2026-08-14 | Started approximately 11:18; batch size 4, 200 epochs, early stopping, CPU; utilization monitoring active |
-| Collect and analyse training log | ⬜ Pending | — | Drop log into `Debug/RunNVL01/` |
+| Train Mask R-CNN Swin-T (70/20/10 split, all Unassigned) | ✅ Done | 2026-08-14/15 | Completed 140 epochs in approximately 15h 53m on CPU; actual split 14 train / 4 validation / 2 test |
+| Collect and analyse training log | ✅ Done | 2026-08-15 | Log, copied project/model files, and utilization CSVs preserved in `Debug/NVL_Geti_Run/` |
 
 ### Phase 4b — NVL Test Run: Inference
 **Status:** ⬜ Planned
 
 | Task | Status | Date | Notes |
 |---|---|---|---|
-| Review model metrics in Geti (mAP, precision, recall) | ⬜ Pending | — | Baseline performance on 20-image dataset |
+| Review model metrics in Geti (mAP, precision, recall) | ✅ Done | 2026-08-15 | Test mAP=22.82%, mAP@0.5=46.53%, mAP@0.75=14.85%, mAR@1=15.71%, mAR@100=28.57% |
 | Run predictions on new unseen NVL images | ⬜ Pending | — | Use Geti Annotate → Predict on images not in training set |
 | Review prediction quality visually | ⬜ Pending | — | Are masks landing on real anomalies? Any false positives? |
 
@@ -210,11 +210,11 @@ Q3 2026 (Jul – Sep)
 | **Project Goal** | Demonstrate AI-based defect detection on NovaLake CSAM scans |
 | **Tool** | Intel Geti™ (open-source, Apache 2.0) |
 | **Hardware** | PVA SAM501 CSAM tool |
-| **Current Phase** | Phase 4a NVL Test Run (Training) — Mask R-CNN Swin-T still running |
-| **Next Milestone** | NVL Test Run Training complete → Inference review |
+| **Current Phase** | Phase 4b NVL Test Run — inference validation on unseen images |
+| **Next Milestone** | Run unseen-image predictions, visually score masks, and decide on fine-tuning |
 | **Demo Target** | September 30, 2026 |
 | **Overall Status** | 🟡 On Track |
 
 ---
 
-*Last updated: 2026-08-14 at approximately 16:29 — Annotation complete for 20 NVL images; Mask R-CNN Swin-T training still running. Next: collect run artifacts and metrics.*
+*Last updated: 2026-08-15 — NVL Test Run 01 completed successfully. Next: inference validation and visual scoring on unseen NVL images.*

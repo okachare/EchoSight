@@ -117,15 +117,15 @@ Q3 2026 (Jul – Sep)
 |---|---|---|---|
 | Upload 20 NVL defect images to Geti | ✅ Done | 2026-08-14 | All defect images; no clean/"No object" images for this run |
 | Annotate all 20 images with `anomaly` polygon masks | ✅ Done | 2026-08-14 | 20/20 submitted; approximately 39 minutes (10:32–11:11) |
-| Train Mask R-CNN Swin-T (70/20/10 split, all Unassigned) | ✅ Done | 2026-08-14/15 | Completed 140 epochs in approximately 15h 53m on CPU; actual split 14 train / 4 validation / 2 test |
-| Collect and analyse training log | ✅ Done | 2026-08-15 | Log, copied project/model files, and utilization CSVs preserved in `Debug/NVL_Geti_Run/` |
+| Train Mask R-CNN Swin-T (70/20/10 split, all Unassigned) | ✅ Done | 2026-08-14/15 | Completed 140 epochs in approximately 15h 53m on CPU; actual split 14 train / 4 validation / 2 test; early stopping patience was 10 |
+| Collect and analyse training log | ✅ Done | 2026-08-15 | Log, copied project/model files, and utilization CSVs preserved in `Debug/NVL_Geti_Run/`; CPU averaged 45.8% and peaked at 100%; available RAM briefly reached zero |
 
 ### Phase 4b — NVL Test Run: Inference
 **Status:** ⬜ Planned
 
 | Task | Status | Date | Notes |
 |---|---|---|---|
-| Review model metrics in Geti (mAP, precision, recall) | ✅ Done | 2026-08-15 | Test mAP=22.82%, mAP@0.5=46.53%, mAP@0.75=14.85%, mAR@1=15.71%, mAR@100=28.57% |
+| Review model metrics in Geti (mAP, precision, recall) | ✅ Done | 2026-08-15 | Test mAP=22.82%, mAP@0.5=46.53%, mAP@0.75=14.85%, mAR@1=15.71%, mAR@100=28.57%; best validation mAP@0.5=79.21% at epoch 129 |
 | Run predictions on new unseen NVL images | ⬜ Pending | — | Use Geti Annotate → Predict on images not in training set |
 | Review prediction quality visually | ⬜ Pending | — | Are masks landing on real anomalies? Any false positives? |
 
@@ -217,4 +217,4 @@ Q3 2026 (Jul – Sep)
 
 ---
 
-*Last updated: 2026-08-15 — NVL Test Run 01 completed successfully. Next: inference validation and visual scoring on unseen NVL images.*
+*Last updated: 2026-08-15 — NVL Test Run 01 completed successfully with a conditional-go metric baseline. Next: inference validation and visual scoring on unseen NVL images.*

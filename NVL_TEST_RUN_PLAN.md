@@ -55,7 +55,7 @@
   - Expected distribution with 20 images: approximately Training=14, Validation=4, Test=2
   - Geti may round subset counts; confirm each subset has at least one image
   - Geti auto-distributes all "Unassigned" images when you open this dialog — confirm **Unassigned: 0** before proceeding, meaning Geti has placed all 20 images into subsets and none are left floating
-- **Advanced Settings → Training:** leave all defaults (200 epochs, early stopping patience 15, LR 0.0001)
+- **Advanced Settings → Training:** configured 200 epochs, early stopping patience 10, and learning rate 0.0001
 - **Device:** CPU (no GPU on SAM501)
 - Click **Start**
 
@@ -93,6 +93,8 @@ Go to **Models** tab → click the trained model → open **Model metrics** tab.
 | mAR@100 | Top of metrics tab | Upper bound of recall — how many defects can it find at all? |
 
 Record all values in the Run Log table at the bottom of this document.
+
+**NVL Test Run 01 result:** held-out test mAP=22.82%, mAP@0.5=46.53%, mAP@0.75=14.85%, mAR@1=15.71%, and mAR@100=28.57%. The model has useful coarse anomaly-localization signal, but the mAP@0.5 to mAP@0.75 drop and limited recall show that mask boundaries and missed instances need improvement.
 
 #### 7b — Check training vs validation gap (overfitting check)
 
@@ -211,7 +213,7 @@ If mAP@0.5 is below ~30% after the first run:
 | Run | Date | Images | Model | mAP@0.5 | Train/Val gap | Visual score | Notes |
 |---|---|---|---|---|---|---|---|
 | Smoke Test | 2026-08-12 | 5 (delamination only) | RF-DETR-Seg-M | ~1% | — | N/A | Pipeline smoke test — not a real model |
-| NVL Test Run 01 | 2026-08-14/15 | 20 (anomaly only; 14/4/2 split) | Mask R-CNN Swin-T | 46.53% | Not available in preserved metrics | Pending | Completed after 140 epochs in ~15h 53m; test mAP=22.82%, mAP@0.75=14.85%, mAR@1=15.71%, mAR@100=28.57%; OpenVINO and ONNX exports created |
+| NVL Test Run 01 | 2026-08-14/15 | 20 (anomaly only; 14/4/2 split) | Mask R-CNN Swin-T | 46.53% | Validation mAP@0.5 peaked at 79.21%; test result is lower, but based on only 2 test images | Pending | Completed after 140 epochs in ~15h 53m; test mAP=22.82%, mAP@0.75=14.85%, mAR@1=15.71%, mAR@100=28.57%; best validation mAP=28.59% at epoch 129; OpenVINO and ONNX exports created |
 
 ---
 

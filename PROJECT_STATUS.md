@@ -64,6 +64,21 @@
 - [ ] Inference review — run predictions on unseen NVL images
 - [ ] Map the temporary `anomaly` label to final defect classes (delamination, void, crack?)
 
+## NVL Test Run 01 Results
+
+| Metric | Held-out test result |
+|---|---:|
+| mAP | 22.82% |
+| mAP@0.5 | 46.53% |
+| mAP@0.75 | 14.85% |
+| mAR@1 | 15.71% |
+| mAR@100 | 28.57% |
+
+- Best validation checkpoint: epoch 129, with mAP=28.59%, mAP@0.5=79.21%, mAP@0.75=13.15%, and mAR@100=37.00%.
+- The test split contains only two images, so these are a directional baseline rather than a stable production-quality estimate.
+- Interpretation: the model recognizes coarse anomaly regions, but the low mAP@0.75 and mAR@100 indicate imprecise mask boundaries and missed defect instances. Treat the run as a conditional go pending visual review on unseen images.
+- Resource monitor: CPU averaged 45.8% and peaked at 100%; available RAM averaged 17.3 GB but briefly reached zero; disk throughput averaged 5.89 MiB/s and peaked at 132.65 MiB/s.
+
 ---
 
 ## Decisions Still Open
@@ -82,13 +97,14 @@
 - getitune **cannot handle `"No object"` annotations in val/test split** for instance segmentation — empty bbox tensor crashes DataLoader collate. Workaround: defect-only datasets until fixed.
 - Images upload directly into Geti project — no need for COCO/VOC folder structure when using Geti GUI.
 - RF-DETR-Seg-M is the confirmed working architecture for this project.
+- The preserved NVL configuration used early-stopping patience 10, despite the earlier planning note listing 15.
 
 ---
 
 ## Next Steps (in order)
 
-1. Review the completed NVL Test Run 01 metrics: test mAP=22.82%, mAP@0.5=46.53%, mAP@0.75=14.85%, mAR@1=15.71%, and mAR@100=28.57%
-2. Run inference on unseen NVL images and capture prediction screenshots
+1. Run inference on unseen NVL images and capture prediction screenshots
+2. Compare visual masks with the metric baseline: coarse localization is promising, while boundary accuracy and missed instances need special attention
 3. Visually score predicted masks and make the go/conditional-go/no-go decision
 4. Fine-tune: predict → review → correct → retrain loop
 5. Lock additional defect classes (void, crack) and expand dataset

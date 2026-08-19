@@ -5,6 +5,8 @@
 **Planned Date:** 2026-08-16/17 (weekend)  
 **Goal:** Train first real anomaly detection model on 20 NVL CSAM images and validate inference quality  
 
+> **Platform update (2026-08-19):** The Windows Geti/MSIX workflow is closed and retained for historical reference. The Web Geti workflow is now the active path. Append new training, inference, metrics, and fine-tuning results to the Web Geti sections and do not mix them with the Windows run metrics.
+
 ---
 
 ## Overview
@@ -67,7 +69,21 @@
 
 ---
 
-## Phase 4b — Inference & Verification
+## Windows Track — Closed
+
+The Windows Geti training run, metrics review, inference attempt, logs, exports, and screenshots are complete historical artifacts. The Windows inference screenshot is preserved at `Debug/NVL_Geti_Run/New folder/Inference Run/nvl_predict.PNG`.
+
+## Web Geti Track — Active
+
+### Web Geti Initial Run
+
+| Activity | Status | Date | Notes |
+|---|---|---|---|
+| Model training | ✅ Complete | 2026-08-19 | Training completed successfully in Web Geti; append model and dataset details here. |
+| Model inference | ✅ Complete | 2026-08-19 | Inference completed successfully in Web Geti; append sample results and screenshots here. |
+| Result collection | 🟡 WIP | 2026-08-19 | Record model revision, metrics, input samples, predictions, and visual score. |
+
+## Phase 4b — Windows Inference & Verification (Closed)
 
 ### Step 6 — Collect run artifacts
 Before reviewing anything:

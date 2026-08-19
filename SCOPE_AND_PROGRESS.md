@@ -1,10 +1,12 @@
 # Project Scope & Progress Report
 **Project:** Geti AI-Assisted Defect Detection on NovaLake Product
-**Tool:** Intel Geti™ on PVA SAM501 Confocal Scanning Acoustic Microscope (CSAM)
+**Tool:** Intel Geti™ Web on PVA SAM501 Confocal Scanning Acoustic Microscope (CSAM)
 **Owner:** Omkar
 **Project Start:** July 14, 2026
 **Target Deadline:** End of Q3 2026 (September 30, 2026)
-**Report Last Updated:** 2026-08-15
+**Report Last Updated:** 2026-08-19
+
+> **Platform transition:** The Windows Geti/MSIX effort is closed as a completed historical track. Intel Geti Web is now the active platform for all future training, inference, evaluation, and deployment work. Windows artifacts remain preserved and are not discarded.
 
 ---
 
@@ -36,8 +38,9 @@ A successful demo will show:
 | 2. Data Collection | Acquire and organize NovaLake CSAM scan images | ✅ Complete |
 | 3. Annotation | Label defects in images using Geti's annotation tools | ✅ Complete |
 | 4a. NVL Test Run — Training | Train Mask R-CNN Swin-T on 20 NVL images (`anomaly`) | ✅ Complete |
-| 4b. NVL Test Run — Inference | Evaluate model; run predictions on new NVL images | 🟡 WIP |
-| 4c. NVL Test Run — Fine-tuning | Iterate: improve annotations, add data, retrain | ⬜ Planned |
+| 4b. NVL Test Run — Windows inference | Evaluate model; run predictions on new NVL images | ✅ Closed |
+| 4c. NVL Test Run — Web inference | Train and infer using the Web Geti model | ✅ Initial run complete; validation WIP |
+| 4d. NVL Test Run — Web fine-tuning | Iterate: improve annotations, add data, retrain | ⬜ Planned |
 | 5. Debugging & Analysis | Review training logs, diagnose issues, improve dataset | ✅ Complete |
 | 6. Results Analysis | Evaluate final model metrics; prepare demo materials | ⬜ Not Started |
 | 7. Demo | Present live defect detection on NovaLake scans to management | ⬜ Not Started |
@@ -64,9 +67,9 @@ Q3 2026 (Jul – Sep)
 ├── Aug 14–15, 2026 ─ Annotated 20 NVL images; completed Mask R-CNN Swin-T CPU
 │                    training after 140 epochs (~15h 53m); OpenVINO and ONNX exports created
 │
-├── Aug 2026 ─────── [NOW] NVL Test Run 01 metrics review → unseen-image inference
-│                              ↑ Currently here
-├── Sep 2026 ─────── Fine-tuning, results analysis, demo preparation
+├── Aug 19, 2026 ─── Windows Geti track closed; Web Geti selected as active platform
+│                    Web model training and inference completed; validation continues
+├── Sep 2026 ─────── Web fine-tuning, results analysis, demo preparation
 │
 └── Sep 30, 2026 ── DEMO DEADLINE
 ```
@@ -120,23 +123,32 @@ Q3 2026 (Jul – Sep)
 | Train Mask R-CNN Swin-T (70/20/10 split, all Unassigned) | ✅ Done | 2026-08-14/15 | Completed 140 epochs in approximately 15h 53m on CPU; actual split 14 train / 4 validation / 2 test; early stopping patience was 10 |
 | Collect and analyse training log | ✅ Done | 2026-08-15 | Log, copied project/model files, and utilization CSVs preserved in `Debug/NVL_Geti_Run/`; CPU averaged 45.8% and peaked at 100%; available RAM briefly reached zero |
 
-### Phase 4b — NVL Test Run: Inference
-**Status:** ⬜ Planned
+### Phase 4b — NVL Test Run: Windows Inference
+**Status:** ✅ Closed
 
 | Task | Status | Date | Notes |
 |---|---|---|---|
 | Review model metrics in Geti (mAP, precision, recall) | ✅ Done | 2026-08-15 | Test mAP=22.82%, mAP@0.5=46.53%, mAP@0.75=14.85%, mAR@1=15.71%, mAR@100=28.57%; best validation mAP@0.5=79.21% at epoch 129 |
-| Run predictions on new unseen NVL images | ⬜ Pending | — | Use Geti Annotate → Predict on images not in training set |
-| Review prediction quality visually | ⬜ Pending | — | Are masks landing on real anomalies? Any false positives? |
+| Run predictions on new unseen NVL images | ✅ Done | 2026-08-19 | Windows UI inference attempt completed; screenshot preserved in `Debug/NVL_Geti_Run/` |
+| Review prediction quality visually | ✅ Closed | 2026-08-19 | Windows sample had no visible overlay; track retained for historical comparison |
 
-### Phase 4c — NVL Test Run: Fine-tuning
+### Phase 4c — NVL Test Run: Web Geti
+**Status:** 🟡 Active
+
+| Task | Status | Date | Notes |
+|---|---|---|---|
+| Train model in Web Geti | ✅ Done | 2026-08-19 | Training completed successfully; model/run details to be appended |
+| Run inference in Web Geti | ✅ Done | 2026-08-19 | Inference completed successfully; prediction evidence and metrics to be appended |
+| Record Web model and inference results | 🟡 WIP | 2026-08-19 | Capture model revision, dataset size, metrics, sample results, and screenshots |
+
+### Phase 4d — NVL Test Run: Web Fine-tuning
 **Status:** ⬜ Planned
 
 | Task | Status | Date | Notes |
 |---|---|---|---|
-| Accept/correct/reject Geti predictions to expand dataset | ⬜ Pending | — | Use predict-review-correct loop to build annotations faster |
+| Accept/correct/reject Web Geti predictions to expand dataset | ⬜ Pending | — | Use predict-review-correct loop to build annotations faster |
 | Add more NVL images if mAP is low | ⬜ Pending | — | Target 50–100+ annotated images for meaningful accuracy |
-| Retrain and compare mAP vs baseline | ⬜ Pending | — | Iterate until model quality is demo-ready |
+| Retrain and compare Web Geti results | ⬜ Pending | — | Iterate until model quality is demo-ready |
 
 ### Phase 5 — Debugging & Analysis
 **Status:** ✅ Complete
@@ -210,11 +222,11 @@ Q3 2026 (Jul – Sep)
 | **Project Goal** | Demonstrate AI-based defect detection on NovaLake CSAM scans |
 | **Tool** | Intel Geti™ (open-source, Apache 2.0) |
 | **Hardware** | PVA SAM501 CSAM tool |
-| **Current Phase** | Phase 4b NVL Test Run — inference validation on unseen images |
-| **Next Milestone** | Run unseen-image predictions, visually score masks, and decide on fine-tuning |
+| **Current Phase** | Web Geti — initial training and inference complete; validation in progress |
+| **Next Milestone** | Record Web results, visually score predictions, and begin Web fine-tuning |
 | **Demo Target** | September 30, 2026 |
 | **Overall Status** | 🟡 On Track |
 
 ---
 
-*Last updated: 2026-08-15 — NVL Test Run 01 completed successfully with a conditional-go metric baseline. Next: inference validation and visual scoring on unseen NVL images.*
+*Last updated: 2026-08-19 — Windows Geti track closed. Web Geti is the active platform; initial model training and inference completed successfully.*

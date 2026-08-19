@@ -1,8 +1,21 @@
 # GeTi CSAM � Engineering Notes
 
-**Hardware:** PVA SAM501 CSAM ? Geti installed directly on it
+**Hardware:** PVA SAM501 CSAM; Geti Web is now the active platform
 **Goal:** Train a defect detection model on NovaLake (NVL) scan images. Demo by end of Q3 2026.
 **This workspace:** Drop logs, scripts, and run artifacts here for analysis and debugging.
+
+## Platform Direction
+
+- **Windows Geti/MSIX:** Closed as of 2026-08-19. All training, debugging, exports, metrics, and inference screenshots remain preserved as historical artifacts in `Debug/NVL_Geti_Run/`.
+- **Web Geti:** Active platform going forward. New training, inference, evaluation, and deployment activities should be appended to the Web progress log below.
+
+## Web Geti Progress Log
+
+| Date | Activity | Status | Notes |
+|---|---|---|---|
+| 2026-08-19 | Web Geti model training | Complete | Model trained successfully in the Web version. Run details to be added as they are confirmed. |
+| 2026-08-19 | Web Geti model inference | Complete | Inference completed successfully in the Web version. Prediction results and screenshots to be added to this log. |
+| 2026-08-19 | Web Geti follow-up validation | Active | Continue recording model, dataset, metrics, sample count, and visual results here. |
 
 ---
 
@@ -56,13 +69,13 @@
 
 ---
 
-## Currently WIP
+## Windows Track: Closed
 
 - [x] Annotate 20 NVL images with `anomaly` polygon masks — completed 2026-08-14, approximately 39 minutes (10:32–11:11)
 - [x] NVL Test Run 01 — Mask R-CNN Swin-T training completed 2026-08-15 at 03:04 after approximately 15 hours 53 minutes; 140 epochs, 14/4/2 train/validation/test split, OpenVINO FP16 and ONNX FP16 exports created
 - [x] Run artifacts — training log, copied project/model files, and resource-monitor CSVs preserved in `Debug/NVL_Geti_Run/`
-- [ ] Inference review — run predictions on unseen NVL images
-- [ ] Map the temporary `anomaly` label to final defect classes (delamination, void, crack?)
+- [x] Inference review attempt — completed in the Windows UI; `nvl_predict.PNG` preserved, with no visible prediction overlay for the captured sample
+- [ ] Map the temporary `anomaly` label to final defect classes (delamination, void, crack?) — superseded by Web Geti work
 
 ## NVL Test Run 01 Results
 
@@ -101,13 +114,13 @@
 
 ---
 
-## Next Steps (in order)
+## Next Steps: Web Geti
 
-1. Run inference on unseen NVL images and capture prediction screenshots
-2. Compare visual masks with the metric baseline: coarse localization is promising, while boundary accuracy and missed instances need special attention
-3. Visually score predicted masks and make the go/conditional-go/no-go decision
-4. Fine-tune: predict → review → correct → retrain loop
-5. Lock additional defect classes (void, crack) and expand dataset
+1. Capture the Web Geti model name, revision, dataset size, and training configuration
+2. Record Web Geti inference samples, prediction screenshots, and visual scores
+3. Compare Web Geti results with the Windows baseline without mixing the two runs
+4. Fine-tune: predict → review → correct → retrain loop in Web Geti
+5. Lock additional defect classes (void, crack) and expand the dataset
 
 ---
 
@@ -127,4 +140,4 @@
 
 ---
 
-*Last updated: 2026-08-15 — NVL Test Run 01 completed successfully after 140 epochs. Next: inference review on unseen NVL images and visual scoring.*
+*Last updated: 2026-08-19 — Windows Geti track closed. Web Geti is the active platform; model training and inference are complete and ongoing validation is being tracked separately.*

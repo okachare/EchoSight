@@ -40,3 +40,8 @@ build/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Local GeTi training runs contain generated datasets, databases, checkpoints,
+# exports, media, and telemetry. Keep the evaluation evidence outside this run
+# directory under version control instead.
+Debug/NVL_Geti_Run/

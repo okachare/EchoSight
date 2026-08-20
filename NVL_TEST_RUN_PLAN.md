@@ -15,11 +15,13 @@
 |---|---|---|
 | **4a — Training** | Annotate 20 images → train Mask R-CNN Swin-T | Clean training run, mAP baseline established |
 | **4b — Inference** | Review metrics → predict on new images | Confirm model detects anomalies on unseen images |
-| **4c — Fine-tuning** | Correct predictions → retrain → compare mAP | Improved accuracy; repeat until demo-ready |
+| **4c — Web initial run** | Train, test, and infer in Web Geti | Baseline Web model and first live predictions |
+| **4d — Web task comparison** | Compare instance segmentation, bounding-box detection, and anomaly detection on the same 20-image set | Select the best task/model combination for NVL |
+| **4e — Web fine-tuning** | Improve the selected model with additional data | Demo-ready accuracy and deployment path |
 
 ---
 
-## Phase 4a — Training
+## Phase 4a — Windows Training (Closed)
 
 ### Step 1 — Create new Geti project
 - Launch Geti on PVA SAM501
@@ -79,9 +81,332 @@ The Windows Geti training run, metrics review, inference attempt, logs, exports,
 
 | Activity | Status | Date | Notes |
 |---|---|---|---|
-| Model training | ✅ Complete | 2026-08-19 | Training completed successfully in Web Geti; append model and dataset details here. |
-| Model inference | ✅ Complete | 2026-08-19 | Inference completed successfully in Web Geti; append sample results and screenshots here. |
-| Result collection | 🟡 WIP | 2026-08-19 | Record model revision, metrics, input samples, predictions, and visual score. |
+| Project and dataset | ✅ Complete | 2026-08-18 | `NVL-S-28C`, Instance Segmentation, 24 images uploaded, two labels visible. |
+| Model training | ✅ Complete | 2026-08-18 | `MaskRCNN-EfficientNetB2B` Speed architecture; Versions 1 and 2 created. |
+| Dataset split | ✅ Complete | 2026-08-18 | Training 50%, Validation 29%, Testing 21%. |
+| Model test | ✅ Complete | 2026-08-18 | Version 2, OpenVINO FP16, 24 images, score 24. |
+| Live inference | ✅ Complete | 2026-08-18 | Visible masks included `Delamination` and `Inclusion/Void` predictions. |
+| Later model test | ✅ Complete | 2026-08-18 | Version 5, OpenVINO FP16, 25 images, score 78. |
+| Result collection | 🟡 WIP | 2026-08-19 | Confirm score definition, Version 5 details, and visual prediction quality. |
+
+### Web Geti Evidence Inventory
+
+Screenshots are preserved in `Debug/NVL_Geti_WB_Run/`:
+
+| Evidence | Confirmed detail |
+|---|---|
+| Dataset view | 24 uploaded images in project `NVL-S-28C`; `Upload media`, `Export/Import`, and `Annotate interactively` controls visible |
+| Jobs view | Training job for `NVL-S-28C`; data preparation complete, model training and evaluation/inference shown in the job lifecycle |
+| Models view | `MaskRCNN-EfficientNetB2B` Speed architecture; Version 2 active at 9% score and Version 1 at 48% score |
+| Model variants | OpenVINO FP32 52.79 MB, OpenVINO FP16 27.36 MB, INT8 optimization available; XAI-head FP32 variant also listed |
+| Training datasets | Training 50%, Validation 29%, Testing 21% |
+| Tests view | Version 2 test: OpenVINO FP16, 24 images, score 24; later Version 5 test: 25 images, score 78 |
+| Live prediction | Upload-based live prediction with visible `Delamination` and `Inclusion/Void` masks and confidence values |
+
+## Phase 4d — Web Geti Model Comparison Study
+
+### Objective
+
+Determine whether NVL defect detection is better served by **instance segmentation** or **object detection**, and identify the strongest practical architecture available in Web Geti. The comparison must answer three questions:
+
+1. Which task localizes the defect most accurately: a mask or a bounding box?
+2. Which architecture gives the best detection quality on the same NVL images?
+3. Which model gives the best balance of quality, inference speed, model size, and deployment suitability on the SAM501 or target host?
+
+This is a controlled benchmark, not a production training run. Do not mix its results with the Windows baseline or the existing 24/25-image Web runs.
+
+### Storage budget and retention rules
+
+The project has approximately **2 TB of available storage**. Apply these rules to every Web run:
+
+- Keep one canonical copy of the 20-image benchmark and its manifest: 14 bad annotated images plus 6 good unannotated images.
+- Do not duplicate the same source images into every run folder.
+- Keep screenshots for configuration, metrics, representative good/partial/fail predictions, and the final decision; discard redundant captures.
+- Preserve job logs and compact metric summaries for every candidate.
+- Keep the selected deployment export and record the sizes of other variants before removing them.
+- Prefer FP16 for routine inference experiments; retain FP32 or INT8 only when the comparison requires it.
+- Record storage usage before and after each comparison run.
+- Do not delete historical Windows artifacts without an explicit project decision.
+
+**Required storage record:** run folder size, source dataset size, annotation size, model/export sizes, and remaining free space.
+
+### Evaluation evidence organization
+
+Store all model-comparison results under `Debug/Evaluation/`. Create one folder per candidate model and keep screenshots, prediction outputs, and evaluation notes together:
+
+```text
+Debug/Evaluation/
+├── Instance_Segmentation/
+├── BoundingBox_Detection/
+└── Anomaly_Detection/
+```
+
+Use stable filenames so results can be compared and found later:
+
+- `01_project_setup.png`
+- `02_dataset_split.png`
+- `03_training_complete.png`
+- `04_model_details.png`
+- `05_test_metrics.png`
+- `06_prediction_01.png`
+- `07_prediction_02.png`
+- `08_resource_usage.png`
+- `evaluation_notes.md`
+
+If Web Geti requires a substitute architecture, use the actual model name for the folder and record the substitution in `evaluation_notes.md`. Keep only representative prediction screenshots rather than multiple identical captures.
+
+### Experimental design
+
+| Item | Decision |
+|---|---|
+| Dataset | 20 NVL images: 14 bad/defect-positive images plus 6 good units |
+| Image set | Same 20 source images for every candidate; retain stable image IDs |
+| Labels | `Delamination` and `Inclusion/Void`, using the current Web taxonomy |
+| Segmentation annotation | One polygon per defect instance |
+| Detection annotation | One bounding box per defect instance, derived from the same polygons |
+| Split | One frozen split reused for every run; target 12 training / 4 validation / 4 testing, stratified by bad/good where possible |
+| Training device | Same device for every run |
+| Input preprocessing | Same image format, resolution, tiling, and augmentation policy where configurable |
+| Training budget | Same maximum epochs and early-stopping policy where configurable |
+| Model selection | Select the best checkpoint using validation results only; evaluate once on the frozen test split |
+| Repeats | One controlled run per candidate initially; repeat only the finalist if run-to-run variance matters |
+| Storage budget | Approximately 2 TB total; retain canonical artifacts and avoid duplicate exports |
+
+Twenty images are a feasibility benchmark and are too small for a production accuracy claim. Leave the 6 good units unannotated; they provide negative/background examples for false-positive evaluation. Report results as directional evidence for model/task selection.
+
+### Selected task shortlist
+
+Evaluate these three task types in Web Geti. Record the exact architecture/model selected for each task after confirming what the Web UI offers:
+
+| Candidate | Task | Intended role | Selection rationale |
+|---|---|---|---|
+| A | Instance Segmentation | Boundary-accurate defect localization | Best fit for irregular delamination, voids, and cracks; separates individual defect instances |
+| B | Object Detection, bounding box | Fast localization baseline | **Selected:** MobileNet; tests whether rectangular boxes are sufficient and practical for deployment |
+| C | Anomaly Detection | Normal-versus-abnormal screening | Uses good units as normal examples and tests sensitivity to unknown or unlabeled defect patterns |
+
+For Candidate A, record the selected segmentation backbone. Candidate B is fixed as **MobileNet bounding-box detection**. Do not silently substitute a task or model; record the exact Web Geti MobileNet variant and version.
+
+### Step-by-step execution plan
+
+#### Step 1 - Freeze the benchmark question
+
+**Objective:** Prevent the comparison from changing while runs are in progress.
+
+- Confirm the question is: segmentation versus detection, then architecture selection.
+- Confirm the two current labels: `Delamination` and `Inclusion/Void`.
+- Record Web Geti project name, Web version, user, date, and available compute device.
+- Create a run folder: `Debug/NVL_Geti_WB_Run/Model_Comparison_01/`.
+- Create a run register with one row for each candidate.
+
+**Expected result:** A signed-off experiment definition before images are selected.
+
+#### Step 2 - Select and freeze the 20-image dataset
+
+**Objective:** Ensure every model sees exactly the same evidence.
+
+- Select 14 representative bad/defect-positive NVL images and 6 representative good units.
+- Include obvious defects, subtle defects, both defect labels where possible, and at least one difficult/low-contrast case.
+- Record each image filename, source TIFF/frame, label presence, image dimensions, and defect count.
+- Do not replace images after the first model starts.
+- Keep a separate copy or manifest of the 20-image set, including a `sample_type` field with `bad` or `good`.
+
+**Expected result:** `nvl_model_comparison_20_images.csv` or equivalent manifest.
+
+#### Step 3 - Create matched annotations
+
+**Objective:** Give segmentation and detection models equivalent ground truth while preserving good units as negative examples.
+
+- For each defect instance, draw a tight polygon for the segmentation task.
+- Generate or draw a bounding box enclosing the same instance for the detection task.
+- Preserve the same class name and instance count in both task datasets.
+- Leave good-unit images unannotated; do not create a `Good` class or draw a shape around the whole unit.
+- Review all 14 bad images twice: once for label correctness and once for geometry correctness. Confirm all 6 good units contain no target defect annotation.
+- Record any image with ambiguous ground truth and exclude it from the primary score only by documented rule.
+
+**Expected result:** Two matched annotation sets with identical image IDs, classes, and instance counts.
+
+#### Step 4 - Create the three Web Geti projects or task configurations
+
+**Objective:** Keep task and architecture differences isolated.
+
+- Create or configure the segmentation project for Candidate A.
+- Create or configure the segmentation project for Candidate B.
+- Create or configure the detection project for Candidate C.
+- Use identical project metadata and label names where Web Geti permits it.
+- Verify that the selected architecture is available before uploading/training.
+- Capture screenshots of task type, labels, architecture, device, and training settings.
+
+**Expected result:** Three reproducible Web configurations with no accidental cross-task settings.
+
+#### Step 5 - Apply the same frozen split
+
+**Objective:** Make validation and test results comparable within each task.
+
+- Use the same image IDs in Training, Validation, and Testing for all three candidates.
+- Target 6/3/3 for the 12-image study, subject to Web Geti minimum and split constraints.
+- If Web Geti forces a different split, use that exact split for all candidates and record it.
+- Never compare one model with a different test image set.
+- Confirm no images are missing, duplicated, or accidentally reassigned.
+
+**Expected result:** A split table mapping every image ID to the same subset across all runs.
+
+#### Step 6 - Train Candidate A
+
+**Objective:** Establish the accuracy-oriented segmentation reference.
+
+- Select the Swin-based segmentation candidate if available.
+- Use the frozen dataset, labels, split, device, and training budget.
+- Start training and record job ID, start/end time, epochs, early stopping, and failures.
+- Save model version, exported variants, model size, and training screenshots.
+
+**Expected result:** One completed Swin segmentation model with validation and test results.
+
+#### Step 7 - Train Candidate B
+
+**Objective:** Compare the current Web baseline against the Swin segmentation model.
+
+- Select `MaskRCNN-EfficientNetB2B` or its confirmed Web equivalent.
+- Repeat the exact data, split, device, and training settings.
+- Record all job, model, export, timing, and metric details.
+
+**Expected result:** One completed EfficientNet-based segmentation model evaluated on the same images.
+
+#### Step 8 - Train Candidate B: MobileNet Detection
+
+**Objective:** Establish the MobileNet bounding-box detection baseline.
+
+- Select the available MobileNet detector in Web Geti.
+- Use the matched bounding-box annotations, not polygons.
+- Repeat the same split, device, and training budget.
+- Record model size, export variants, training time, and inference timing.
+
+**Expected result:** One completed MobileNet detection model evaluated on the same images.
+
+#### Step 9 - Run the frozen test set
+
+**Objective:** Produce comparable evidence without changing the models.
+
+- Run each candidate on the same two test images, or the same Web-enforced test set.
+- Use the same model variant where possible; record FP32, FP16, or INT8 explicitly.
+- Save annotated outputs with a consistent naming scheme, for example:
+  - `A_swin_seg_test_01.png`
+  - `B_efficientnet_seg_test_01.png`
+  - `C_mobilenet_det_test_01.png`
+- Do not correct or submit test predictions back into training.
+
+**Expected result:** A side-by-side prediction set for all candidates.
+
+#### Step 10 - Collect quality metrics
+
+**Objective:** Score each model using metrics appropriate to its task.
+
+For segmentation, record:
+
+- mask mAP or the closest Web Geti mask metric
+- mAP@0.5 and mAP@0.75 if available
+- mask recall / mAR if available
+- per-label results for `Delamination` and `Inclusion/Void`
+- false positives, missed instances, and mask-boundary quality
+
+For detection, record:
+
+- bounding-box mAP or the closest Web Geti detection metric
+- mAP@0.5 and mAP@0.75 if available
+- precision, recall, and per-label results
+- false positives, missed instances, and box tightness
+
+Do not place a mask mAP and box mAP in one ranking column as though they were identical measurements. Use task-specific quality first, then compare operational usefulness.
+
+#### Step 11 - Measure practical performance
+
+**Objective:** Select a model that can run reliably, not only one with the highest score.
+
+Record for every candidate:
+
+- model architecture and version
+- model format and precision: FP32, FP16, or INT8
+- model size in MB
+- storage used by the run and remaining free space
+- training duration
+- average inference latency per image
+- throughput, if Web Geti reports it
+- CPU/RAM utilization, if available
+- export/deployment availability
+- number of manual corrections required per image
+
+**Expected result:** A quality-versus-cost profile for all three candidates.
+
+#### Step 12 - Perform blinded visual review
+
+**Objective:** Add engineering judgment to the small numerical sample.
+
+- Have the reviewer inspect outputs using image IDs, not candidate names, where practical.
+- For each output score localization, class correctness, completeness, boundary/box quality, and false positives on a 0-2 scale.
+- Use the same reviewer and rubric for all candidates.
+- Record `PASS`, `PARTIAL`, or `FAIL` per image and per candidate.
+
+**Expected result:** A visual score that explains cases where the headline metric is misleading.
+
+#### Step 13 - Select the finalist
+
+**Objective:** Make an explicit model choice for the next NVL iteration.
+
+Use this decision order:
+
+1. Reject candidates with unstable training, invalid exports, or unusable inference.
+2. Prefer the candidate with the best task-appropriate test quality and lowest false-negative rate.
+3. Use visual boundary quality to break ties between segmentation candidates.
+4. Use latency, size, and resource use to break ties between practical deployment options.
+5. Select segmentation when boundary shape matters operationally; select detection when localization is sufficient and speed is materially better.
+
+The finalist is a recommendation for the next run, not a production qualification. Twelve bad images do not support a final accuracy claim or clean-image false-positive measurement.
+
+#### Step 14 - Expand and fine-tune the finalist
+
+**Objective:** Confirm that the selected model generalizes beyond the 12-image benchmark.
+
+- Add new NVL images, especially examples corresponding to missed defects and false positives.
+- Keep the original 12-image set as a locked regression set.
+- Annotate and review the new images using the finalist task.
+- Retrain the finalist in Web Geti.
+- Compare the expanded-run results against the locked 12-image regression results.
+
+**Expected result:** A better-supported Web model recommendation and a documented path toward the management demo.
+
+### Required comparison table
+
+| Candidate | Task | Architecture | Version | Train/Val/Test IDs | Test quality metric | Per-label result | Visual score | Model size | Precision | Avg latency | Training time | Evaluation folder | Decision |
+|---|---|---|---|---|---|---|---|---:|---|---:|---:|---|
+| A | Segmentation | Swin-based | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | `Debug/Evaluation/Swin_Segmentation/` | TBD |
+| B | Segmentation | EfficientNetB2B | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | `Debug/Evaluation/EfficientNetB2B_Segmentation/` | TBD |
+| C | Detection | MobileNet-based or documented substitute | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | `Debug/Evaluation/MobileNet_Detection/` | TBD |
+
+### Evaluation result template
+
+For each candidate, record:
+
+```text
+Candidate:
+Task:
+Architecture and model version:
+Web Geti project:
+Dataset manifest:
+Split:
+Training settings:
+Model variant/precision:
+Test metric and definition:
+Delamination result:
+Inclusion/Void result:
+False positives:
+Missed instances:
+Visual score:
+Model size:
+Average latency:
+Training duration:
+Export/deployment status:
+Decision: continue / reject / finalist
+Notes:
+```
 
 ## Phase 4b — Windows Inference & Verification (Closed)
 
@@ -201,7 +526,7 @@ Based on metrics + visual inspection, decide what to do next:
 
 ---
 
-## Phase 4c — Fine-tuning
+## Phase 4e — Web Fine-tuning
 
 ### Step 10 — Accept / correct / reject predictions
 For each predicted image from Step 8:
@@ -217,8 +542,8 @@ If mAP@0.5 is below ~30% after the first run:
 - Aim to add images that show defect types the model currently misses (hard examples)
 
 ### Step 12 — Retrain and compare
-- Repeat Steps 4–9 for each new training run
-- Save each run into a new folder: `Debug/RunNVL02/`, `Debug/RunNVL03/`, etc.
+- Repeat the selected Web task/model workflow for each new training run
+- Save each comparison or fine-tuning run under `Debug/NVL_Geti_WB_Run/`
 - Record mAP@0.5 and visual score per run in the Run Log table below
 - Stop iterating when mAP@0.5 >50% and visual inspection passes consistently
 

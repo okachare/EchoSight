@@ -4,18 +4,34 @@
 **Goal:** Train a defect detection model on NovaLake (NVL) scan images. Demo by end of Q3 2026.
 **This workspace:** Drop logs, scripts, and run artifacts here for analysis and debugging.
 
+**Storage constraint:** The available storage budget is approximately 2 TB. Keep only required source data, selected screenshots, logs, model exports, and comparison summaries; avoid duplicating full datasets or every model variant.
+
 ## Platform Direction
 
 - **Windows Geti/MSIX:** Closed as of 2026-08-19. All training, debugging, exports, metrics, and inference screenshots remain preserved as historical artifacts in `Debug/NVL_Geti_Run/`.
 - **Web Geti:** Active platform going forward. New training, inference, evaluation, and deployment activities should be appended to the Web progress log below.
+- **Evaluation results:** Store model-comparison screenshots and notes under `Debug/Evaluation/`, organized by model folder.
+
+## Web Geti Access
+
+- Access request: `http://goto/getiapply`
+- Web application: `http://goto/cdgeti`
+- Current Web evidence: `Debug/NVL_Geti_WB_Run/`
 
 ## Web Geti Progress Log
 
 | Date | Activity | Status | Notes |
 |---|---|---|---|
-| 2026-08-19 | Web Geti model training | Complete | Model trained successfully in the Web version. Run details to be added as they are confirmed. |
-| 2026-08-19 | Web Geti model inference | Complete | Inference completed successfully in the Web version. Prediction results and screenshots to be added to this log. |
-| 2026-08-19 | Web Geti follow-up validation | Active | Continue recording model, dataset, metrics, sample count, and visual results here. |
+| 2026-08-18 | Web Geti dataset setup | Complete | Project `NVL-S-28C`; Instance Segmentation; 24 images uploaded; two labels visible in the Web UI. |
+| 2026-08-18 | Web Geti model training | Complete | `MaskRCNN-EfficientNetB2B` Speed architecture; model Versions 1 and 2 created. |
+| 2026-08-18 | Web Geti model evaluation | Complete | Version 2 active; score 9%; OpenVINO FP32 and FP16 variants available; FP16 size 27.36 MB. |
+| 2026-08-18 | Web Geti dataset split | Complete | Training 50%, Validation 29%, Testing 21%. |
+| 2026-08-18 | Web Geti test run | Complete | Version 2, OpenVINO FP16, 24 images, score 24. |
+| 2026-08-18 | Web Geti live prediction | Complete | Live prediction produced visible masks for `Delamination` and `Inclusion/Void`; a later test record shows Version 5, 25 images, score 78. |
+| 2026-08-19 | Web Geti follow-up validation | Complete | Initial Web training, testing, and live prediction evidence recorded. |
+| 2026-08-20 | Web Geti model comparison planning | Complete | MobileNet selected for the bounding-box detection baseline; comparison uses 20 images: 14 bad annotated images and 6 good unannotated units. |
+| 2026-08-20 | Model comparison deck generation | Complete | Final technical deck generated and saved as `GeTi_CSAM_Model_Comparison_Deck.pptx`; includes DOE overview, individual model summaries, workflow logic, and comparison matrix. |
+| 2026-08-20 | Quarter closeout | Complete | DOE work is closed for the quarter; remaining fine-tuning, deployment validation, and demo activities are intentionally deferred to Q4. |
 
 ---
 
@@ -67,6 +83,11 @@
 - `NVL_TEST_RUN_PLAN.md` — step-by-step plan for NVL Test Run (Training → Inference → Fine-tuning)
 - `GETI_TRAINING_MANUAL.md` — full training manual: concepts, metrics, parameters, troubleshooting, run records
 
+**2026-08-20 — Model comparison deck completed**
+- Built the final management-facing deck for the NVL DOE comparison.
+- Includes the DOE setup slide, technical workflow slide, 3 model summaries, and the final comparison matrix with pros/cons/accuracy/limitations.
+- Output file: `GeTi_CSAM_Model_Comparison_Deck.pptx`
+
 ---
 
 ## Windows Track: Closed
@@ -75,7 +96,7 @@
 - [x] NVL Test Run 01 — Mask R-CNN Swin-T training completed 2026-08-15 at 03:04 after approximately 15 hours 53 minutes; 140 epochs, 14/4/2 train/validation/test split, OpenVINO FP16 and ONNX FP16 exports created
 - [x] Run artifacts — training log, copied project/model files, and resource-monitor CSVs preserved in `Debug/NVL_Geti_Run/`
 - [x] Inference review attempt — completed in the Windows UI; `nvl_predict.PNG` preserved, with no visible prediction overlay for the captured sample
-- [ ] Map the temporary `anomaly` label to final defect classes (delamination, void, crack?) — superseded by Web Geti work
+- [x] Windows temporary `anomaly` label track closed — superseded by Web Geti labels `Delamination` and `Inclusion/Void`
 
 ## NVL Test Run 01 Results
 
@@ -94,7 +115,7 @@
 
 ---
 
-## Decisions Still Open
+## Web Decisions Still Open
 
 | Decision | Why it matters |
 |---|---|
@@ -116,11 +137,12 @@
 
 ## Next Steps: Web Geti
 
-1. Capture the Web Geti model name, revision, dataset size, and training configuration
-2. Record Web Geti inference samples, prediction screenshots, and visual scores
-3. Compare Web Geti results with the Windows baseline without mixing the two runs
-4. Fine-tune: predict → review → correct → retrain loop in Web Geti
-5. Lock additional defect classes (void, crack) and expand the dataset
+1. Freeze the 20-image Web benchmark: 14 bad annotated images and 6 good unannotated units
+2. Train three Web candidates: Swin segmentation, EfficientNetB2B segmentation, and MobileNet detection or documented substitutes
+3. Compare task-appropriate quality, visual performance, latency, model size, and resource use
+4. Select a finalist and expand it with additional difficult NVL images
+5. Keep Web experiment metrics separate from the closed Windows baseline
+6. Q4 follow-up: fine-tune the selected model, validate deployment, and prepare the live management demo
 
 ---
 
@@ -140,4 +162,4 @@
 
 ---
 
-*Last updated: 2026-08-19 — Windows Geti track closed. Web Geti is the active platform; model training and inference are complete and ongoing validation is being tracked separately.*
+*Last updated: 2026-08-20 — Windows Geti track closed. Web Geti initial run is complete; the next active effort is a three-model comparison on a frozen 10-image NVL benchmark.*

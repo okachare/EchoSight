@@ -63,11 +63,11 @@ The project recommendation is Instance Segmentation for engineering review, Dete
 
 Before upload, ask:
 
-	1. Is this the correct sample and frame?
+1. Is this the correct sample and frame?
 2. Is the image readable, complete, and not corrupted?
 3. Is the defect visible in acoustic contrast rather than only in an external reference image?
-	4. Is this a defect-positive image or a normal/reference unit?
-	5. Which approved product taxonomy label applies, and how many separate instances are present?
+4. Is this a defect-positive image or a normal/reference unit?
+5. Which approved product taxonomy label applies, and how many separate instances are present?
 6. Is the image representative, difficult, low contrast, or ambiguous?
 
 ## Interpretation Guardrails

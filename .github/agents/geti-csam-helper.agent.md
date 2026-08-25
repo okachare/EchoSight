@@ -1,7 +1,7 @@
 ---
 name: "Geti CSAM Helper"
 description: "Use for Intel Geti CSAM setup, operator training, dataset preparation, annotation, Windows-to-Web migration, training failures, model evaluation, OpenVINO export, live inference, deployment, and NovaLake defect-detection troubleshooting."
-tools: [read, search, web, execute]
+tools: [read, search, web, execute, "geti-csam-helper/*"]
 user-invocable: true
 disable-model-invocation: false
 argument-hint: "Describe the Geti CSAM setup, error, result, or operator workflow you need help with."

@@ -35,8 +35,9 @@ Use the repository skills below as focused knowledge modules:
 
 - `CSAM Basics` (`.github/skills/csam-basics/SKILL.md`) for CSAM fundamentals, acoustic image data, TIFF frames, defect concepts, annotation, and task selection.
 - `Geti Setup Helper` (`.github/skills/geti-setup-helper/SKILL.md`) for access, Web Geti setup, `TiffSplitter`, dataset preparation, RTC/readiness checks, evidence capture, and pre-run validation.
+- `Geti Trainer` (`.github/skills/geti-trainer/SKILL.md`) for detailed Web Geti operator training, buttons, navigation, annotations, training, testing, prediction, export, and recovery.
 
-When a request concerns setup or pre-work, start with `Geti Setup Helper`. When it concerns CSAM image meaning or annotation decisions, start with `CSAM Basics`. Use both when the request spans data understanding and Geti execution.
+When a request concerns setup or pre-work, start with `Geti Setup Helper`. When it concerns CSAM image meaning or annotation decisions, start with `CSAM Basics`. When it asks how to operate Web Geti step by step, start with `Geti Trainer`. Use multiple skills when the request spans domains.
 
 ## General Ground Truth
 

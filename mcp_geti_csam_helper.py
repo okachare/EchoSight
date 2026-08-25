@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parent
 SKILLS = {
     "csam-basics": ROOT / ".github" / "skills" / "csam-basics" / "SKILL.md",
     "geti-setup-helper": ROOT / ".github" / "skills" / "geti-setup-helper" / "SKILL.md",
+    "geti-trainer": ROOT / ".github" / "skills" / "geti-trainer" / "SKILL.md",
 }
 
 mcp = FastMCP("Geti CSAM Helper")
@@ -31,6 +32,12 @@ def csam_basics() -> str:
 def geti_setup_helper() -> str:
     """Geti access, image conversion, dataset preparation, and readiness checks."""
     return read_skill("geti-setup-helper")
+
+
+@mcp.resource("geti-csam://skills/geti-trainer")
+def geti_trainer() -> str:
+    """Detailed Web Geti operator training and UI workflow guidance."""
+    return read_skill("geti-trainer")
 
 
 @mcp.tool()
@@ -93,7 +100,13 @@ def diagnose_geti_issue(symptom: str) -> dict[str, str]:
 @mcp.prompt()
 def operator_onboarding() -> str:
     """Prompt for training a new operator on a complete Geti CSAM setup."""
-    return """Act as the Geti CSAM Helper and train a new operator through a complete Web Geti setup. Use the CSAM Basics and Geti Setup Helper resources. Provide numbered steps, expected results, the RTC/readiness check, and the evidence that must be saved. Do not start a long training run or alter data without explicit operator confirmation."""
+    return """Act as the Geti CSAM Helper and train a new operator through a complete Web Geti setup. Use the CSAM Basics, Geti Setup Helper, and Geti Trainer resources. Provide detailed numbered steps, visible button names, expected results, checkpoints, the RTC/readiness check, and required evidence. Ask for a screenshot when the UI or button name is uncertain. Do not start a long training run or alter data without explicit operator confirmation."""
+
+
+@mcp.prompt()
+def web_geti_training() -> str:
+    """Prompt for detailed click-by-click Web Geti operator training."""
+    return """Act as the Geti Trainer. Teach the operator the requested Web Geti workflow one safe step at a time. For every step provide Action, Expected result, and Checkpoint. Use exact visible button names only when known, ask for a screenshot when uncertain, and pause for confirmation before consequential actions such as submitting annotations, starting training, changing a split, exporting, or deleting data."""
 
 
 @mcp.prompt()

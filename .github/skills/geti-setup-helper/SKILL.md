@@ -12,7 +12,7 @@ Use this skill before an operator creates or starts a Geti CSAM training run. Th
 - Geti access request: `http://goto/getiapply`
 - Web Geti application: `http://goto/cdgeti`
 - Current active platform: Intel Geti Web
-- Project owner and primary agent author: Omkar Kachare, 11943102
+- Project owner and original agent author: Omkar Kachare, 11943102
 
 If access fails, capture the browser message and confirm the operator is signed in to the required Intel environment. Do not guess permissions or bypass authentication.
 

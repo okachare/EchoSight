@@ -1,6 +1,6 @@
 ---
 name: geti-setup-helper
-description: "Use for Geti CSAM pre-work, Web Geti access, project setup, TIFF-to-image conversion, TiffSplitter, dataset readiness, labels, annotations, splits, RTC/readiness checks, evidence capture, and starting a reliable Geti run."
+description: "Use for product-neutral Geti CSAM pre-work, Web Geti access, project setup, TIFF-to-image conversion, TiffSplitter, dataset readiness, labels, annotations, splits, RTC/readiness checks, evidence capture, and starting a reliable Geti run."
 ---
 
 # Geti Setup Helper
@@ -20,14 +20,14 @@ If access fails, capture the browser message and confirm the operator is signed 
 
 Complete these checks in order:
 
-1. Confirm the sample, product, scan date, and operator.
+1. Confirm the sample, product context if applicable, scan date, and operator.
 2. Confirm Geti Web access using the links above.
 3. Identify the source TIFF file and preserve its original location and filename.
 4. Inspect TIFF frame count, image mode, dimensions, and readability.
 5. Split multi-frame TIFF data into individual PNG or JPEG images with `TiffSplitter`.
 6. Review converted outputs for missing frames, corruption, wrong orientation, and unusable contrast.
 7. Select representative defect-positive and good-unit images without changing the set after training begins.
-8. Decide and document the taxonomy before annotation. Current Web labels are `Delamination` and `Inclusion/Void`.
+8. Obtain and document the approved product-specific taxonomy before annotation; never assume labels.
 9. Choose the Geti task: Instance Segmentation for engineering review, Detection for screening, or Anomaly Detection for normal-versus-abnormal alerting.
 10. Prepare the manifest and evidence folder before uploading.
 11. Create the Web project and confirm task type, labels, model family, and settings.

@@ -1,6 +1,6 @@
 ---
 name: csam-basics
-description: "Use for CSAM fundamentals, PVA SAM501 acoustic microscopy, NovaLake scan images, multi-frame TIFF data, image quality, defect appearance, annotations, and choosing Geti task types."
+description: "Use for CSAM fundamentals, acoustic microscopy, CSAM scan images, multi-frame TIFF data, image quality, defect appearance, annotations, and choosing Geti task types."
 ---
 
 # CSAM Basics
@@ -11,12 +11,12 @@ Use this skill when an operator needs the domain foundation before preparing dat
 
 Confocal Scanning Acoustic Microscopy (CSAM) uses acoustic signals to inspect internal interfaces and structures in a sample. The output is an image of acoustic contrast, not a conventional optical photograph. Brightness, texture, boundaries, reflections, and process-related variation can all affect how a defect appears.
 
-The project hardware is the PVA SAM501 CSAM tool. NovaLake (NVL) CSAM scans are the target data for the GeTi CSAM project.
+CSAM images may originate from different instruments, products, samples, and acquisition workflows. Ask the operator for the relevant hardware and sample context rather than assuming a specific product.
 
 ## Image Data Basics
 
 - CSAM acquisition can produce multi-frame TIFF files rather than one standalone image per inspection view.
-- A TIFF may contain many frames. The project integrity check found a source with 66 frames at 517 x 281 pixels in 8-bit palette mode.
+- A TIFF may contain many frames. Record the source frame count, dimensions, and image mode for each dataset.
 - Geti works with individual image files, so multi-frame TIFF data must be split before upload.
 - PNG is the preferred training format for this project because it is lossless and preserves acoustic contrast and defect boundaries.
 - JPEG can be used when needed, but compression artifacts may affect subtle defect edges. The project splitter supports configurable JPEG quality.
@@ -24,12 +24,7 @@ The project hardware is the PVA SAM501 CSAM tool. NovaLake (NVL) CSAM scans are 
 
 ## Defect Concepts
 
-The current Web taxonomy uses:
-
-- `Delamination`: separation or loss of adhesion between material layers or interfaces.
-- `Inclusion/Void`: an inclusion, void, or similar internal region identified in the acoustic scan.
-
-Do not merge different physical defect types into one label unless the project owner explicitly approves that decision. The old Windows run used a temporary generic `anomaly` label and is historical only.
+Defect terminology and label taxonomy are product- and process-dependent. Ask the operator for the approved labels and definitions before annotating. Do not invent, merge, or reinterpret physical defect classes without explicit project-owner approval.
 
 ## Annotation Fundamentals
 
@@ -68,11 +63,11 @@ The project recommendation is Instance Segmentation for engineering review, Dete
 
 Before upload, ask:
 
-1. Is this the correct NVL sample and frame?
+	1. Is this the correct sample and frame?
 2. Is the image readable, complete, and not corrupted?
 3. Is the defect visible in acoustic contrast rather than only in an external reference image?
-4. Is this a defect-positive image or a good unit?
-5. Which approved label applies, and how many separate instances are present?
+	4. Is this a defect-positive image or a normal/reference unit?
+	5. Which approved product taxonomy label applies, and how many separate instances are present?
 6. Is the image representative, difficult, low contrast, or ambiguous?
 
 ## Interpretation Guardrails

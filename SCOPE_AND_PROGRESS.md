@@ -4,7 +4,7 @@
 **Owner:** Omkar
 **Project Start:** July 14, 2026
 **Target Deadline:** End of Q3 2026 (September 30, 2026)
-**Report Last Updated:** 2026-08-20
+**Report Last Updated:** 2026-08-26
 
 > **Platform transition:** The Windows Geti/MSIX effort is closed as a completed historical track. Intel Geti Web is now the active platform for all future training, inference, evaluation, and deployment work. Windows artifacts remain preserved and are not discarded.
 
@@ -20,6 +20,26 @@
 This project evaluates Intel Geti™ — an end-to-end Vision AI platform — as a tool for automated defect detection in acoustic microscopy scans of the **NovaLake product**. The work encompasses the full AI model development lifecycle: tool research and qualification, custom data pipeline engineering, dataset preparation, model training, iterative debugging, and deployment for live inference on the PVA SAM501 CSAM tool.
 
 The end goal is a live demonstration showing Geti's ability to identify and classify defects (such as voids, delamination, and cracks) directly from CSAM scan images — reducing reliance on manual inspection and establishing a repeatable AI-assisted quality workflow for NovaLake.
+
+## Management Update — 2026-08-25
+
+Web Geti validation is complete and is now the active project path. Project `NVL-S-28C` demonstrated the end-to-end workflow on NovaLake CSAM images: upload and annotation, Instance Segmentation training, OpenVINO FP16 testing, and live prediction.
+
+Key results:
+
+- The Web project uses `Delamination` and `Inclusion/Void` labels.
+- The later OpenVINO FP16 test used 25 images and displayed a score of **78**; an earlier 24-image test displayed **24**.
+- Live prediction produced visible defect masks, including a `Delamination` prediction at 47% confidence. The captured live-prediction evidence displayed a 72% project score.
+- The 20-image model-comparison benchmark and management-facing technical deck are complete.
+- Instance segmentation is recommended for engineering review because it preserves defect shape. Detection remains the faster screening option, while anomaly detection is useful for alerting and prioritization.
+
+These results are a positive feasibility demonstration, not a production accuracy claim, because the benchmark is small. The next phase follows the updated deck: fine-tune the NVL models, deploy the selected model for WIPs, train the team on Geti, and bring in team support for other products.
+
+**Additional Windows limitation:** The Windows Geti workflow could not use an image folder directly as the source dataset. It required images to be uploaded and managed through the application, making repeatable dataset reuse and experiment management less practical. This was a major operational reason for selecting Web Geti as the active platform, in addition to the legacy `getitune` annotation-split crash.
+
+**Email-ready summary:**
+
+> Web Geti validation for NovaLake CSAM defect detection is complete. The Instance Segmentation workflow successfully progressed from image upload and annotation through training, OpenVINO FP16 testing, and live prediction. The later Web test displayed a score of 78 on 25 images, and live inference produced visible masks for the `Delamination` and `Inclusion/Void` defect taxonomy. The 20-image model-comparison study and technical deck are also complete. Instance segmentation is recommended for engineering review because it provides the most useful defect-shape information; detection remains an option for fast screening and anomaly detection can support alerting. The results are a positive feasibility demonstration. Next steps are to fine-tune the NVL models, deploy the selected model for WIPs, train the team on Geti, and extend the approach to other products.
 
 ---
 
@@ -42,14 +62,16 @@ A successful demo will show:
 | 1. Research & Setup | Literature review, tool evaluation, installation | ✅ Complete |
 | 2. Data Collection | Acquire and organize NovaLake CSAM scan images | ✅ Complete |
 | 3. Annotation | Label defects in images using Geti's annotation tools | ✅ Complete |
-| 4a. NVL Test Run — Windows training | Train Mask R-CNN Swin-T on 20 NVL images (`anomaly`) | ✅ Closed |
+| 4a. NVL Test Run — Windows training | Train Mask R-CNN Swin-T on 20 NVL images (`anomaly`) | ✅ Complete |
 | 4b. NVL Test Run — Windows inference | Evaluate model; run predictions on new NVL images | ✅ Closed |
-| 4c. NVL Test Run — Web initial run | Train, test, and infer using Web Geti project `NVL-S-28C` | ✅ Complete; validation WIP |
+| 4c. NVL Test Run — Web initial run | Train, test, and infer using Web Geti project `NVL-S-28C` | ✅ Complete |
 | 4d. NVL Test Run — Web model comparison | Compare Instance Segmentation, MobileNet bounding-box Detection, and Anomaly Detection on 20 images: 14 bad plus 6 good | ✅ Complete (technical deck and comparison summary prepared) |
-| 4e. NVL Test Run — Web fine-tuning | Improve the selected finalist with additional data | ⏭️ Deferred to Q4 |
+| 8. Geti CSAM Helper Agent & Skills Package | Build product-neutral agent, MCP server, and three shareable skills for team training and troubleshooting | ✅ Complete |
+| 9. Geti Trainer Skill Implementation | Detailed 16-step Web Geti operator training with structured 19-field intake form and 9-issue recovery playbook | ✅ Complete |
+| 4e. NVL Test Run — Web fine-tuning | Improve the selected finalist with additional data | 📅 Planned for Q4 |
 | 5. Windows debugging & analysis | Review Windows logs, diagnose issues, improve dataset | ✅ Closed |
 | 6. Web results analysis | Validate Web scores and prediction quality; prepare demo materials | ✅ Complete for the comparison deck |
-| 7. Demo | Present live defect detection on NovaLake scans to management | ⏭️ Deferred to Q4 |
+| 7. Demo | Present live defect detection on NovaLake scans to management | 📅 Planned for Q4 |
 
 ---
 
@@ -79,6 +101,14 @@ Q3 2026 (Jul – Sep)
 │                    Web validation and result tracking continue
 ├── Aug 20, 2026 ─── DOE comparison deck completed and saved; technical workflow and model
 │                    comparison summary finalized
+├── Aug 26, 2026 ─── Geti CSAM Helper agent and skills package finalized for team sharing:
+│                    • Geti Trainer skill: 16-step Web Geti walkthrough with debugging intake form
+│                    • CSAM Basics and Geti Setup Helper skills completed and validated
+│                    • All product-specific terms removed (NVL, NovaLake, SAM501, PVA)
+│                    • MCP server operational; three skills exposed as resources and prompts
+│                    • Dual-repository strategy: source repo (okachare/GeTi_CSAM_PVA) + public
+│                      repo (okachare/Geti-CSAM-Helper) synchronized
+│                    • Skills demonstrated in action; ready for team training and rollout
 ├── Sep 2026 ─────── Q4 follow-up: fine-tuning, deployment validation, and demo preparation
 │
 └── Sep 30, 2026 ── DEMO DEADLINE (next-quarter follow-up activities continue beyond the DOE closeout)
@@ -107,7 +137,7 @@ Q3 2026 (Jul – Sep)
 
 | Task | Status | Date | Notes |
 |---|---|---|---|
-| Define defect classes to detect | 🟡 WIP | 2026-08-14 | Using temporary `anomaly` label for first real run; map to final classes (delamination, void, crack) later |
+| Define defect classes to detect | ✅ Done for Web baseline | 2026-08-18 | Web taxonomy established as `Delamination` and `Inclusion/Void`; additional classes can be added during Q4 expansion |
 | Perform initial CSAM scans of NovaLake samples | ✅ Done | ~2026-07-28 | NVL CSAM images captured on PVA SAM501 |
 | Collect sufficient images for training (target: 50–200+) | ✅ Done | 2026-08-12 | 20 NVL images selected from the collected and organised dataset; ready for annotation |
 | Convert CSAM .tiff output to PNG for Geti input | ✅ Done | ~2026-08-04 | Custom TiffSplitter tool engineered: GUI app with multi-format export, quality controls, and batch frame splitting |
@@ -143,7 +173,7 @@ Q3 2026 (Jul – Sep)
 | Review prediction quality visually | ✅ Closed | 2026-08-19 | Windows sample had no visible overlay; track retained for historical comparison |
 
 ### Phase 4c — NVL Test Run: Web Geti
-**Status:** 🟡 Active
+**Status:** ✅ Complete
 
 | Task | Status | Date | Notes |
 |---|---|---|---|
@@ -152,28 +182,28 @@ Q3 2026 (Jul – Sep)
 | Run Web Geti test | ✅ Done | 2026-08-18 | Version 2, OpenVINO FP16, 24 images, score 24 |
 | Run live inference in Web Geti | ✅ Done | 2026-08-18 | Visible predictions for `Delamination` and `Inclusion/Void` |
 | Run later Web test | ✅ Done | 2026-08-18 | Version 5, OpenVINO FP16, 25 images, score 78 |
-| Record Web model and inference results | 🟡 WIP | 2026-08-19 | Confirm score meaning and capture additional prediction examples |
+| Record Web model and inference results | ✅ Done | 2026-08-25 | Version 5 OpenVINO FP16 test displayed score 78 on 25 images; live prediction produced visible masks and displayed a 72% project score |
 
 ### Phase 4d — NVL Test Run: Web Model Comparison
 **Status:** ✅ Complete for the technical comparison deck
 
 | Task | Status | Date | Notes |
 |---|---|---|---|
-| Freeze 10-image comparison dataset | ✅ Done | 2026-08-20 | The comparison uses a consistent 20-image benchmark with a frozen train/validation/test logic across tasks |
+| Freeze 20-image comparison dataset | ✅ Done | 2026-08-20 | The comparison uses a consistent 20-image benchmark with a frozen train/validation/test logic across tasks |
 | Create matched segmentation and detection annotations | ✅ Done | 2026-08-20 | Technical comparison is structured around the same NVL defect evidence set for each task |
 | Train three Web candidate models | ✅ Done for comparison review | 2026-08-20 | Detection, anomaly, and instance segmentation were evaluated as the DOE candidates |
 | Run matched test-set inference | ✅ Done for technical summary | 2026-08-20 | Comparison deck captures the same benchmark framing and decision logic |
 | Compare quality, speed, size, and resource use | ✅ Done | 2026-08-20 | Final slide includes pros, cons, limitations, and model positioning |
-| Select finalist for expansion | 🟡 Recommended | 2026-08-20 | Instance segmentation is the most technically precise; detection remains the fastest screening option |
+| Select finalist for expansion | ✅ Recommended | 2026-08-25 | Use Instance Segmentation for engineering review; retain Detection for fast screening and Anomaly Detection for alerting/prioritization |
 
 ### Phase 4e — NVL Test Run: Web Fine-tuning
-**Status:** ⏭️ Deferred to Q4
+**Status:** 📅 Planned for Q4
 
 | Task | Status | Date | Notes |
 |---|---|---|---|
-| Add difficult and representative NVL images | ⏭️ Deferred | — | Keep the original benchmark as a locked regression set while scaling the next Q4 dataset |
-| Accept/correct/reject finalist predictions | ⏭️ Deferred | — | Use the predict-review-correct loop to expand annotations in the next iteration |
-| Retrain and compare finalist results | ⏭️ Deferred | — | Validate improvement on both new data and the locked benchmark in Q4 |
+| Add difficult and representative NVL images | 📅 Planned | Q4 2026 | Owner: Omkar; keep the original benchmark as a locked regression set while scaling the next dataset |
+| Accept/correct/reject finalist predictions | 📅 Planned | Q4 2026 | Owner: Omkar; use the predict-review-correct loop to expand annotations |
+| Retrain and compare finalist results | 📅 Planned | Q4 2026 | Owner: Omkar; validate improvement on new data and the locked benchmark |
 
 ### Phase 5 — Windows Debugging & Analysis
 **Status:** ✅ Closed
@@ -195,35 +225,35 @@ Q3 2026 (Jul – Sep)
 | Prepare demo presentation materials | ✅ Done | 2026-08-20 | Final presentation deck generated: `GeTi_CSAM_Model_Comparison_Deck.pptx` |
 
 ### Phase 7 — Demo
-**Status:** ⏭️ Deferred to Q4
+**Status:** 📅 Planned for Q4
 
 | Task | Status | Date | Notes |
 |---|---|---|---|
-| Run live inference on new NovaLake scans | ⏭️ Deferred | — | This is the deployment follow-up after the DOE comparison closes |
-| Present results to management | ⏭️ Deferred | — | Target: next-quarter demo / management review |
+| Run live inference on new NovaLake scans | 📅 Planned | Q4 2026 | Owner: Omkar; deploy the selected model for WIPs and validate inference behavior |
+| Present results to management | 📅 Planned | Q4 2026 | Owner: Omkar; management deck is ready, with live demo to follow deployment validation |
 
 ---
 
 ## Challenges & Decisions
 
-### Open Decisions
+### Decisions for Q4 Execution
 | # | Decision Needed | Impact |
 |---|---|---|
-| 1 | What defect classes does the temporary `anomaly` label represent? (delamination, voids, cracks?) | Defines annotation scope and label schema for the next iteration |
-| 2 | How many labeled images can we collect before Q3 end? | Determines model quality ceiling — target 50–200+ |
-| 3 | Will demo be live on SAM501 or on a separate machine? | Affects export/deployment approach |
-| 4 | How to correctly include "No object" / clean images in training? | Needs investigation — current workaround is defect-only dataset |
+| 1 | Expand the Web taxonomy beyond `Delamination` and `Inclusion/Void` as needed | Defines annotation scope for additional products and defect types |
+| 2 | Select the final WIP deployment host and export precision | Determines OpenVINO packaging and runtime validation |
+| 3 | Establish the clean-image training workflow | Controls false-positive evaluation and anomaly-screening quality |
 
 ### Challenges Faced
 | # | Date | Challenge | Resolution |
 |---|---|---|---|
-| 1 | 2026-07-24 – 2026-08-12 | 13 training runs failed with `ValueError: Boxes batch must have 4 coordinates` — getitune cannot handle `"No object"` annotations in the val/test split for instance segmentation; empty bbox tensors fail internal validation | **Resolved 2026-08-12** — new project with defect-only images; all images in every split have at least one polygon mask; first clean run completed |
+| 1 | 2026-07-14 – 2026-08-19 | Windows Geti could not use an image folder directly as the source dataset; the upload-only workflow made dataset reuse and repeated experiments cumbersome | Windows track closed; Web Geti selected as the active platform |
+| 2 | 2026-07-24 – 2026-08-12 | 13 training runs failed with `ValueError: Boxes batch must have 4 coordinates` — getitune cannot handle `"No object"` annotations in the val/test split for instance segmentation; empty bbox tensors fail internal validation | **Resolved 2026-08-12** — new project with defect-only images; all images in every split have at least one polygon mask; first clean run completed |
 
-### Current Roadblocks
+### Historical Limitations and Q4 Actions
 | # | Roadblock | Severity | Action Required |
 |---|---|---|---|
-| 1 | **Smoke test mAP ~1%** — 5-image dataset too small for meaningful accuracy | 🟡 Medium — expected; does not block progress | Scale up to 50+ annotated NVL images for real training run |
-| 2 | **"No object" / clean images cannot currently be used** — getitune crashes when empty-annotation images land in val/test split | 🟡 Medium — workaround in place | Investigate if getitune has a fix/config for this; or keep negative examples out until resolved |
+| 1 | **Smoke test mAP ~1%** — 5-image dataset was too small for meaningful accuracy | Closed historical limitation | Superseded by the successful Web run and 20-image comparison benchmark |
+| 2 | **"No object" / clean images can crash the legacy getitune path** | Known limitation with workaround | Validate the Web workflow during Q4 expansion before using clean images for formal scoring |
 
 ---
 
@@ -247,11 +277,11 @@ Q3 2026 (Jul – Sep)
 | **Project Goal** | Demonstrate AI-based defect detection on NovaLake CSAM scans |
 | **Tool** | Intel Geti™ (open-source, Apache 2.0) |
 | **Hardware** | PVA SAM501 CSAM tool |
-| **Current Phase** | DOE comparison and technical deck finalized; quarter-closeout completed |
-| **Next Milestone** | Q4 follow-up: fine-tuning, deployment validation, and management demo |
-| **Demo Target** | Next-quarter review after model deployment and tuning |
-| **Overall Status** | ✅ Quarter closeout complete; Q4 follow-ups remain |
+| **Current Phase** | Web validation and DOE comparison complete; technical deck ready for management |
+| **Next Milestone** | Q4 fine-tuning, deployment for WIPs, team training, and product expansion |
+| **Demo Target** | Q4 management demonstration after model tuning and deployment validation |
+| **Overall Status** | ✅ Web feasibility demonstrated; Q4 engineering follow-up remains |
 
 ---
 
-*Last updated: 2026-08-20 — Quarter closeout complete. The NVL DOE comparison deck is completed, the benchmark study is closed for this quarter, and the remaining fine-tuning/deployment/demo actions are deferred to Q4.*
+*Last updated: 2026-08-25 — Web Geti validation and the NVL DOE comparison are complete. The Web workflow produced successful test and live-prediction evidence; fine-tuning, deployment, team training, and product expansion continue in Q4.*

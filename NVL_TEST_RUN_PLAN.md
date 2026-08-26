@@ -2,7 +2,7 @@
 
 **Project:** Geti AI-Assisted Defect Detection on NovaLake  
 **Run Name:** NVL Test Run  
-**Planned Date:** 2026-08-16/17 (weekend)  
+**Planned Date:** 2026-08-16/17 (weekend; completed)
 **Goal:** Train first real anomaly detection model on 20 NVL CSAM images and validate inference quality  
 
 > **Platform update (2026-08-19):** The Windows Geti/MSIX workflow is closed and retained for historical reference. The Web Geti workflow is now the active path. Append new training, inference, metrics, and fine-tuning results to the Web Geti sections and do not mix them with the Windows run metrics.
@@ -87,7 +87,7 @@ The Windows Geti training run, metrics review, inference attempt, logs, exports,
 | Model test | ✅ Complete | 2026-08-18 | Version 2, OpenVINO FP16, 24 images, score 24. |
 | Live inference | ✅ Complete | 2026-08-18 | Visible masks included `Delamination` and `Inclusion/Void` predictions. |
 | Later model test | ✅ Complete | 2026-08-18 | Version 5, OpenVINO FP16, 25 images, score 78. |
-| Result collection | 🟡 WIP | 2026-08-19 | Confirm score definition, Version 5 details, and visual prediction quality. |
+| Result collection | ✅ Complete | 2026-08-25 | Evidence confirms Version 5 OpenVINO FP16 test score 78 on 25 images and visible live-prediction masks; results remain directional because the dataset is small. |
 
 ### Web Geti Evidence Inventory
 
@@ -100,8 +100,8 @@ Screenshots are preserved in `Debug/NVL_Geti_WB_Run/`:
 | Models view | `MaskRCNN-EfficientNetB2B` Speed architecture; Version 2 active at 9% score and Version 1 at 48% score |
 | Model variants | OpenVINO FP32 52.79 MB, OpenVINO FP16 27.36 MB, INT8 optimization available; XAI-head FP32 variant also listed |
 | Training datasets | Training 50%, Validation 29%, Testing 21% |
-| Tests view | Version 2 test: OpenVINO FP16, 24 images, score 24; later Version 5 test: 25 images, score 78 |
-| Live prediction | Upload-based live prediction with visible `Delamination` and `Inclusion/Void` masks and confidence values |
+| Tests view | Version 2 test: OpenVINO FP16, 24 images, score 24; later Version 5 test: OpenVINO FP16, 25 images, score 78 |
+| Live prediction | Upload-based live prediction with visible `Delamination` and `Inclusion/Void` masks and confidence values; captured project score 72% |
 
 ## Phase 4d — Web Geti Model Comparison Study
 
@@ -373,13 +373,25 @@ The finalist is a recommendation for the next run, not a production qualificatio
 
 **Expected result:** A better-supported Web model recommendation and a documented path toward the management demo.
 
-### Required comparison table
+### Completed comparison outcome
+
+The updated management deck is the completed comparison record for this phase. It concludes that Detection is the fastest and simplest screening option, Anomaly Detection is best suited to alerting and prioritization, and Instance Segmentation is the recommended engineering-review path because it preserves defect shape and boundary information. The deck records the segmentation baseline as mAP 22.82%, mAP@0.5 46.53%, mAP@0.75 14.85%, with a best validation checkpoint of mAP 28.59% and mAP@0.5 79.21%.
+
+| Candidate | Completed decision | Intended use | Remaining Q4 validation |
+|---|---|---|---|
+| Detection | Retain as fast-screening option | Rapid triage and localization | Measure task-specific detection quality and latency on expanded data |
+| Anomaly Detection | Retain as alerting option | Unknown-defect screening and prioritization | Increase good-unit diversity and calibrate false-alarm threshold |
+| Instance Segmentation | Recommended finalist | Engineering review and defect geometry | Fine-tune boundary quality and validate deployment on new NVL scans |
+
+The deck does not provide comparable per-candidate latency, resource, or task-specific metric values. Those measurements remain Q4 execution items and are intentionally not represented as completed results.
+
+### Comparison table template for Q4 measurements
 
 | Candidate | Task | Architecture | Version | Train/Val/Test IDs | Test quality metric | Per-label result | Visual score | Model size | Precision | Avg latency | Training time | Evaluation folder | Decision |
 |---|---|---|---|---|---|---|---|---:|---|---:|---:|---|
-| A | Segmentation | Swin-based | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | `Debug/Evaluation/Swin_Segmentation/` | TBD |
-| B | Segmentation | EfficientNetB2B | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | `Debug/Evaluation/EfficientNetB2B_Segmentation/` | TBD |
-| C | Detection | MobileNet-based or documented substitute | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | `Debug/Evaluation/MobileNet_Detection/` | TBD |
+| A | Segmentation | Swin-based | Q4 | Locked benchmark plus expanded NVL set | Task-specific metric | Per-label results | Visual review | Record | FP16 preferred | Record | Record | `Debug/Evaluation/Instance_Segmentation/` | Finalist validation |
+| B | Segmentation | EfficientNetB2B | Q4 | Locked benchmark plus expanded NVL set | Task-specific metric | Per-label results | Visual review | Record | FP16 preferred | Record | Record | `Debug/Evaluation/Instance_Segmentation/` | Engineering comparison |
+| C | Detection | MobileNet or confirmed Web equivalent | Q4 | Locked benchmark plus expanded NVL set | Box metric | Per-label results | Visual review | Record | FP16 preferred | Record | Record | `Debug/Evaluation/Detection only/` | Screening comparison |
 
 ### Evaluation result template
 
@@ -554,7 +566,8 @@ If mAP@0.5 is below ~30% after the first run:
 | Run | Date | Images | Model | mAP@0.5 | Train/Val gap | Visual score | Notes |
 |---|---|---|---|---|---|---|---|
 | Smoke Test | 2026-08-12 | 5 (delamination only) | RF-DETR-Seg-M | ~1% | — | N/A | Pipeline smoke test — not a real model |
-| NVL Test Run 01 | 2026-08-14/15 | 20 (anomaly only; 14/4/2 split) | Mask R-CNN Swin-T | 46.53% | Validation mAP@0.5 peaked at 79.21%; test result is lower, but based on only 2 test images | Pending | Completed after 140 epochs in ~15h 53m; test mAP=22.82%, mAP@0.75=14.85%, mAR@1=15.71%, mAR@100=28.57%; best validation mAP=28.59% at epoch 129; OpenVINO and ONNX exports created |
+| NVL Test Run 01 | 2026-08-14/15 | 20 (anomaly only; 14/4/2 split) | Mask R-CNN Swin-T | 46.53% | Validation mAP@0.5 peaked at 79.21%; test result is lower, but based on only 2 test images | Historical visual review incomplete | Completed after 140 epochs in ~15h 53m; test mAP=22.82%, mAP@0.75=14.85%, mAR@1=15.71%, mAR@100=28.57%; best validation mAP=28.59% at epoch 129; OpenVINO and ONNX exports created |
+| Web Geti initial run | 2026-08-18 | 24/25 | MaskRCNN-EfficientNetB2B Speed, OpenVINO FP16 | 78 displayed test score | Earlier test score 24 on 24 images; project/live evidence displayed 69%/72% | Visible masks | Project `NVL-S-28C`; labels `Delamination` and `Inclusion/Void`; later test used Version 5 and 25 images |
 
 ---
 

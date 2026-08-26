@@ -32,6 +32,16 @@
 | 2026-08-20 | Web Geti model comparison planning | Complete | MobileNet selected for the bounding-box detection baseline; comparison uses 20 images: 14 bad annotated images and 6 good unannotated units. |
 | 2026-08-20 | Model comparison deck generation | Complete | Final technical deck generated and saved as `GeTi_CSAM_Model_Comparison_Deck.pptx`; includes DOE overview, individual model summaries, workflow logic, and comparison matrix. |
 | 2026-08-20 | Quarter closeout | Complete | DOE work is closed for the quarter; remaining fine-tuning, deployment validation, and demo activities are intentionally deferred to Q4. |
+| 2026-08-26 | Geti CSAM Helper Agent development | Complete | Product-neutral agent and MCP-based skills package created for team training and troubleshooting; dual-repository strategy implemented (source + public). |
+| 2026-08-26 | Geti Trainer skill implementation | Complete | 16-step Web Geti operator walkthrough with 19-field debugging intake form and 5-field gate logic; 9-issue recovery playbook; integrated into MCP server. |
+| 2026-08-26 | Product neutralization pass | Complete | All product-specific terms removed (NVL, NovaLake, SAM501, PVA); three skills now suitable for team sharing and cross-product use. |
+| 2026-08-26 | Skills validation and demonstration | Complete | CSAM Basics, Geti Trainer, and Geti Setup Helper skills invoked and validated; MCP server correctly exposes all resources and prompts. |
+
+## Management Update — 2026-08-25
+
+Web Geti successfully demonstrated the end-to-end NovaLake CSAM workflow: upload and annotate images, train an Instance Segmentation model, test an OpenVINO FP16 variant, and run live prediction. Project `NVL-S-28C` uses `Delamination` and `Inclusion/Void` labels. The later recorded Web test scored **78** on 25 images, and live prediction produced visible defect masks, including a `Delamination` prediction. The Web workflow is operational and is the recommended platform for the next iteration.
+
+The 20-image model-comparison benchmark and `GeTi_CSAM_Model_Comparison_Deck.pptx` are complete. Instance segmentation is recommended for engineering review because it preserves defect shape; detection remains the fast-screening alternative. Results are directional because the dataset is small. Q4 work will fine-tune the NVL models, deploy the selected model for WIPs, train the team on Geti, and extend the approach to other products.
 
 ---
 
@@ -92,6 +102,10 @@
 
 ## Windows Track: Closed
 
+### Windows Track Limitation: No Direct Image-Folder Source
+
+The Windows Geti workflow could not use the organized image folder directly as the source dataset. Images had to be uploaded and managed through the application, which made repeated runs, dataset reuse, and controlled source-data management less practical. This was separate from the `getitune` annotation crash and was a major operational reason for moving the active work to Web Geti.
+
 - [x] Annotate 20 NVL images with `anomaly` polygon masks — completed 2026-08-14, approximately 39 minutes (10:32–11:11)
 - [x] NVL Test Run 01 — Mask R-CNN Swin-T training completed 2026-08-15 at 03:04 after approximately 15 hours 53 minutes; 140 epochs, 14/4/2 train/validation/test split, OpenVINO FP16 and ONNX FP16 exports created
 - [x] Run artifacts — training log, copied project/model files, and resource-monitor CSVs preserved in `Debug/NVL_Geti_Run/`
@@ -110,24 +124,25 @@
 
 - Best validation checkpoint: epoch 129, with mAP=28.59%, mAP@0.5=79.21%, mAP@0.75=13.15%, and mAR@100=37.00%.
 - The test split contains only two images, so these are a directional baseline rather than a stable production-quality estimate.
-- Interpretation: the model recognizes coarse anomaly regions, but the low mAP@0.75 and mAR@100 indicate imprecise mask boundaries and missed defect instances. Treat the run as a conditional go pending visual review on unseen images.
+- Interpretation: the model recognized coarse anomaly regions, but the low mAP@0.75 and mAR@100 indicated imprecise mask boundaries and missed defect instances. The Windows run is closed as a historical conditional-go baseline; the Web workflow is the active path.
 - Resource monitor: CPU averaged 45.8% and peaked at 100%; available RAM averaged 17.3 GB but briefly reached zero; disk throughput averaged 5.89 MiB/s and peaked at 132.65 MiB/s.
 
 ---
 
-## Web Decisions Still Open
+## Web Decisions for Q4 Execution
 
 | Decision | Why it matters |
 |---|---|
-| Final meaning of temporary `anomaly` label? (delamination, void, crack?) | Determines whether the first NVL model is a generic anomaly detector or a class-specific defect model |
-| How many NVL frames are useful vs noise? | Not all 66 frames per TIFF will have defects — need selection criteria |
-| Will demo be live on SAM501 or separate machine? | Affects OpenVINO export target and deployment steps |
-| How to include clean/"No object" images? | getitune limitation — needs investigation or workaround |
+| Expand the Web taxonomy beyond `Delamination` and `Inclusion/Void` as needed | Defines annotation scope for additional products and defect types |
+| Select useful NVL frames and add difficult examples | Improves coverage and reduces the risk of overfitting to a small benchmark |
+| Select the final WIP deployment host and export precision | Determines OpenVINO packaging and runtime validation |
+| Establish the clean-image training workflow | Controls false-positive evaluation and anomaly-screening quality |
 
 ---
 
 ## Known Issues / Things to Watch
 
+- Windows Geti could not consume an image folder directly as the source dataset; the application upload workflow was required. Web Geti is the active path for more practical dataset and experiment management.
 - getitune **cannot handle `"No object"` annotations in val/test split** for instance segmentation — empty bbox tensor crashes DataLoader collate. Workaround: defect-only datasets until fixed.
 - Images upload directly into Geti project — no need for COCO/VOC folder structure when using Geti GUI.
 - RF-DETR-Seg-M is the confirmed working architecture for this project.
@@ -137,12 +152,24 @@
 
 ## Next Steps: Web Geti
 
-1. Freeze the 20-image Web benchmark: 14 bad annotated images and 6 good unannotated units
-2. Train three Web candidates: Swin segmentation, EfficientNetB2B segmentation, and MobileNet detection or documented substitutes
-3. Compare task-appropriate quality, visual performance, latency, model size, and resource use
-4. Select a finalist and expand it with additional difficult NVL images
-5. Keep Web experiment metrics separate from the closed Windows baseline
-6. Q4 follow-up: fine-tune the selected model, validate deployment, and prepare the live management demo
+1. Preserve the completed 20-image Web benchmark and comparison evidence
+2. Fine-tune the NVL models with difficult and representative images
+3. Deploy the selected model for WIPs and validate inference behavior, latency, and resource use
+4. **Use Geti CSAM Helper agent and skills package for team training on Web Geti workflow** ← NEW
+5. Bring in team support to extend the approach to other products using the product-neutral skills package
+
+---
+
+## Team Training & Knowledge Transfer (2026-08-26)
+
+The **Geti CSAM Helper** agent and MCP-based skills package is now operational and ready for team use:
+
+- **Geti Trainer skill**: Provides 16-step click-by-click Web Geti walkthrough, debugging intake form (19 fields, 5-field gate), and 9-issue recovery playbook
+- **CSAM Basics skill**: Multi-frame TIFF preparation, defect annotation guidance, task selection (Instance Seg vs Detection vs Anomaly)
+- **Geti Setup Helper skill**: Pre-work readiness checks, TiffSplitter guidance, dataset validation, evidence capture
+- **MCP architecture**: Three skills exposed as resources; can be invoked from VS Code agent or custom applications
+- **Product neutrality**: All references removed (NVL, NovaLake, SAM501, PVA) for cross-product and external team sharing
+- **Repositories**: Source repo (`okachare/GeTi_CSAM_PVA`, branch `main`, commit 697acc3) contains full project history; public repo (`okachare/Geti-CSAM-Helper`, branch `main`, commit 5c222de) is product-neutral for team distribution
 
 ---
 
@@ -162,4 +189,4 @@
 
 ---
 
-*Last updated: 2026-08-20 — Windows Geti track closed. Web Geti initial run is complete; the next active effort is a three-model comparison on a frozen 10-image NVL benchmark.*
+*Last updated: 2026-08-26 — Geti CSAM Helper agent and team training skills package completed and validated; product neutrality achieved; dual-repository strategy deployed (source + public). Q4 activities: fine-tuning, WIP deployment, team training rollout, and product expansion.*

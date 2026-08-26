@@ -16,6 +16,7 @@
 
 - Access request: `http://goto/getiapply`
 - Web application: `http://goto/cdgeti`
+- **Geti CSAM Helper Agent & Skills (MCP):** [GitHub public repository](https://github.com/okachare/Geti-CSAM-Helper) — Product-neutral agent, Geti Trainer skill, CSAM Basics, and Setup Helper for team training and troubleshooting.
 - Current Web evidence: `Debug/NVL_Geti_WB_Run/`
 
 ## Web Geti Progress Log

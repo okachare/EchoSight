@@ -9,6 +9,7 @@
 > **Platform transition:** The Windows Geti/MSIX effort is closed as a completed historical track. Intel Geti Web is now the active platform for all future training, inference, evaluation, and deployment work. Windows artifacts remain preserved and are not discarded.
 
 **Web Geti access:** [Request access](http://goto/getiapply) | [Open Web Geti](http://goto/cdgeti)
+**MCP agent & skills:** [Geti CSAM Helper GitHub](https://github.com/okachare/Geti-CSAM-Helper) — product-neutral Geti CSAM agent, CSAM Basics, Geti Setup Helper, and Geti Trainer for team onboarding and troubleshooting.
 **Current Web evidence:** `Debug/NVL_Geti_WB_Run/`
 **Storage constraint:** Approximately 2 TB is available for the project; artifact retention and model-export selection must be managed deliberately.
 **Evaluation results:** Future model-comparison screenshots and notes will be stored under `Debug/Evaluation/`, organized by model.

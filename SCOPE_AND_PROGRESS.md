@@ -4,12 +4,12 @@
 **Owner:** Omkar
 **Project Start:** July 14, 2026
 **Target Deadline:** End of Q3 2026 (September 30, 2026)
-**Report Last Updated:** 2026-08-26
+**Report Last Updated:** 2026-09-02
 
 > **Platform transition:** The Windows Geti/MSIX effort is closed as a completed historical track. Intel Geti Web is now the active platform for all future training, inference, evaluation, and deployment work. Windows artifacts remain preserved and are not discarded.
 
 **Web Geti access:** [Request access](http://goto/getiapply) | [Open Web Geti](http://goto/cdgeti)
-**MCP agent & skills:** [Geti CSAM Helper GitHub](https://github.com/okachare/Geti-CSAM-Helper) — product-neutral Geti CSAM agent, CSAM Basics, Geti Setup Helper, and Geti Trainer for team onboarding and troubleshooting.
+**MCP agent & skills:** [Geti CSAM Helper GitHub](https://github.com/okachare/Geti-CSAM-Helper) — product-neutral Geti CSAM agent, four skills, and upstream Geti source guidance for team onboarding and troubleshooting.
 **Current Web evidence:** `Debug/NVL_Geti_WB_Run/`
 **Storage constraint:** Approximately 2 TB is available for the project; artifact retention and model-export selection must be managed deliberately.
 **Evaluation results:** Future model-comparison screenshots and notes will be stored under `Debug/Evaluation/`, organized by model.
@@ -69,6 +69,7 @@ A successful demo will show:
 | 4d. NVL Test Run — Web model comparison | Compare Instance Segmentation, MobileNet bounding-box Detection, and Anomaly Detection on 20 images: 14 bad plus 6 good | ✅ Complete (technical deck and comparison summary prepared) |
 | 8. Geti CSAM Helper Agent & Skills Package | Build product-neutral agent, MCP server, and three shareable skills for team training and troubleshooting | ✅ Complete |
 | 9. Geti Trainer Skill Implementation | Detailed 16-step Web Geti operator training with structured 19-field intake form and 9-issue recovery playbook | ✅ Complete |
+| 10. Upstream Geti Source Integration | Add official repository literature, source navigation, release-aware debugging guidance, and MCP source links | ✅ Complete |
 | 4e. NVL Test Run — Web fine-tuning | Improve the selected finalist with additional data | 📅 Planned for Q4 |
 | 5. Windows debugging & analysis | Review Windows logs, diagnose issues, improve dataset | ✅ Closed |
 | 6. Web results analysis | Validate Web scores and prediction quality; prepare demo materials | ✅ Complete for the comparison deck |
@@ -110,6 +111,9 @@ Q3 2026 (Jul – Sep)
 │                    • Dual-repository strategy: source repo (okachare/GeTi_CSAM_PVA) + public
 │                      repo (okachare/Geti-CSAM-Helper) synchronized
 │                    • Skills demonstrated in action; ready for team training and rollout
+├── Sep 2, 2026 ──── Integrated the official Geti GitHub repository as a source-reference skill:
+│                    • Added literature/source navigation, release-aware debugging, and MCP source links
+│                    • Updated the MCP server import for the declared MCP 2.x dependency
 ├── Sep 2026 ─────── Q4 follow-up: fine-tuning, deployment validation, and demo preparation
 │
 └── Sep 30, 2026 ── DEMO DEADLINE (next-quarter follow-up activities continue beyond the DOE closeout)
@@ -285,4 +289,4 @@ Q3 2026 (Jul – Sep)
 
 ---
 
-*Last updated: 2026-08-25 — Web Geti validation and the NVL DOE comparison are complete. The Web workflow produced successful test and live-prediction evidence; fine-tuning, deployment, team training, and product expansion continue in Q4.*
+*Last updated: 2026-09-02 — Web Geti validation and the NVL DOE comparison are complete. The Geti CSAM Helper now includes official upstream source guidance for literature and release-aware debugging; fine-tuning, deployment, team training, and product expansion continue in Q4.*

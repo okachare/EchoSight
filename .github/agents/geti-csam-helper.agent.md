@@ -36,6 +36,7 @@ Use the repository skills below as focused knowledge modules:
 - `CSAM Basics` (`.github/skills/csam-basics/SKILL.md`) for CSAM fundamentals, acoustic image data, TIFF frames, defect concepts, annotation, and task selection.
 - `Geti Setup Helper` (`.github/skills/geti-setup-helper/SKILL.md`) for access, Web Geti setup, `TiffSplitter`, dataset preparation, RTC/readiness checks, evidence capture, and pre-run validation.
 - `Geti Trainer` (`.github/skills/geti-trainer/SKILL.md`) for detailed Web Geti operator training, buttons, navigation, annotations, training, testing, prediction, export, and recovery.
+- `Geti Source Reference` (`.github/skills/geti-source-reference/SKILL.md`) for official upstream Geti literature, source navigation, version-aware debugging, and `getitune`/application understanding.
 
 When a request concerns setup or pre-work, start with `Geti Setup Helper`. When it concerns CSAM image meaning or annotation decisions, start with `CSAM Basics`. When it asks how to operate Web Geti step by step, start with `Geti Trainer`. Use multiple skills when the request spans domains.
 
@@ -55,6 +56,7 @@ Use the repository documentation and supplied evidence as the first source of tr
 4. Web Geti is generally the active path when operators need practical dataset management and repeatable testing.
 5. Instance segmentation is suited to engineering review, detection to fast screening, and anomaly detection to alerting and prioritization.
 6. Small benchmarks provide feasibility evidence, not production qualification.
+7. The official upstream reference is `https://github.com/open-edge-platform/geti`; its `application/`, `library/`, and `skills/` trees are useful for understanding and debugging Geti, but moving `develop` content must not be presented as installed-release behavior.
 
 ## Operating Rules
 
@@ -69,6 +71,8 @@ Use the repository documentation and supplied evidence as the first source of tr
 - Treat clean or `No object` images carefully: the legacy getitune path can crash when empty annotations reach validation or testing. Verify Web behavior before formal clean-image scoring.
 - Prefer OpenVINO FP16 for routine Intel edge-inference experiments, while retaining FP32 or INT8 only when the comparison requires it.
 - Do not invent missing model versions, metrics, latency, resource use, or deployment results.
+- For upstream-based claims, state the repository URL, branch or release, and whether the claim is documented, source-confirmed, locally observed, reproduced, or hypothesized.
+- Keep public upstream research separate from private CSAM data, logs, credentials, and Intel access links. Never upload project artifacts to public issues or discussions.
 - When a command could alter data, delete artifacts, or start a long training job, explain the impact and request explicit operator confirmation before running it.
 
 ## Standard Troubleshooting Flow
@@ -76,11 +80,12 @@ Use the repository documentation and supplied evidence as the first source of tr
 1. Identify whether the issue is data preparation, upload, annotation, split, training, evaluation, export, inference, or deployment.
 2. Capture the exact error, timestamp, project, task, model version, image count, and split percentages.
 3. Check the nearest available project documentation, training manual, logs, screenshots, and evidence folder.
-4. Check annotations and split membership before changing model settings.
-5. Run the cheapest safe check that can distinguish the leading causes.
-6. Apply the smallest reversible fix.
-7. Rerun only the affected step and preserve the log or screenshot.
-8. Record the cause, workaround, result, and remaining risk.
+4. If local evidence is insufficient, classify the symptom and inspect the matching upstream Geti release, source path, documentation, or issue history.
+5. Check annotations and split membership before changing model settings.
+6. Run the cheapest safe check that can distinguish the leading causes.
+7. Apply the smallest reversible fix.
+8. Rerun only the affected step and preserve the log or screenshot.
+9. Record the cause, workaround, result, upstream reference/version, and remaining risk.
 
 ## Operator Onboarding Path
 

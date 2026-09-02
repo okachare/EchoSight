@@ -11,13 +11,17 @@ The server exposes:
 - `geti-csam://skills/csam-basics`: CSAM fundamentals and image/annotation guidance.
 - `geti-csam://skills/geti-setup-helper`: Geti pre-work and readiness guidance.
 - `geti-csam://skills/geti-trainer`: Detailed click-by-click Web Geti operator training.
+- `geti-csam://skills/geti-source-reference`: Official upstream Geti literature, source navigation, and version-aware debugging guidance.
 - `get_setup_links`: approved access and Web Geti links.
+- `get_geti_source_links`: official Geti GitHub, documentation, release, issue, and discussion links.
 - `get_run_readiness_check`: pre-run readiness checklist.
 - `diagnose_geti_issue`: first safe diagnostic check for common symptoms.
 - `operator_onboarding`: prompt for training a new operator.
 - `troubleshooting`: prompt for structured issue diagnosis.
 
-It reads only the three skill files and does not expose raw CSAM images, logs, or model artifacts through MCP.
+It reads only the four skill files and does not expose raw CSAM images, logs, or model artifacts through MCP.
+
+The helper uses `https://github.com/open-edge-platform/geti` as its public upstream reference for Geti architecture, `getitune`, recipes, source-level debugging, and release history. Upstream `develop` is treated as a moving development reference; installed-release behavior must be checked against the matching tag or local evidence.
 
 ## VS Code use
 
@@ -49,6 +53,7 @@ Commit and push these files with the agent package:
 - `.github/skills/csam-basics/SKILL.md`
 - `.github/skills/geti-setup-helper/SKILL.md`
 - `.github/skills/geti-trainer/SKILL.md`
+- `.github/skills/geti-source-reference/SKILL.md`
 - `mcp_geti_csam_helper.py`
 - `requirements-mcp.txt`
 - `.vscode/mcp.json`

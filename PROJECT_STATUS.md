@@ -37,6 +37,8 @@
 | 2026-08-26 | Geti Trainer skill implementation | Complete | 16-step Web Geti operator walkthrough with 19-field debugging intake form and 5-field gate logic; 9-issue recovery playbook; integrated into MCP server. |
 | 2026-08-26 | Product neutralization pass | Complete | All product-specific terms removed (NVL, NovaLake, SAM501, PVA); three skills now suitable for team sharing and cross-product use. |
 | 2026-08-26 | Skills validation and demonstration | Complete | CSAM Basics, Geti Trainer, and Geti Setup Helper skills invoked and validated; MCP server correctly exposes all resources and prompts. |
+| 2026-09-02 | Upstream Geti reference integration | Complete | Added the official `open-edge-platform/geti` source, release, documentation, issue, and discussion references for literature and version-aware debugging; added the fourth MCP skill/resource and source-links tool. |
+| 2026-09-02 | MCP 2.x compatibility correction | Complete | Updated the server from the removed `FastMCP` import to `MCPServer` to match `requirements-mcp.txt`; syntax validation passes. Runtime smoke testing remains limited by slow `rich` import from the network-share virtual environment. |
 
 ## Management Update — 2026-08-25
 
@@ -168,7 +170,7 @@ The **Geti CSAM Helper** agent and MCP-based skills package is now operational a
 - **Geti Trainer skill**: Provides 16-step click-by-click Web Geti walkthrough, debugging intake form (19 fields, 5-field gate), and 9-issue recovery playbook
 - **CSAM Basics skill**: Multi-frame TIFF preparation, defect annotation guidance, task selection (Instance Seg vs Detection vs Anomaly)
 - **Geti Setup Helper skill**: Pre-work readiness checks, TiffSplitter guidance, dataset validation, evidence capture
-- **MCP architecture**: Three skills exposed as resources; can be invoked from VS Code agent or custom applications
+- **MCP architecture**: Four skills exposed as resources, including upstream Geti source guidance; source links are also available as an MCP tool
 - **Product neutrality**: All references removed (NVL, NovaLake, SAM501, PVA) for cross-product and external team sharing
 - **Repositories**: Source repo (`okachare/GeTi_CSAM_PVA`, branch `main`, commit 697acc3) contains full project history; public repo (`okachare/Geti-CSAM-Helper`, branch `main`, commit 5c222de) is product-neutral for team distribution
 

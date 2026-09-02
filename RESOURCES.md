@@ -76,6 +76,17 @@ geti/
     └── application/       ← geti-using-the-pipeline, backend-dev, ui-dev
 ```
 
+### Using the upstream repository for research and debugging
+
+Use the official repository as the public technical reference:
+
+- Repository: https://github.com/open-edge-platform/geti
+- Development branch: https://github.com/open-edge-platform/geti/tree/develop
+- Releases: https://github.com/open-edge-platform/geti/releases
+- Issues and discussions: https://github.com/open-edge-platform/geti/issues
+
+For source navigation, inspect `application/` for the end-to-end product, `library/` and `library/src/getitune/` for training and optimization, `library/src/getitune/recipe/` for model/task recipes, and `skills/` or `.agents/skills/` for first-party workflow guidance. Match the upstream release to the installed Geti version before using source or issue history to explain a failure. Record the URL, branch/tag, commit when available, and access date in the relevant `Debug/` notes. Keep private CSAM data and logs out of public issues and discussions.
+
 ---
 
 ## Supported CV Tasks & Models

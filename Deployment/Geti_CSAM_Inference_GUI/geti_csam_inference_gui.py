@@ -160,7 +160,7 @@ class GetiDeployment:
 class GetiCSAMInferenceGUI(tk.Tk):
     def __init__(self) -> None:
         super().__init__()
-        self.title("Geti CSAM Inference")
+        self.title("EchoSight")
         self.geometry("1250x800")
         self.minsize(980, 650)
         self.after_idle(self._maximize_window)
@@ -206,6 +206,9 @@ class GetiCSAMInferenceGUI(tk.Tk):
         self.style.map("Cancel.TButton", background=[("active", "#f5c4ca"), ("pressed", "#df8994"), ("disabled", "#80696c")])
         self.style.configure("Preprocess.TButton", background="#d5e7ec", foreground="#10252a", bordercolor="#7ba4ad", lightcolor="#eef8fa", darkcolor="#7ba4ad", padding=(4, 4), font=("Segoe UI Symbol", 12))
         self.style.map("Preprocess.TButton", background=[("active", "#e6f4f6"), ("pressed", "#a9d0d7")])
+        self.style.configure("Apply.TButton", background="#79c99a", foreground="#10251a", bordercolor="#4d9a6d", lightcolor="#b9e8c8", darkcolor="#4d9a6d", padding=(10, 5), font=("Segoe UI Semibold", 9))
+        self.style.map("Apply.TButton", background=[("active", "#91d9aa"), ("pressed", "#5caf7d")])
+        self.style.configure("PreviewBadge.TLabel", background="#10252a", foreground="#d9f5f3", padding=(8, 4), font=("Consolas", 8))
         self.style.configure("Review.TCheckbutton", background=PANEL, foreground=TEXT, padding=(8, 5), font=("Segoe UI Semibold", 9))
         self.style.map("Review.TCheckbutton", foreground=[("active", TEXT), ("disabled", MUTED)], background=[("active", PANEL_LIGHT)])
         self.style.configure("TNotebook", background=BACKGROUND, borderwidth=0, tabmargins=(0, 0, 0, 0), padding=0)
@@ -222,7 +225,8 @@ class GetiCSAMInferenceGUI(tk.Tk):
         header.pack(fill=X, padx=22, pady=(18, 8))
         title_group = ttk.Frame(header)
         title_group.pack(side=LEFT)
-        ttk.Label(title_group, text="Geti CSAM Inference", style="Header.TLabel").pack(anchor="w")
+        ttk.Label(title_group, text="EchoSight", style="Header.TLabel").pack(anchor="w")
+        ttk.Label(title_group, text="Model-agnostic image inference and inspection", style="Muted.TLabel").pack(anchor="w", pady=(2, 0))
         self.style.configure("AccentLine.TFrame", background=ACCENT)
         ttk.Frame(self, height=2, style="AccentLine.TFrame").pack(fill=X, padx=22, pady=(0, 4))
         activity_group = ttk.Frame(header)
@@ -295,6 +299,8 @@ class GetiCSAMInferenceGUI(tk.Tk):
         self.preview_canvas.pack(fill=BOTH, expand=True)
         self.preview_hint = ttk.Label(preview_stage, text="Import an image or TIFF to begin", style="Muted.TLabel")
         self.preview_hint.place(relx=0.5, rely=0.5, anchor="center")
+        self.preview_adjustment_label = ttk.Label(preview_stage, text="", style="PreviewBadge.TLabel")
+        self.preview_adjustment_label.place(relx=0.0, rely=1.0, anchor="sw", x=10, y=-10)
         self.progress = ttk.Progressbar(preview_panel, mode="determinate", style="Horizontal.TProgressbar")
         self.progress.pack(fill=X, pady=(12, 4))
         self.progress_label = ttk.Label(preview_panel, text="0 / 0", style="Muted.TLabel")
@@ -308,9 +314,9 @@ class GetiCSAMInferenceGUI(tk.Tk):
         self.preprocess_panel = panel
         panel.place(relx=1.0, rely=1.0, anchor="se", x=-8, y=-8, width=365, height=245)
         panel.place_forget()
-        ttk.Label(panel, text="Preprocess before analysis", style="PanelTitle.TLabel").grid(row=0, column=0, columnspan=6, sticky="w", pady=(0, 6))
+        ttk.Label(panel, text="Image Pre-Processing", style="PanelTitle.TLabel").grid(row=0, column=0, columnspan=6, sticky="w", pady=(0, 6))
         ttk.Button(panel, text="Close", width=6, command=self._toggle_preprocess_panel).grid(row=0, column=6, sticky="e", pady=(0, 6))
-        ttk.Label(panel, text="Apply to", style="Muted.TLabel").grid(row=1, column=0, sticky="w")
+        ttk.Label(panel, text="Scope", style="Muted.TLabel").grid(row=1, column=0, sticky="w")
         self.preprocess_scope = tk.StringVar(value="Selected frames")
         scope = ttk.Combobox(panel, textvariable=self.preprocess_scope, values=("All frames", "Current frame", "Selected frames"), state="readonly", width=16)
         scope.grid(row=1, column=1, columnspan=2, sticky="w", padx=(6, 12))
@@ -332,7 +338,8 @@ class GetiCSAMInferenceGUI(tk.Tk):
             value_label.grid(row=row, column=6, sticky="e")
             setattr(self, f"{name.lower()}_value_label", value_label)
         panel.columnconfigure(5, weight=1)
-        ttk.Button(panel, text="Reset processing", command=self._reset_preprocessing).grid(row=6, column=0, columnspan=7, sticky="e", pady=(8, 0))
+        ttk.Button(panel, text="Apply Processing", style="Apply.TButton", command=self._apply_preprocessing).grid(row=6, column=0, columnspan=5, sticky="ew", padx=(0, 6), pady=(8, 0))
+        ttk.Button(panel, text="Reset", command=self._reset_preprocessing).grid(row=6, column=5, columnspan=2, sticky="e", pady=(8, 0))
 
     def _toggle_preprocess_panel(self) -> None:
         if self.preprocess_panel.winfo_ismapped():
@@ -530,6 +537,7 @@ class GetiCSAMInferenceGUI(tk.Tk):
                     frames, errors = value
                     self.frames = frames
                     self.preprocess_profiles.clear()
+                    self._set_preprocess_controls(self._default_preprocess_settings())
                     self.results.clear()
                     self.image_list.delete(0, END)
                     self.result_list.delete(0, END)
@@ -583,7 +591,7 @@ class GetiCSAMInferenceGUI(tk.Tk):
                     self.status_label.configure(text="Operation failed")
                     self._stop_activity()
                     self._set_busy(False)
-                    messagebox.showerror("Geti CSAM Inference", value)
+                    messagebox.showerror("EchoSight", value)
         except queue.Empty:
             pass
         except Exception as error:
@@ -592,7 +600,7 @@ class GetiCSAMInferenceGUI(tk.Tk):
             self.status_label.configure(text="GUI update failed")
             self._stop_activity()
             self._set_busy(False)
-            messagebox.showerror("Geti CSAM Inference", f"The results panel could not update:\n{error}")
+            messagebox.showerror("EchoSight", f"The results panel could not update:\n{error}")
         self.after(100, self._poll_worker)
 
     def _set_busy(self, busy: bool) -> None:
@@ -690,6 +698,7 @@ class GetiCSAMInferenceGUI(tk.Tk):
     def _on_image_selected(self, _event: object) -> None:
         selection = self.image_list.curselection()
         if selection:
+            self._set_preprocess_controls(self.preprocess_profiles.get(selection[0], self._default_preprocess_settings()))
             self._refresh_preprocess_preview()
 
     def _preprocess_value_text(self, name: str) -> str:
@@ -699,10 +708,14 @@ class GetiCSAMInferenceGUI(tk.Tk):
     def _on_preprocess_changed(self) -> None:
         for name in self.preprocess_values:
             getattr(self, f"{name.lower()}_value_label").configure(text=self._preprocess_value_text(name))
+
+    def _apply_preprocessing(self) -> None:
         settings = self._current_preprocess_settings()
-        for index in self._preprocess_target_indices():
+        target_indices = self._preprocess_target_indices()
+        for index in target_indices:
             self.preprocess_profiles[index] = settings
         self._refresh_preprocess_preview()
+        self.preprocess_status.configure(text=f"Applied to {len(target_indices)} frame(s)")
 
     def _current_preprocess_settings(self) -> tuple[float, float, float, float]:
         return tuple(self.preprocess_values[name].get() for name in ("Brightness", "Contrast", "Sharpness", "Denoiser"))
@@ -771,11 +784,19 @@ class GetiCSAMInferenceGUI(tk.Tk):
             if settings != self._default_preprocess_settings():
                 image = self._preprocess_image(image, settings)
                 self.preprocess_status.configure(text=f"Previewing processed frame {index + 1}")
+                self.preview_adjustment_label.configure(text=self._preprocess_badge(settings))
             else:
                 self.preprocess_status.configure(text="Previewing original image")
+                self.preview_adjustment_label.configure(text="")
         else:
             self.preprocess_status.configure(text="Previewing original image")
+            self.preview_adjustment_label.configure(text="")
         self._show_image(image, self.preview_canvas, self.preview_hint, reset_zoom=False)
+
+    @staticmethod
+    def _preprocess_badge(settings: tuple[float, float, float, float]) -> str:
+        brightness, contrast, sharpness, denoiser = settings
+        return f"PROCESSED  |  Bright {brightness:+.0f}  Contrast {contrast:.0f}%  Sharp {sharpness:.0f}%  Denoise {denoiser:.0f}%"
 
     def _on_result_selected(self, _event: object) -> None:
         selection = self.result_list.curselection()

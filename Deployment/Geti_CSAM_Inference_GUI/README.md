@@ -1,4 +1,6 @@
-# Geti CSAM Inference GUI
+# EchoSight
+
+Model-agnostic image inference and inspection.
 
 First offline GUI prototype for running the downloaded Geti code deployment on images and multi-frame TIFF files.
 
@@ -9,7 +11,9 @@ Author: Omkar Kachare
 - Dark theme with high-contrast controls.
 - Select the downloaded deployment parent folder; the GUI discovers the model folder.
 - Import common images and multi-frame TIFF files.
-- Preview preprocessing on the Analyze tab with brightness, contrast, sharpness, and denoiser sliders.
+- Open **Image Pre-Processing** from the compact gear control in the preview corner.
+- Adjust brightness, contrast, sharpness, and denoiser values, then click **Apply Processing** to mark the selected scope as processed.
+- Applied values are shown on the processed preview; navigating to another frame loads that frame's applied values or resets to original values.
 - Apply preprocessing to all frames, the current frame, or selected frames before model inference; original images remain preserved.
 - Open preprocessing from the compact gear control in the preview's lower-right corner; reset all, current, or selected frame settings independently.
 - Preview preprocessing without changing the current image zoom or pan position.

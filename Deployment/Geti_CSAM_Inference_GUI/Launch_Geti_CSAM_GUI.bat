@@ -45,7 +45,7 @@ if not exist "%RUNTIME%\openvino\__init__.py" (
 
 :launch
 set "PYTHONPATH=%RUNTIME%;%DEPLOYMENT%"
-echo Starting Geti CSAM Inference GUI...
+echo Starting EchoSight...
 echo Runtime: %RUNTIME%
 echo Deployment: %GETI_DEFAULT_DEPLOYMENT%
 "%PYTHON%" "%APP%"

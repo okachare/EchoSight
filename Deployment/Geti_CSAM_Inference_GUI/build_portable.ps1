@@ -44,7 +44,7 @@ Copy-Item -Path "$DeploymentSource\*" -Destination "$OutputRoot\deployment\Detec
 if (-not (Test-Path "$OutputRoot\deployment\Detection\model\model.xml")) { throw "Model XML was not copied" }
 
 @"
-Geti CSAM Inference GUI - portable folder
+EchoSight - portable folder
 
 Double-click Launch_Geti_CSAM_GUI.bat.
 This folder contains the Python runtime, OpenVINO dependencies, Geti wrapper, and model deployment.

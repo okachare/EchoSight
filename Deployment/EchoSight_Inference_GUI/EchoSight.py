@@ -63,14 +63,22 @@ class RoundedButton(tk.Canvas):
         initial_state = kwargs.pop("state", NORMAL)
         self.enabled = initial_state != DISABLED
         self.font = kwargs.pop("font", ("Segoe UI Semibold", 10))
-        self.requested_width = width
-        button_width = width * 14 if width is not None and width < 20 else width
-        super().__init__(parent, height=36, width=button_width or 120, highlightthickness=0, bd=0, bg=BACKGROUND, **kwargs)
-        self.bind("<Configure>", lambda _event: self._draw())
+        # Calculate button size: small buttons (width < 20) use width*16, others use width directly
+        if width is not None and width < 20:
+            button_width = width * 16
+        elif width is not None:
+            button_width = width
+        else:
+            button_width = 110
+        super().__init__(parent, height=34, width=button_width, highlightthickness=0, bd=0, bg=BACKGROUND, cursor="hand2", **kwargs)
+        self.bind("<Configure>", self._on_configure)
         self.bind("<Enter>", self._on_enter)
         self.bind("<Leave>", self._on_leave)
         self.bind("<Button-1>", self._on_click)
         self._hover = False
+        self._draw()
+
+    def _on_configure(self, event: object) -> None:
         self._draw()
 
     def _draw(self) -> None:
@@ -78,11 +86,22 @@ class RoundedButton(tk.Canvas):
         color = hover if self._hover and self.enabled else normal if self.enabled else "#59636a"
         text_color = foreground if self.enabled else "#a8afb3"
         self.delete("all")
-        width = max(20, self.winfo_width())
-        height = max(20, self.winfo_height())
-        radius = min(10, height // 2 - 2)
-        self.create_round_rect(2, 2, width - 2, height - 2, radius, fill=color, outline=outline, width=2)
-        self.create_text(width / 2, height / 2, text=self.label, fill=text_color, font=self.font)
+        # Get canvas dimensions - use actual size or request size as fallback
+        canvas_width = self.winfo_width()
+        canvas_height = self.winfo_height()
+        if canvas_width <= 1:
+            canvas_width = self.winfo_reqwidth()
+        if canvas_height <= 1:
+            canvas_height = self.winfo_reqheight()
+        # Ensure minimum viable size
+        canvas_width = max(24, canvas_width)
+        canvas_height = max(24, canvas_height)
+        # Calculate corner radius (max 8 pixels, or half height minus padding)
+        radius = min(8, (canvas_height - 4) // 2)
+        # Draw rounded rectangle background
+        self.create_round_rect(1, 1, canvas_width - 1, canvas_height - 1, radius, fill=color, outline=outline, width=2)
+        # Draw text centered
+        self.create_text(canvas_width // 2, canvas_height // 2, text=self.label, fill=text_color, font=self.font, anchor="center")
 
     def create_round_rect(self, x1: float, y1: float, x2: float, y2: float, radius: float, **kwargs: object) -> None:
         import math

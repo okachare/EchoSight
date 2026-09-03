@@ -62,9 +62,10 @@ class ZoomPanCanvas(tk.Canvas):
         self.bind("<ButtonRelease-1>", self._stop_pan)
         self.bind("<Configure>", lambda _event: self._render())
 
-    def set_image(self, image_rgb: np.ndarray | None) -> None:
+    def set_image(self, image_rgb: np.ndarray | None, reset_zoom: bool = True) -> None:
         self.source_image = Image.fromarray(image_rgb) if image_rgb is not None else None
-        self.zoom = 1.0
+        if reset_zoom:
+            self.zoom = 1.0
         self.delete("all")
         self._render()
 
@@ -180,6 +181,7 @@ class GetiCSAMInferenceGUI(tk.Tk):
         self.output_directory: Path | None = None
         self.details: tk.Text | None = None
         self.progress_animation_id: str | None = None
+        self.preprocess_profiles: dict[int, tuple[float, float, float, float]] = {}
         self._build_ui()
         self.after(100, self._poll_worker)
         self.after(120, self._animate_activity)
@@ -201,6 +203,8 @@ class GetiCSAMInferenceGUI(tk.Tk):
         self.style.map("RunCurrent.TButton", background=[("active", "#f7dfb4"), ("pressed", "#dfb96f"), ("disabled", "#817664")])
         self.style.configure("Cancel.TButton", background="#efb0b8", foreground="#3b1017", bordercolor="#b96a75", lightcolor="#f8d3d8", darkcolor="#b96a75", **button_options)
         self.style.map("Cancel.TButton", background=[("active", "#f5c4ca"), ("pressed", "#df8994"), ("disabled", "#80696c")])
+        self.style.configure("Preprocess.TButton", background="#d5e7ec", foreground="#10252a", bordercolor="#7ba4ad", lightcolor="#eef8fa", darkcolor="#7ba4ad", padding=(4, 4), font=("Segoe UI Symbol", 12))
+        self.style.map("Preprocess.TButton", background=[("active", "#e6f4f6"), ("pressed", "#a9d0d7")])
         self.style.configure("TNotebook", background=BACKGROUND, borderwidth=0, tabmargins=(0, 0, 0, 0), padding=0)
         self.style.configure("TNotebook.Tab", background=PANEL_LIGHT, foreground=MUTED, padding=(14, 8), font=("Segoe UI Semibold", 10), borderwidth=2, relief="solid")
         self.style.map("TNotebook.Tab", background=[("selected", ACCENT), ("active", "#354452")], foreground=[("selected", "#081217"), ("active", TEXT)], padding=[("selected", (22, 13)), ("!selected", (14, 8))])
@@ -275,20 +279,27 @@ class GetiCSAMInferenceGUI(tk.Tk):
         preview_panel = ttk.Frame(body, style="Panel.TFrame", padding=12)
         preview_panel.grid(row=0, column=1, sticky="nsew")
         ttk.Label(preview_panel, text="Preview", style="PanelTitle.TLabel").pack(anchor="w", pady=(0, 8))
-        self.preview_canvas = ZoomPanCanvas(preview_panel)
+        preview_stage = ttk.Frame(preview_panel, style="Panel.TFrame")
+        preview_stage.pack(fill=BOTH, expand=True)
+        self.preview_canvas = ZoomPanCanvas(preview_stage)
         self.preview_canvas.pack(fill=BOTH, expand=True)
-        self.preview_hint = ttk.Label(preview_panel, text="Import an image or TIFF to begin", style="Muted.TLabel")
+        self.preview_hint = ttk.Label(preview_stage, text="Import an image or TIFF to begin", style="Muted.TLabel")
         self.preview_hint.place(relx=0.5, rely=0.5, anchor="center")
         self.progress = ttk.Progressbar(preview_panel, mode="determinate", style="Horizontal.TProgressbar")
         self.progress.pack(fill=X, pady=(12, 4))
         self.progress_label = ttk.Label(preview_panel, text="0 / 0", style="Muted.TLabel")
         self.progress_label.pack(anchor="e")
-        self._build_preprocess_controls(preview_panel)
+        self.preprocess_button = ttk.Button(preview_stage, text="⚙", width=3, style="Preprocess.TButton", command=self._toggle_preprocess_panel)
+        self.preprocess_button.place(relx=1.0, rely=1.0, anchor="se", x=-10, y=-10)
+        self._build_preprocess_controls(preview_stage)
 
     def _build_preprocess_controls(self, parent: ttk.Frame) -> None:
         panel = ttk.Frame(parent, style="Panel.TFrame", padding=(10, 8))
-        panel.pack(fill=X, pady=(8, 0))
-        ttk.Label(panel, text="Preprocess before analysis", style="PanelTitle.TLabel").grid(row=0, column=0, columnspan=8, sticky="w", pady=(0, 6))
+        self.preprocess_panel = panel
+        panel.place(relx=1.0, rely=1.0, anchor="se", x=-8, y=-8, width=350, height=205)
+        panel.place_forget()
+        ttk.Label(panel, text="Preprocess before analysis", style="PanelTitle.TLabel").grid(row=0, column=0, columnspan=6, sticky="w", pady=(0, 6))
+        ttk.Button(panel, text="Close", width=6, command=self._toggle_preprocess_panel).grid(row=0, column=6, sticky="e", pady=(0, 6))
         ttk.Label(panel, text="Apply to", style="Muted.TLabel").grid(row=1, column=0, sticky="w")
         self.preprocess_scope = tk.StringVar(value="Selected frames")
         scope = ttk.Combobox(panel, textvariable=self.preprocess_scope, values=("All frames", "Current frame", "Selected frames"), state="readonly", width=16)
@@ -311,6 +322,13 @@ class GetiCSAMInferenceGUI(tk.Tk):
             value_label.grid(row=row, column=6, sticky="e")
             setattr(self, f"{name.lower()}_value_label", value_label)
         panel.columnconfigure(5, weight=1)
+        ttk.Button(panel, text="Reset processing", command=self._reset_preprocessing).grid(row=6, column=0, columnspan=7, sticky="e", pady=(6, 0))
+
+    def _toggle_preprocess_panel(self) -> None:
+        if self.preprocess_panel.winfo_ismapped():
+            self.preprocess_panel.place_forget()
+        else:
+            self.preprocess_panel.place(relx=1.0, rely=1.0, anchor="se", x=-8, y=-8, width=350, height=205)
 
     def _build_results_tab(self) -> None:
         toolbar = ttk.Frame(self.results_tab, style="Panel.TFrame", padding=12)
@@ -499,6 +517,7 @@ class GetiCSAMInferenceGUI(tk.Tk):
                 elif event == "frames":
                     frames, errors = value
                     self.frames = frames
+                    self.preprocess_profiles.clear()
                     self.results.clear()
                     self.image_list.delete(0, END)
                     self.result_list.delete(0, END)
@@ -668,13 +687,37 @@ class GetiCSAMInferenceGUI(tk.Tk):
     def _on_preprocess_changed(self) -> None:
         for name in self.preprocess_values:
             getattr(self, f"{name.lower()}_value_label").configure(text=self._preprocess_value_text(name))
+        settings = self._current_preprocess_settings()
+        for index in self._preprocess_target_indices():
+            self.preprocess_profiles[index] = settings
         self._refresh_preprocess_preview()
 
-    def _preprocess_image(self, image_rgb: np.ndarray) -> np.ndarray:
-        brightness = self.preprocess_values["Brightness"].get()
-        contrast = self.preprocess_values["Contrast"].get() / 100.0
-        sharpness = self.preprocess_values["Sharpness"].get() / 100.0
-        denoiser = self.preprocess_values["Denoiser"].get() / 100.0
+    def _current_preprocess_settings(self) -> tuple[float, float, float, float]:
+        return tuple(self.preprocess_values[name].get() for name in ("Brightness", "Contrast", "Sharpness", "Denoiser"))
+
+    @staticmethod
+    def _default_preprocess_settings() -> tuple[float, float, float, float]:
+        return (0.0, 100.0, 0.0, 0.0)
+
+    def _set_preprocess_controls(self, settings: tuple[float, float, float, float]) -> None:
+        for name, value in zip(self.preprocess_values, settings):
+            self.preprocess_values[name].set(value)
+            getattr(self, f"{name.lower()}_value_label").configure(text=self._preprocess_value_text(name))
+
+    def _reset_preprocessing(self) -> None:
+        target_indices = self._preprocess_target_indices()
+        for index in target_indices:
+            self.preprocess_profiles[index] = self._default_preprocess_settings()
+        self._set_preprocess_controls(self._default_preprocess_settings())
+        self._refresh_preprocess_preview()
+        count = len(target_indices)
+        self.preprocess_status.configure(text=f"Reset {count} frame(s) to original")
+
+    def _preprocess_image(self, image_rgb: np.ndarray, settings: tuple[float, float, float, float] | None = None) -> np.ndarray:
+        brightness, contrast_value, sharpness_value, denoiser_value = settings or self._current_preprocess_settings()
+        contrast = contrast_value / 100.0
+        sharpness = sharpness_value / 100.0
+        denoiser = denoiser_value / 100.0
         processed = cv2.convertScaleAbs(image_rgb, alpha=contrast, beta=brightness)
         if denoiser > 0:
             filtered = cv2.bilateralFilter(processed, 5, 10 + denoiser * 90, 3 + denoiser * 7)
@@ -699,7 +742,8 @@ class GetiCSAMInferenceGUI(tk.Tk):
         prepared = []
         for frame in frames:
             index = frame_indices.get(id(frame), -1)
-            analysis_image = self._preprocess_image(frame.image_rgb) if index in target_indices else None
+            settings = self.preprocess_profiles.get(index, self._current_preprocess_settings())
+            analysis_image = self._preprocess_image(frame.image_rgb, settings) if index in target_indices and settings != self._default_preprocess_settings() else None
             prepared.append(LoadedFrame(frame.source, frame.frame_number, frame.image_rgb, analysis_image))
         return prepared
 
@@ -711,11 +755,15 @@ class GetiCSAMInferenceGUI(tk.Tk):
         image = self.frames[index].image_rgb
         target = index in self._preprocess_target_indices()
         if target:
-            image = self._preprocess_image(image)
-            self.preprocess_status.configure(text=f"Previewing processed frame {index + 1}")
+            settings = self.preprocess_profiles.get(index, self._current_preprocess_settings())
+            if settings != self._default_preprocess_settings():
+                image = self._preprocess_image(image, settings)
+                self.preprocess_status.configure(text=f"Previewing processed frame {index + 1}")
+            else:
+                self.preprocess_status.configure(text="Previewing original image")
         else:
             self.preprocess_status.configure(text="Previewing original image")
-        self._show_image(image, self.preview_canvas, self.preview_hint)
+        self._show_image(image, self.preview_canvas, self.preview_hint, reset_zoom=False)
 
     def _on_result_selected(self, _event: object) -> None:
         selection = self.result_list.curselection()
@@ -865,9 +913,9 @@ class GetiCSAMInferenceGUI(tk.Tk):
         lines[2] = f"Detections shown: {visible}"
         return cv2.cvtColor(image, cv2.COLOR_BGR2RGB), "\n".join(lines)
 
-    def _show_image(self, image_rgb: np.ndarray, target: ZoomPanCanvas, hint: ttk.Label) -> None:
+    def _show_image(self, image_rgb: np.ndarray, target: ZoomPanCanvas, hint: ttk.Label, reset_zoom: bool = True) -> None:
         hint.place_forget()
-        target.set_image(image_rgb)
+        target.set_image(image_rgb, reset_zoom=reset_zoom)
 
     def export_current(self) -> None:
         if not self.results:

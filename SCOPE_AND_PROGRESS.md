@@ -281,6 +281,7 @@ Q3 2026 (Jul – Sep)
 | Add model-independent review controls | ✅ Done | 2026-09-03 | Added label visibility toggle, 1%-100% confidence scale, instance-mask overlays, pastel outlined action buttons, and stronger selected-tab emphasis |
 | Add per-frame score navigation | ✅ Done | 2026-09-03 | Results list now shows a right-aligned maximum score for every frame and highlights the overall highest-scoring frame |
 | Add configurable preprocessing | ✅ Done | 2026-09-03 | Analyze tab now provides brightness, contrast, sharpness, and denoiser sliders with All/Current/Selected frame scope before inference |
+| Integrate preprocessing into preview | ✅ Done | 2026-09-03 | Replaced the full-width control panel with a lower-right gear popover, added targeted reset, and preserved zoom/pan while previewing adjustments |
 | Build standalone offline installer | ⏸ Backburner | Later | PyInstaller scaffold and portable build script retained; resume after GUI behavior and output validation are complete |
 
 ---

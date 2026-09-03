@@ -11,6 +11,8 @@ Author: Omkar Kachare
 - Import common images and multi-frame TIFF files.
 - Preview preprocessing on the Analyze tab with brightness, contrast, sharpness, and denoiser sliders.
 - Apply preprocessing to all frames, the current frame, or selected frames before model inference; original images remain preserved.
+- Open preprocessing from the compact gear control in the preview's lower-right corner; reset all, current, or selected frame settings independently.
+- Preview preprocessing without changing the current image zoom or pan position.
 - Run one image or all loaded images with a visible progress bar.
 - Review every result in the Results tab.
 - Results list rows show each frame's highest detection/anomaly score on the right; the highest-scoring frame is highlighted in pastel green.

@@ -86,67 +86,18 @@ class RoundedButton(tk.Canvas):
         color = hover if self._hover and self.enabled else normal if self.enabled else "#59636a"
         text_color = foreground if self.enabled else "#a8afb3"
         self.delete("all")
-        # Get canvas dimensions - use actual size or request size as fallback
+        # Get canvas dimensions
         canvas_width = self.winfo_width()
         canvas_height = self.winfo_height()
         if canvas_width <= 1:
             canvas_width = self.winfo_reqwidth()
         if canvas_height <= 1:
             canvas_height = self.winfo_reqheight()
-        # Ensure minimum viable size
-        canvas_width = max(24, canvas_width)
-        canvas_height = max(24, canvas_height)
-        # Calculate corner radius (max 8 pixels, or half height minus padding)
-        radius = min(8, (canvas_height - 4) // 2)
-        # Draw rounded rectangle using arcs
-        self._draw_rounded_rect(1, 1, canvas_width - 1, canvas_height - 1, radius, fill=color, outline=outline, width=2)
+        # Simple rectangle with soft edge (1px border)
+        self.create_rectangle(0, 0, canvas_width, canvas_height, fill=color, outline=outline, width=1)
         # Draw text centered
         self.create_text(canvas_width // 2, canvas_height // 2, text=self.label, fill=text_color, font=self.font, anchor="center")
 
-    def _draw_rounded_rect(self, x1: float, y1: float, x2: float, y2: float, radius: float, **kwargs: object) -> None:
-        """Draw a rounded rectangle using arcs and lines (clean, no shadow)."""
-        r = int(radius)
-        fill = kwargs.get("fill", "white")
-        outline = kwargs.get("outline", "black")
-        width = kwargs.get("width", 1)
-        
-        # Draw the filled rounded rectangle with no outline first
-        # Create an octagon (8-sided polygon) for the interior
-        points = [
-            x1 + r, y1,           # top-left point
-            x2 - r, y1,           # top-right point
-            x2, y1 + r,           # right-top point
-            x2, y2 - r,           # right-bottom point
-            x2 - r, y2,           # bottom-right point
-            x1 + r, y2,           # bottom-left point
-            x1, y2 - r,           # left-bottom point
-            x1, y1 + r,           # left-top point
-        ]
-        self.create_polygon(points, fill=fill, outline=fill)
-        
-        # Draw the four corner arcs to fill in the rounded corners (no outline, just fill)
-        self.create_arc(x1, y1, x1 + 2*r, y1 + 2*r, start=90, extent=90, fill=fill, outline=fill)
-        self.create_arc(x2 - 2*r, y1, x2, y1 + 2*r, start=0, extent=90, fill=fill, outline=fill)
-        self.create_arc(x2 - 2*r, y2 - 2*r, x2, y2, start=270, extent=90, fill=fill, outline=fill)
-        self.create_arc(x1, y2 - 2*r, x1 + 2*r, y2, start=180, extent=90, fill=fill, outline=fill)
-        
-        # Draw a clean outline around the entire shape
-        # Top line
-        self.create_line(x1 + r, y1, x2 - r, y1, fill=outline, width=width)
-        # Top-right corner arc outline
-        self.create_arc(x2 - 2*r, y1, x2, y1 + 2*r, start=0, extent=90, outline=outline, width=width, fill="")
-        # Right line
-        self.create_line(x2, y1 + r, x2, y2 - r, fill=outline, width=width)
-        # Bottom-right corner arc outline
-        self.create_arc(x2 - 2*r, y2 - 2*r, x2, y2, start=270, extent=90, outline=outline, width=width, fill="")
-        # Bottom line
-        self.create_line(x2 - r, y2, x1 + r, y2, fill=outline, width=width)
-        # Bottom-left corner arc outline
-        self.create_arc(x1, y2 - 2*r, x1 + 2*r, y2, start=180, extent=90, outline=outline, width=width, fill="")
-        # Left line
-        self.create_line(x1, y2 - r, x1, y1 + r, fill=outline, width=width)
-        # Top-left corner arc outline
-        self.create_arc(x1, y1, x1 + 2*r, y1 + 2*r, start=90, extent=90, outline=outline, width=width, fill="")
 
     def _on_enter(self, _event: object) -> None:
         self._hover = True

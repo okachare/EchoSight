@@ -2,22 +2,128 @@
 
 Model-agnostic image inference and inspection.
 
-First offline GUI prototype for running the downloaded Geti code deployment on images and multi-frame TIFF files.
+Portable standalone GUI application for running Geti OpenVINO model deployments on images and multi-frame TIFF files.
 
-Author: Omkar Kachare
+**Author:** Omkar Kachare
+
+---
+
+## Quick Start
+
+### Installation (Windows)
+
+1. **Download and build** the portable installer:
+   ```powershell
+   cd Deployment\EchoSight_Inference_GUI
+   .\build_installer.ps1
+   ```
+
+2. **Copy the executable**:
+   - Find the built folder at `dist\EchoSight\`
+   - Copy the entire `EchoSight` folder to any location on your system
+   - No additional installation or Python required
+
+3. **Launch**:
+   - Double-click `EchoSight.exe` to start the application
+   - The GUI launches maximized for a full-screen working view
+
+4. **Load your model**:
+   - Click **Load Model** button
+   - Select your Geti deployment parent folder (the folder containing `Detection/`, `Instance Segmentation/`, or `Anomaly classification/` subdirectory)
+   - EchoSight automatically discovers and loads the model
+
+---
 
 ## Features
 
-- Dark theme with high-contrast controls.
-- Select the downloaded deployment parent folder; the GUI discovers the model folder.
-- Import common images and multi-frame TIFF files.
-- Open **Image Pre-Processing** from the compact gear control in the preview corner.
-- Adjust brightness, contrast, sharpness, and denoiser values, then click **Apply Processing** to mark the selected scope as processed.
-- Applied values are shown on the processed preview; navigating to another frame loads that frame's applied values or resets to original values.
-- Apply preprocessing to all frames, the current frame, or selected frames before model inference; original images remain preserved.
-- Preview preprocessing without changing the current image zoom or pan position.
-- The GUI launches maximized for a full-screen working view.
-- Preprocessing opens from a compact translucent-style gear popover in the preview corner rather than taking a separate pane.
+- **Standalone portable**: All dependencies bundled; runs on Windows without Python installation
+- **Dark theme with high-contrast controls**: Professional UI with soft rounded button corners
+- **Model discovery**: Automatically finds model.xml and config.json in the deployment folder structure
+- **Multi-format import**: Common images (PNG, JPG, BMP, WebP) and multi-frame TIFF files
+- **Real-time model inference**: Background threading keeps UI responsive; progress updates shown for each frame
+- **Confidence filtering**: Adjustable 1%-100% confidence threshold for detection results
+- **Image preprocessing**: Optional brightness, contrast, sharpness, and denoiser adjustments
+  - Apply to all frames, current frame, or selected frames
+  - Original images remain preserved
+  - Per-frame profile storage and preview preservation
+- **Results review**: Navigate results with Previous/Next, zoom and pan detection overlays
+- **Annotation visibility**: Toggle detection boxes, labels, and instance masks independently
+- **Export**: Save results as annotated images, CSV, or JSON for downstream analysis
+
+---
+
+## Usage Workflow
+
+1. **Load Model**: Click `Load Model` → Select deployment folder → Confirm
+2. **Import Images**: Click `Import Images` → Select image files or TIFF sequences → Confirm
+3. **Configure (Optional)**: Click the gear icon in preview corner → Adjust preprocessing sliders → Click `Apply Processing`
+4. **Run Inference**: Click `Run Current` for single frame or `Run All` for batch processing
+5. **Review Results**: Navigate frames with Previous/Next, adjust confidence filter, toggle annotations
+6. **Export**: Click `Export` to save results as annotated images, CSV, or JSON
+
+---
+
+## System Requirements
+
+- **Windows 7 or later** (64-bit)
+- **2 GB RAM minimum** (4 GB+ recommended)
+- **500 MB disk space** for application folder
+- **GPU optional**: OpenVINO CPU inference is bundled; GPU support requires separate installation
+
+---
+
+## Build Requirements (Developer)
+
+If rebuilding the installer from source:
+
+- Python 3.9+
+- PowerShell 5.1+
+- Dependencies listed in `requirements.txt`:
+  - Pillow >= 10.0
+  - NumPy >= 1.26
+  - OpenCV >= 4.10
+  - OpenVINO == 2024.5
+  - OpenVINO Model API == 0.2.5
+
+To build:
+```powershell
+cd Deployment\EchoSight_Inference_GUI
+.\build_installer.ps1
+```
+
+The script automatically installs all dependencies, builds the standalone executable, and outputs the portable folder.
+
+---
+
+## Supported Model Types
+
+EchoSight works with any Geti OpenVINO deployment, including:
+- **Detection**: Bounding box detection (YOLOv8, MobileNetV2-ATSS, etc.)
+- **Instance Segmentation**: Pixel-level masks (MaskRCNN, etc.)
+- **Anomaly Detection**: Anomaly classification with confidence scores
+
+---
+
+## Troubleshooting
+
+**"Model load failed"**
+- Verify the selected folder contains a valid Geti deployment (should have `Detection/`, `Instance Segmentation/`, or `Anomaly classification/` subdirectory)
+- Check that `model.xml` and `config.json` are present in the model folder
+
+**"No images loaded"**
+- Supported formats: PNG, JPG, JPEG, BMP, TIFF, WebP
+- Multi-frame TIFFs are automatically split into separate frames for processing
+
+**"GPU not detected"**
+- EchoSight uses CPU inference by default (bundled OpenVINO)
+- GPU inference requires separate OpenVINO GPU plugin installation
+
+---
+
+## License
+
+This application is provided as-is for research and development purposes.
+
 - Run one image or all loaded images with a visible progress bar.
 - Review every result in the Results tab.
 - Results list rows show each frame's highest detection/anomaly score on the right; the highest-scoring frame is highlighted in pastel green.

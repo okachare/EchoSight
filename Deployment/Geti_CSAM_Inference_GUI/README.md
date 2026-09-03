@@ -20,7 +20,10 @@ Author: Omkar Kachare
 - Background model loading, image decoding, and inference with live top-right activity status.
 - One top-right spinner glyph with elapsed-time status prevents duplicate "Loading images" messages.
 - Run All pulses the progress bar while each frame is actively inside model inference and reports the current frame and elapsed time.
+- Progress uses a determinate, smoothly eased fill from imported/inferred frame count instead of an indeterminate animation.
 - Activity state is explicitly closed on completion, error, or cancellation so the spinner cannot remain running after inference finishes.
+- Detection labels are measured and clamped to the image bounds so long labels remain fully visible.
+- Model information uses wrapped rows sized to display the complete deployment summary without requiring scrolling.
 - Model information panel with model name, version, task, labels, precision, size, record date, score, optimization, XAI-head status, and deployment status.
 
 ## Setup

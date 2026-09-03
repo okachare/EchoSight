@@ -48,6 +48,7 @@
 | 2026-09-02 | GUI activity and Run All feedback fix | Complete | Removed duplicate top-right loading text, added a single animated spinner glyph with elapsed time, pulsed progress during active frame inference, and reported the current frame so Run All cannot appear idle. |
 | 2026-09-02 | GUI activity cleanup and runtime packaging clarification | Complete | Added explicit completion cleanup for success/error/cancel paths so the spinner cannot persist after inference; retained the complete dependency set because packaging preservation is not a percentage-based inference optimization. |
 | 2026-09-02 | GUI import-progress and error-state hardening | Complete | Added per-frame TIFF import progress, guarded results-panel updates, and explicit worker cleanup. The staged deployment is preserved under `Deployment/Test_Run_Detect/` for repeatable validation. |
+| 2026-09-02 | GUI display polish | Complete | Clamped measured detection labels to image bounds, changed Run All to a smooth determinate progress fill, and expanded wrapped model metadata so labels and deployment information remain visible. |
 
 ## Management Update — 2026-08-25
 
@@ -218,4 +219,4 @@ The **Geti CSAM Helper** agent and MCP-based skills package is now operational a
 
 ---
 
-*Last updated: 2026-09-02 — Geti CSAM Helper agent and team training skills package completed and validated; the local inference GUI now reports TIFF import progress, loads the staged Geti deployment, and renders validated single-image detections. Representative multi-TIFF validation and output comparison remain active; portable installer packaging is deferred.*
+*Last updated: 2026-09-02 — Geti CSAM Helper agent and team training skills package completed and validated; the local inference GUI now reports TIFF import progress, uses smooth determinate Run All progress, keeps labels inside image bounds, displays complete model metadata, and renders validated single-image detections. Representative multi-TIFF validation and output comparison remain active; portable installer packaging is deferred.*

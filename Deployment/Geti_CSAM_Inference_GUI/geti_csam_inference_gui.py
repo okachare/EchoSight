@@ -170,6 +170,7 @@ class GetiCSAMInferenceGUI(tk.Tk):
         self.activity_running = False
         self.output_directory: Path | None = None
         self.details: tk.Text | None = None
+        self.progress_animation_id: str | None = None
         self._build_ui()
         self.after(100, self._poll_worker)
         self.after(120, self._animate_activity)
@@ -239,7 +240,7 @@ class GetiCSAMInferenceGUI(tk.Tk):
         self.run_current_button.grid(row=0, column=4, padx=8, sticky="e")
         self.cancel_button = ttk.Button(controls, text="Cancel", style="Danger.TButton", command=self.cancel_run, state=DISABLED)
         self.cancel_button.grid(row=0, column=5, padx=(8, 0), sticky="e")
-        self.model_info = tk.Text(controls, height=4, bg=PANEL, fg=TEXT, relief="flat", wrap="word", font=("Segoe UI", 9), state=DISABLED)
+        self.model_info = tk.Text(controls, height=7, bg=PANEL, fg=TEXT, relief="flat", wrap="char", font=("Segoe UI", 9), state=DISABLED)
         self.model_info.grid(row=1, column=0, columnspan=6, sticky="ew", pady=(14, 0))
         self._set_model_info("No model loaded")
 
@@ -417,8 +418,8 @@ class GetiCSAMInferenceGUI(tk.Tk):
         self.operation_started_at = time.monotonic()
         self.operation_status = f"Starting inference for {len(frames)} image(s)..."
         self._start_activity("Analyzing")
-        self.progress.configure(mode="indeterminate")
-        self.progress.start(80)
+        self._stop_progress_animation()
+        self.progress.configure(mode="determinate", value=0, maximum=max(1, len(frames)))
         self.worker = threading.Thread(target=self._inference_worker, args=(frames,), daemon=True)
         self.worker.start()
 
@@ -465,9 +466,8 @@ class GetiCSAMInferenceGUI(tk.Tk):
                     if frames:
                         self.image_list.selection_set(0)
                         self._show_image(frames[0].image_rgb, self.preview_canvas, self.preview_hint)
-                    self.progress.stop()
-                    self.progress.configure(mode="determinate")
-                    self.progress.configure(value=0, maximum=max(1, len(frames)))
+                    self._stop_progress_animation()
+                    self.progress.configure(mode="determinate", value=0, maximum=max(1, len(frames)))
                     self.progress_label.configure(text=f"0 / {len(frames)}")
                     self.status_label.configure(text=f"Loaded {len(frames)} image(s)")
                     self.operation_started_at = None
@@ -477,27 +477,21 @@ class GetiCSAMInferenceGUI(tk.Tk):
                     index, total, source = value
                     self.operation_status = f"Reading {source.name}, frame {index}/{total}"
                     self.status_label.configure(text=self.operation_status)
-                    self.progress.stop()
-                    self.progress.configure(mode="determinate", maximum=total, value=index)
+                    self._animate_progress(index, total)
                 elif event == "progress":
                     index, total, frame = value
                     self.operation_status = f"Analyzing {frame.source.name}, frame {frame.frame_number} ({index}/{total})"
                     self.status_label.configure(text=self.operation_status)
-                    if str(self.progress.cget("mode")) != "indeterminate":
-                        self.progress.configure(mode="indeterminate")
-                        self.progress.start(80)
                 elif event == "result":
                     result, index, total = value
-                    self.progress.stop()
-                    self.progress.configure(mode="determinate", maximum=total, value=index)
+                    self._animate_progress(index, total)
                     self.results.append(result)
                     self.result_list.insert(END, self._result_title(result))
                     self._highlight_best_result()
                     self.progress_label.configure(text=f"{index} / {total}")
                 elif event == "complete":
                     total = value
-                    self.progress.stop()
-                    self.progress.configure(mode="determinate", value=len(self.results), maximum=max(1, total))
+                    self._animate_progress(len(self.results), max(1, total))
                     if self.results:
                         self.current_result_index = 0
                         self.result_list.selection_set(0)
@@ -518,7 +512,7 @@ class GetiCSAMInferenceGUI(tk.Tk):
         except queue.Empty:
             pass
         except Exception as error:
-            self.progress.stop()
+            self._stop_progress_animation()
             self.progress.configure(mode="determinate")
             self.status_label.configure(text="GUI update failed")
             self._stop_activity()
@@ -533,6 +527,27 @@ class GetiCSAMInferenceGUI(tk.Tk):
         self.run_button.configure(state=DISABLED if busy else NORMAL)
         self.run_current_button.configure(state=DISABLED if busy else NORMAL)
         self.cancel_button.configure(state=NORMAL if busy else DISABLED)
+
+    def _stop_progress_animation(self) -> None:
+        if self.progress_animation_id is not None:
+            try:
+                self.after_cancel(self.progress_animation_id)
+            except tk.TclError:
+                pass
+            self.progress_animation_id = None
+
+    def _animate_progress(self, target: int, maximum: int) -> None:
+        maximum = max(1, maximum)
+        target = min(maximum, max(0, target))
+        self.progress.configure(mode="determinate", maximum=maximum)
+        current = float(self.progress.cget("value") or 0)
+        if current >= target - 0.01:
+            self.progress.configure(value=target)
+            self.progress_animation_id = None
+            return
+        self.progress.configure(value=current + max(0.05, (target - current) * 0.25))
+        self._stop_progress_animation()
+        self.progress_animation_id = self.after(20, lambda: self._animate_progress(target, maximum))
 
     def _start_activity(self, label: str) -> None:
         self.activity_label.configure(text="|")
@@ -673,8 +688,20 @@ class GetiCSAMInferenceGUI(tk.Tk):
             x_min, y_min, x_max, y_max = [int(value) for value in box]
             cv2.rectangle(image, (x_min, y_min), (x_max, y_max), (41, 182, 199), 2)
             text = f"{label} {score:.1%}"
-            cv2.rectangle(image, (x_min, max(0, y_min - 24)), (x_min + max(120, len(text) * 8), y_min), (20, 24, 29), -1)
-            cv2.putText(image, text, (x_min + 4, max(16, y_min - 7)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (220, 245, 248), 1, cv2.LINE_AA)
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            font_scale = 0.5
+            thickness = 1
+            (text_width, text_height), baseline = cv2.getTextSize(text, font, font_scale, thickness)
+            image_height, image_width = image.shape[:2]
+            label_width = text_width + 8
+            label_height = text_height + baseline + 8
+            label_x = min(max(0, x_min), max(0, image_width - label_width))
+            label_y = y_min - label_height if y_min >= label_height else min(image_height - label_height, y_max)
+            label_y = max(0, label_y)
+            text_x = label_x + 4
+            text_y = label_y + text_height + 4
+            cv2.rectangle(image, (label_x, label_y), (label_x + label_width, label_y + label_height), (20, 24, 29), -1)
+            cv2.putText(image, text, (text_x, text_y), font, font_scale, (220, 245, 248), thickness, cv2.LINE_AA)
             lines.append(f"{visible}. {label}: {score:.1%}\n   box: ({x_min}, {y_min}) - ({x_max}, {y_max})")
         lines[2] = f"Detections shown: {visible}"
         return cv2.cvtColor(image, cv2.COLOR_BGR2RGB), "\n".join(lines)

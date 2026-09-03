@@ -77,8 +77,9 @@ A successful demo will show:
 | 9. Geti Trainer Skill Implementation | Detailed 16-step Web Geti operator training with structured 19-field intake form and 9-issue recovery playbook | ✅ Complete |
 | 10. Upstream Geti Source Integration | Add official repository literature, source navigation, release-aware debugging guidance, and MCP source links | ✅ Complete |
 | 11. Local Inference GUI Deployment | Load exported Geti model, process multi-frame TIFFs, run offline inference, display results, and validate deployment behavior | ✅ Complete |
-| 12. First GUI Prototype | Implement dark desktop GUI, model discovery, TIFF/image import, progress reporting, result review, and export | ✅ Complete; renamed to EchoSight with launch fix applied |
+| 12. EchoSight GUI and UI Polish | Implement dark desktop GUI with rounded-button controls, model discovery, TIFF/image import, preprocessing, result review, export, and professional visual appearance | ✅ Complete |
 | 13. GUI Responsiveness and Metadata | Stabilize tab layout, move blocking work to workers, add activity feedback, and display model metadata | ✅ Complete |
+| 14. Portable standalone installer | Bundle all dependencies (OpenVINO, OpenCV, NumPy, PIL) into PyInstaller executable; users download, build, copy folder, and double-click to launch; no external dependencies required | ✅ Complete |
 | 4e. NVL Test Run — Web fine-tuning | Improve the selected finalist with additional data | 📅 Planned for Q4 |
 | 5. Windows debugging & analysis | Review Windows logs, diagnose issues, improve dataset | ✅ Closed |
 | 6. Web results analysis | Validate Web scores and prediction quality; prepare demo materials | ✅ Complete for the comparison deck |

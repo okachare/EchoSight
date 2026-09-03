@@ -98,37 +98,48 @@ class RoundedButton(tk.Canvas):
         canvas_height = max(24, canvas_height)
         # Calculate corner radius (max 8 pixels, or half height minus padding)
         radius = min(8, (canvas_height - 4) // 2)
-        # Draw rounded rectangle background
-        self.create_round_rect(1, 1, canvas_width - 1, canvas_height - 1, radius, fill=color, outline=outline, width=2)
+        # Draw rounded rectangle using arcs
+        self._draw_rounded_rect(1, 1, canvas_width - 1, canvas_height - 1, radius, fill=color, outline=outline, width=2)
         # Draw text centered
         self.create_text(canvas_width // 2, canvas_height // 2, text=self.label, fill=text_color, font=self.font, anchor="center")
 
-    def create_round_rect(self, x1: float, y1: float, x2: float, y2: float, radius: float, **kwargs: object) -> None:
-        import math
-        r = float(radius)
-        points: list[float] = []
-        steps = 16
-        for i in range(steps):
-            angle = math.pi / 2 * (i / (steps - 1))
-            x = r - r * math.cos(angle)
-            y = r - r * math.sin(angle)
-            points.extend([x1 + r - x, y1 + r - y])
-        for i in range(steps):
-            angle = math.pi / 2 * (i / (steps - 1))
-            x = r * math.sin(angle)
-            y = r - r * math.cos(angle)
-            points.extend([x2 - r + x, y1 + r - y])
-        for i in range(steps):
-            angle = math.pi / 2 * (i / (steps - 1))
-            x = r * math.cos(angle)
-            y = r * math.sin(angle)
-            points.extend([x2 - r + x, y2 - r + y])
-        for i in range(steps):
-            angle = math.pi / 2 * (i / (steps - 1))
-            x = r - r * math.sin(angle)
-            y = r * math.cos(angle)
-            points.extend([x1 + r - x, y2 - r + y])
-        self.create_polygon(points, **kwargs)
+    def _draw_rounded_rect(self, x1: float, y1: float, x2: float, y2: float, radius: float, **kwargs: object) -> None:
+        """Draw a rounded rectangle using arcs and lines (reliable, non-self-intersecting)."""
+        r = int(radius)
+        fill = kwargs.get("fill", "white")
+        outline = kwargs.get("outline", "black")
+        width = kwargs.get("width", 1)
+        
+        # Draw the four straight sides with arcs at corners
+        # Top-left arc
+        self.create_arc(x1, y1, x1 + 2*r, y1 + 2*r, start=90, extent=90, fill=fill, outline=outline, width=width)
+        # Top side
+        self.create_line(x1 + r, y1, x2 - r, y1, fill=outline, width=width)
+        # Top-right arc
+        self.create_arc(x2 - 2*r, y1, x2, y1 + 2*r, start=0, extent=90, fill=fill, outline=outline, width=width)
+        # Right side
+        self.create_line(x2, y1 + r, x2, y2 - r, fill=outline, width=width)
+        # Bottom-right arc
+        self.create_arc(x2 - 2*r, y2 - 2*r, x2, y2, start=270, extent=90, fill=fill, outline=outline, width=width)
+        # Bottom side
+        self.create_line(x2 - r, y2, x1 + r, y2, fill=outline, width=width)
+        # Bottom-left arc
+        self.create_arc(x1, y2 - 2*r, x1 + 2*r, y2, start=180, extent=90, fill=fill, outline=outline, width=width)
+        # Left side
+        self.create_line(x1, y2 - r, x1, y1 + r, fill=outline, width=width)
+        
+        # Fill the interior with a polygon
+        points = [
+            x1 + r, y1,           # top-left point
+            x2 - r, y1,           # top-right point
+            x2, y1 + r,           # right-top point
+            x2, y2 - r,           # right-bottom point
+            x2 - r, y2,           # bottom-right point
+            x1 + r, y2,           # bottom-left point
+            x1, y2 - r,           # left-bottom point
+            x1, y1 + r,           # left-top point
+        ]
+        self.create_polygon(points, fill=fill, outline="")
 
     def _on_enter(self, _event: object) -> None:
         self._hover = True

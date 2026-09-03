@@ -1,0 +1,5 @@
+Pillow>=10.0
+numpy>=1.26
+opencv-python>=4.10
+openvino>=2024.5
+openvino-model-api==0.2.5

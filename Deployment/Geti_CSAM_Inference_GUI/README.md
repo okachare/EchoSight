@@ -39,6 +39,7 @@ Author: Omkar Kachare
 - Detection labels are measured and clamped to the image bounds so long labels remain fully visible.
 - Model information uses wrapped rows sized to display the complete deployment summary without requiring scrolling.
 - Run All, Run Current, and Cancel use distinct pastel colors with outlined controls; the selected Analyze or Results tab is visually emphasized.
+- Action buttons use soft rounded edges with consistent hover, pressed, outline, and disabled states for a cohesive EchoSight surface.
 - Model information panel with model name, version, task, labels, precision, size, record date, score, optimization, XAI-head status, and deployment status.
 
 ## Setup

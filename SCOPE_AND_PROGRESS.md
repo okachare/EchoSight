@@ -283,6 +283,7 @@ Q3 2026 (Jul – Sep)
 | Add configurable preprocessing | ✅ Done | 2026-09-03 | Analyze tab now provides brightness, contrast, sharpness, and denoiser sliders with All/Current/Selected frame scope before inference |
 | Integrate preprocessing into preview | ✅ Done | 2026-09-03 | Replaced the full-width control panel with a lower-right gear popover, added targeted reset, and preserved zoom/pan while previewing adjustments |
 | Complete GUI visual-cue overhaul | ✅ Done | 2026-09-03 | Added maximized launch, refined control styling and slider appearance, improved popover clearance, and independent label/annotation visibility |
+| Complete EchoSight soft-touch control cleanup | ✅ Done | 2026-09-03 | Replaced rectangular action controls with reusable rounded buttons and completed stale active-branding housekeeping |
 | Build standalone offline installer | ⏸ Backburner | Later | PyInstaller scaffold and portable build script retained; resume after GUI behavior and output validation are complete |
 
 ---

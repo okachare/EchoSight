@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import csv
-import importlib
 import importlib.util
 import json
 import os
@@ -45,6 +44,70 @@ class InferenceResult:
     frame: LoadedFrame
     prediction: object | None
     error: str | None = None
+
+
+class RoundedButton(tk.Canvas):
+    COLORS = {
+        "default": ("#2b3540", "#41515f", "#9fb3c1", "#182027"),
+        "run_all": ("#9ed9ad", "#bce9c6", "#386f4a", "#173622"),
+        "run_current": ("#edc77f", "#f5dcae", "#886523", "#3d2c0b"),
+        "cancel": ("#eaa0aa", "#f4bec5", "#914a56", "#42141b"),
+        "apply": ("#73c695", "#a3dfb8", "#327a51", "#153b25"),
+        "preprocess": ("#c6e3e8", "#e0f2f4", "#568c96", "#17343a"),
+    }
+
+    def __init__(self, parent: tk.Misc, text: str, command: object, variant: str = "default", width: int | None = None, **kwargs: object) -> None:
+        self.variant = variant
+        self.label = text
+        self.command = command
+        initial_state = kwargs.pop("state", NORMAL)
+        self.enabled = initial_state != DISABLED
+        self.font = kwargs.pop("font", ("Segoe UI Semibold", 10))
+        self.requested_width = width
+        button_width = width * 14 if width is not None and width < 20 else width
+        super().__init__(parent, height=36, width=button_width or 120, highlightthickness=0, bd=0, bg=parent.cget("background"), **kwargs)
+        self.bind("<Configure>", lambda _event: self._draw())
+        self.bind("<Enter>", self._on_enter)
+        self.bind("<Leave>", self._on_leave)
+        self.bind("<Button-1>", self._on_click)
+        self._hover = False
+        self._draw()
+
+    def _draw(self) -> None:
+        normal, hover, outline, foreground = self.COLORS.get(self.variant, self.COLORS["default"])
+        color = hover if self._hover and self.enabled else normal if self.enabled else "#59636a"
+        text_color = foreground if self.enabled else "#a8afb3"
+        self.delete("all")
+        width = max(20, self.winfo_width())
+        height = max(20, self.winfo_height())
+        radius = min(11, height // 2 - 1)
+        self.create_round_rect(2, 2, width - 2, height - 2, radius, fill=color, outline=outline, width=2)
+        self.create_text(width / 2, height / 2, text=self.label, fill=text_color, font=self.font)
+
+    def create_round_rect(self, x1: int, y1: int, x2: int, y2: int, radius: int, **kwargs: object) -> None:
+        points = (x1 + radius, y1, x2 - radius, y1, x2, y1, x2, y1 + radius, x2, y2 - radius, x2, y2, x2 - radius, y2, x1 + radius, y2, x1, y2, x1, y2 - radius, x1, y1 + radius, x1, y1)
+        self.create_polygon(points, smooth=True, splinesteps=20, **kwargs)
+
+    def _on_enter(self, _event: object) -> None:
+        self._hover = True
+        self._draw()
+
+    def _on_leave(self, _event: object) -> None:
+        self._hover = False
+        self._draw()
+
+    def _on_click(self, _event: object) -> None:
+        if self.enabled and callable(self.command):
+            self.command()
+
+    def configure(self, cnf: object = None, **kwargs: object) -> object:
+        state = kwargs.pop("state", None)
+        if state is not None:
+            self.enabled = state != DISABLED
+            self._draw()
+        return super().configure(cnf, **kwargs)
+
+    config = configure
 
 
 class ZoomPanCanvas(tk.Canvas):
@@ -261,15 +324,15 @@ class GetiCSAMInferenceGUI(tk.Tk):
         controls.pack(fill=X, padx=8, pady=8)
         for column in range(6):
             controls.columnconfigure(column, weight=1 if column == 2 else 0)
-        self.load_model_button = ttk.Button(controls, text="Load Model", command=self.load_model)
+        self.load_model_button = RoundedButton(controls, "Load Model", self.load_model)
         self.load_model_button.grid(row=0, column=0, padx=(0, 8), sticky="w")
-        self.import_button = ttk.Button(controls, text="Import Images", command=self.import_images)
+        self.import_button = RoundedButton(controls, "Import Images", self.import_images)
         self.import_button.grid(row=0, column=1, padx=8, sticky="w")
-        self.run_button = ttk.Button(controls, text="Run All", style="RunAll.TButton", command=self.run_all)
+        self.run_button = RoundedButton(controls, "Run All", self.run_all, variant="run_all")
         self.run_button.grid(row=0, column=3, padx=8, sticky="e")
-        self.run_current_button = ttk.Button(controls, text="Run Current", style="RunCurrent.TButton", command=self.run_current)
+        self.run_current_button = RoundedButton(controls, "Run Current", self.run_current, variant="run_current")
         self.run_current_button.grid(row=0, column=4, padx=8, sticky="e")
-        self.cancel_button = ttk.Button(controls, text="Cancel", style="Cancel.TButton", command=self.cancel_run, state=DISABLED)
+        self.cancel_button = RoundedButton(controls, "Cancel", self.cancel_run, variant="cancel", state=DISABLED)
         self.cancel_button.grid(row=0, column=5, padx=(8, 0), sticky="e")
         self.model_info = tk.Text(controls, height=7, bg=PANEL, fg=TEXT, relief="flat", wrap="char", font=("Segoe UI", 9), state=DISABLED)
         self.model_info.grid(row=1, column=0, columnspan=6, sticky="ew", pady=(14, 0))
@@ -305,7 +368,7 @@ class GetiCSAMInferenceGUI(tk.Tk):
         self.progress.pack(fill=X, pady=(12, 4))
         self.progress_label = ttk.Label(preview_panel, text="0 / 0", style="Muted.TLabel")
         self.progress_label.pack(anchor="e")
-        self.preprocess_button = ttk.Button(preview_stage, text="⚙", width=3, style="Preprocess.TButton", command=self._toggle_preprocess_panel)
+        self.preprocess_button = RoundedButton(preview_stage, "⚙", self._toggle_preprocess_panel, variant="preprocess", width=3, font=("Segoe UI Symbol", 12))
         self.preprocess_button.place(relx=1.0, rely=1.0, anchor="se", x=-10, y=-10)
         self._build_preprocess_controls(preview_stage)
 
@@ -315,7 +378,7 @@ class GetiCSAMInferenceGUI(tk.Tk):
         panel.place(relx=1.0, rely=1.0, anchor="se", x=-8, y=-8, width=365, height=245)
         panel.place_forget()
         ttk.Label(panel, text="Image Pre-Processing", style="PanelTitle.TLabel").grid(row=0, column=0, columnspan=6, sticky="w", pady=(0, 6))
-        ttk.Button(panel, text="Close", width=6, command=self._toggle_preprocess_panel).grid(row=0, column=6, sticky="e", pady=(0, 6))
+        RoundedButton(panel, "Close", self._toggle_preprocess_panel, width=6).grid(row=0, column=6, sticky="e", pady=(0, 6))
         ttk.Label(panel, text="Scope", style="Muted.TLabel").grid(row=1, column=0, sticky="w")
         self.preprocess_scope = tk.StringVar(value="Selected frames")
         scope = ttk.Combobox(panel, textvariable=self.preprocess_scope, values=("All frames", "Current frame", "Selected frames"), state="readonly", width=16)
@@ -338,8 +401,8 @@ class GetiCSAMInferenceGUI(tk.Tk):
             value_label.grid(row=row, column=6, sticky="e")
             setattr(self, f"{name.lower()}_value_label", value_label)
         panel.columnconfigure(5, weight=1)
-        ttk.Button(panel, text="Apply Processing", style="Apply.TButton", command=self._apply_preprocessing).grid(row=6, column=0, columnspan=5, sticky="ew", padx=(0, 6), pady=(8, 0))
-        ttk.Button(panel, text="Reset", command=self._reset_preprocessing).grid(row=6, column=5, columnspan=2, sticky="e", pady=(8, 0))
+        RoundedButton(panel, "Apply Processing", self._apply_preprocessing, variant="apply").grid(row=6, column=0, columnspan=5, sticky="ew", padx=(0, 6), pady=(8, 0))
+        RoundedButton(panel, "Reset", self._reset_preprocessing).grid(row=6, column=5, columnspan=2, sticky="e", pady=(8, 0))
 
     def _toggle_preprocess_panel(self) -> None:
         if self.preprocess_panel.winfo_ismapped():
@@ -362,9 +425,9 @@ class GetiCSAMInferenceGUI(tk.Tk):
         ttk.Checkbutton(toolbar, text="Show labels", style="Review.TCheckbutton", variable=self.show_labels, command=self._refresh_result).pack(side=LEFT, padx=4)
         self.show_annotations = tk.BooleanVar(value=True)
         ttk.Checkbutton(toolbar, text="Show annotations", style="Review.TCheckbutton", variable=self.show_annotations, command=self._refresh_result).pack(side=LEFT, padx=4)
-        ttk.Button(toolbar, text="Export Current", command=self.export_current).pack(side=LEFT, padx=8)
-        ttk.Button(toolbar, text="Export Selected", command=self.export_selected).pack(side=LEFT, padx=8)
-        ttk.Button(toolbar, text="Export All", command=self.export_all).pack(side=LEFT, padx=(8, 0))
+        RoundedButton(toolbar, "Export Current", self.export_current).pack(side=LEFT, padx=8)
+        RoundedButton(toolbar, "Export Selected", self.export_selected).pack(side=LEFT, padx=8)
+        RoundedButton(toolbar, "Export All", self.export_all).pack(side=LEFT, padx=(8, 0))
 
         content = ttk.Frame(self.results_tab)
         content.pack(fill=BOTH, expand=True, padx=8, pady=(0, 8))
@@ -386,8 +449,8 @@ class GetiCSAMInferenceGUI(tk.Tk):
         self.result_hint.place(relx=0.5, rely=0.5, anchor="center")
         buttons = ttk.Frame(view_panel, style="Panel.TFrame")
         buttons.pack(fill=X, pady=(10, 0))
-        ttk.Button(buttons, text="Previous", command=self.previous_result).pack(side=LEFT)
-        ttk.Button(buttons, text="Next", command=self.next_result).pack(side=RIGHT)
+        RoundedButton(buttons, "Previous", self.previous_result).pack(side=LEFT)
+        RoundedButton(buttons, "Next", self.next_result).pack(side=RIGHT)
         detail_panel = ttk.Frame(content, style="Panel.TFrame", padding=12)
         detail_panel.grid(row=0, column=2, sticky="nsew")
         ttk.Label(detail_panel, text="Detection details", style="PanelTitle.TLabel").pack(anchor="w", pady=(0, 8))

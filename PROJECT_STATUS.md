@@ -56,6 +56,7 @@
 | 2026-09-03 | Integrated preprocessing popover | Complete | Moved controls into a compact lower-right preview popover with gear toggle, per-frame profiles, targeted reset, and zoom/pan preservation during preview updates. |
 | 2026-09-03 | Final GUI visual-cue overhaul | Complete | Added maximized launch, softer outlined controls, stronger pastel contrast, modern slider styling, enlarged popover clearance, and independent annotation visibility alongside label visibility. |
 | 2026-09-03 | EchoSight naming and applied preprocessing workflow | Complete | Renamed the UI to EchoSight with its model-agnostic subtitle; added explicit Apply Processing, per-frame slider profile reload, and applied-value preview badges. |
+| 2026-09-03 | Soft-touch UI housekeeping | Complete | Replaced rectangular action controls with a reusable rounded-button surface, preserved pastel action variants and disabled states, and confirmed no stale `Geti_CSAM_Inf` branding remains. |
 
 ## Management Update — 2026-08-25
 
@@ -226,4 +227,4 @@ The **Geti CSAM Helper** agent and MCP-based skills package is now operational a
 
 ---
 
-*Last updated: 2026-09-03 — The local inference GUI is now EchoSight: a maximized, model-agnostic image inference and inspection tool with explicit applied preprocessing, per-frame value badges, targeted reset, zoom preservation, and independent label/annotation visibility. Representative multi-TIFF validation and output comparison remain active; portable installer packaging is deferred.*
+*Last updated: 2026-09-03 — The local inference GUI is now EchoSight: a maximized, model-agnostic image inference and inspection tool with soft-touch rounded controls, explicit applied preprocessing, per-frame value badges, targeted reset, zoom preservation, and independent label/annotation visibility. Representative multi-TIFF validation and output comparison remain active; portable installer packaging is deferred.*

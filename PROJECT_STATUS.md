@@ -54,6 +54,7 @@
 | 2026-09-03 | Results list score navigation | Complete | Added a right-aligned maximum score indicator for every frame, with fixed-width formatting and overall-best frame highlighting to speed visual review. |
 | 2026-09-03 | Configurable image preprocessing | Complete | Added Analyze-tab brightness, contrast, sharpness, and denoiser sliders with All/Current/Selected frame scope; processed copies feed inference while originals remain preserved. |
 | 2026-09-03 | Integrated preprocessing popover | Complete | Moved controls into a compact lower-right preview popover with gear toggle, per-frame profiles, targeted reset, and zoom/pan preservation during preview updates. |
+| 2026-09-03 | Final GUI visual-cue overhaul | Complete | Added maximized launch, softer outlined controls, stronger pastel contrast, modern slider styling, enlarged popover clearance, and independent annotation visibility alongside label visibility. |
 
 ## Management Update — 2026-08-25
 
@@ -224,4 +225,4 @@ The **Geti CSAM Helper** agent and MCP-based skills package is now operational a
 
 ---
 
-*Last updated: 2026-09-03 — Geti CSAM Helper agent and team training skills package completed and validated; the local inference GUI now supports configurable brightness, contrast, sharpness, and denoising preprocessing through an integrated preview popover with targeted reset and zoom preservation, plus label-free review, percentage confidence filtering, per-frame highest-score navigation, detection, instance-mask, and anomaly-result rendering, smooth determinate Run All progress, bounded labels, complete model metadata, and validated single-image detections. Representative multi-TIFF validation and output comparison remain active; portable installer packaging is deferred.*
+*Last updated: 2026-09-03 — Geti CSAM Helper agent and team training skills package completed and validated; the local inference GUI now launches maximized, supports configurable preprocessing through an integrated preview popover with targeted reset and zoom preservation, and provides independent label/annotation visibility for detection, instance-mask, and anomaly-result review. Representative multi-TIFF validation and output comparison remain active; portable installer packaging is deferred.*

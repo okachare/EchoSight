@@ -163,6 +163,7 @@ class GetiCSAMInferenceGUI(tk.Tk):
         self.title("Geti CSAM Inference")
         self.geometry("1250x800")
         self.minsize(980, 650)
+        self.after_idle(self._maximize_window)
         self.configure(bg=BACKGROUND)
         self.style = ttk.Style(self)
         self.style.theme_use("clam")
@@ -205,9 +206,12 @@ class GetiCSAMInferenceGUI(tk.Tk):
         self.style.map("Cancel.TButton", background=[("active", "#f5c4ca"), ("pressed", "#df8994"), ("disabled", "#80696c")])
         self.style.configure("Preprocess.TButton", background="#d5e7ec", foreground="#10252a", bordercolor="#7ba4ad", lightcolor="#eef8fa", darkcolor="#7ba4ad", padding=(4, 4), font=("Segoe UI Symbol", 12))
         self.style.map("Preprocess.TButton", background=[("active", "#e6f4f6"), ("pressed", "#a9d0d7")])
+        self.style.configure("Review.TCheckbutton", background=PANEL, foreground=TEXT, padding=(8, 5), font=("Segoe UI Semibold", 9))
+        self.style.map("Review.TCheckbutton", foreground=[("active", TEXT), ("disabled", MUTED)], background=[("active", PANEL_LIGHT)])
         self.style.configure("TNotebook", background=BACKGROUND, borderwidth=0, tabmargins=(0, 0, 0, 0), padding=0)
         self.style.configure("TNotebook.Tab", background=PANEL_LIGHT, foreground=MUTED, padding=(14, 8), font=("Segoe UI Semibold", 10), borderwidth=2, relief="solid")
         self.style.map("TNotebook.Tab", background=[("selected", ACCENT), ("active", "#354452")], foreground=[("selected", "#081217"), ("active", TEXT)], padding=[("selected", (22, 13)), ("!selected", (14, 8))])
+        self.style.configure("Horizontal.TScale", troughcolor="#0e1115", background="#5fc6d1", sliderlength=18, borderwidth=0)
         self.style.configure("Horizontal.TProgressbar", troughcolor="#0e1115", background=ACCENT, borderwidth=0, thickness=12)
         self.style.configure("Treeview", background=PANEL, fieldbackground=PANEL, foreground=TEXT, rowheight=28, borderwidth=0)
         self.style.configure("Treeview.Heading", background=PANEL_LIGHT, foreground=MUTED, font=("Segoe UI Semibold", 9))
@@ -241,6 +245,12 @@ class GetiCSAMInferenceGUI(tk.Tk):
         self.notebook.configure(width=1200, height=690)
         self._build_analyze_tab()
         self._build_results_tab()
+
+    def _maximize_window(self) -> None:
+        try:
+            self.state("zoomed")
+        except tk.TclError:
+            self.attributes("-fullscreen", True)
 
     def _build_analyze_tab(self) -> None:
         controls = ttk.Frame(self.analyze_tab, style="Panel.TFrame", padding=16)
@@ -294,9 +304,9 @@ class GetiCSAMInferenceGUI(tk.Tk):
         self._build_preprocess_controls(preview_stage)
 
     def _build_preprocess_controls(self, parent: ttk.Frame) -> None:
-        panel = ttk.Frame(parent, style="Panel.TFrame", padding=(10, 8))
+        panel = ttk.Frame(parent, style="Panel.TFrame", padding=(12, 10), relief="solid", borderwidth=1)
         self.preprocess_panel = panel
-        panel.place(relx=1.0, rely=1.0, anchor="se", x=-8, y=-8, width=350, height=205)
+        panel.place(relx=1.0, rely=1.0, anchor="se", x=-8, y=-8, width=365, height=245)
         panel.place_forget()
         ttk.Label(panel, text="Preprocess before analysis", style="PanelTitle.TLabel").grid(row=0, column=0, columnspan=6, sticky="w", pady=(0, 6))
         ttk.Button(panel, text="Close", width=6, command=self._toggle_preprocess_panel).grid(row=0, column=6, sticky="e", pady=(0, 6))
@@ -322,13 +332,13 @@ class GetiCSAMInferenceGUI(tk.Tk):
             value_label.grid(row=row, column=6, sticky="e")
             setattr(self, f"{name.lower()}_value_label", value_label)
         panel.columnconfigure(5, weight=1)
-        ttk.Button(panel, text="Reset processing", command=self._reset_preprocessing).grid(row=6, column=0, columnspan=7, sticky="e", pady=(6, 0))
+        ttk.Button(panel, text="Reset processing", command=self._reset_preprocessing).grid(row=6, column=0, columnspan=7, sticky="e", pady=(8, 0))
 
     def _toggle_preprocess_panel(self) -> None:
         if self.preprocess_panel.winfo_ismapped():
             self.preprocess_panel.place_forget()
         else:
-            self.preprocess_panel.place(relx=1.0, rely=1.0, anchor="se", x=-8, y=-8, width=350, height=205)
+            self.preprocess_panel.place(relx=1.0, rely=1.0, anchor="se", x=-8, y=-8, width=365, height=245)
 
     def _build_results_tab(self) -> None:
         toolbar = ttk.Frame(self.results_tab, style="Panel.TFrame", padding=12)
@@ -340,9 +350,11 @@ class GetiCSAMInferenceGUI(tk.Tk):
         self.threshold_value = ttk.Label(toolbar, text="10%", style="Muted.TLabel")
         self.threshold_value.pack(side=LEFT, padx=(0, 18))
         self.hide_no_object = tk.BooleanVar(value=True)
-        ttk.Checkbutton(toolbar, text="Hide No_object", variable=self.hide_no_object, command=self._refresh_result).pack(side=LEFT, padx=8)
+        ttk.Checkbutton(toolbar, text="Hide no-object", style="Review.TCheckbutton", variable=self.hide_no_object, command=self._refresh_result).pack(side=LEFT, padx=4)
         self.show_labels = tk.BooleanVar(value=True)
-        ttk.Checkbutton(toolbar, text="Show labels", variable=self.show_labels, command=self._refresh_result).pack(side=LEFT, padx=8)
+        ttk.Checkbutton(toolbar, text="Show labels", style="Review.TCheckbutton", variable=self.show_labels, command=self._refresh_result).pack(side=LEFT, padx=4)
+        self.show_annotations = tk.BooleanVar(value=True)
+        ttk.Checkbutton(toolbar, text="Show annotations", style="Review.TCheckbutton", variable=self.show_annotations, command=self._refresh_result).pack(side=LEFT, padx=4)
         ttk.Button(toolbar, text="Export Current", command=self.export_current).pack(side=LEFT, padx=8)
         ttk.Button(toolbar, text="Export Selected", command=self.export_selected).pack(side=LEFT, padx=8)
         ttk.Button(toolbar, text="Export All", command=self.export_all).pack(side=LEFT, padx=(8, 0))
@@ -832,7 +844,7 @@ class GetiCSAMInferenceGUI(tk.Tk):
         if anomaly_mask is not None and anomaly_score is not None:
             score = float(anomaly_score)
             mask = np.asarray(anomaly_mask > 0, dtype=np.uint8)
-            if mask.shape == image.shape[:2] and score >= self.threshold.get() / 100.0:
+            if self.show_annotations.get() and mask.shape == image.shape[:2] and score >= self.threshold.get() / 100.0:
                 overlay = image.copy()
                 overlay[mask.astype(bool)] = (80, 170, 220)
                 image = cv2.addWeighted(image, 0.65, overlay, 0.35, 0)
@@ -857,7 +869,7 @@ class GetiCSAMInferenceGUI(tk.Tk):
             return cv2.cvtColor(image, cv2.COLOR_BGR2RGB), "\n".join(lines)
         objects = getattr(prediction, "objects", None)
         masks = getattr(prediction, "masks", None)
-        if masks is not None:
+        if self.show_annotations.get() and masks is not None:
             mask_array = np.asarray(masks)
             if mask_array.ndim == 3:
                 overlay = image.copy()
@@ -892,7 +904,8 @@ class GetiCSAMInferenceGUI(tk.Tk):
                 continue
             visible += 1
             x_min, y_min, x_max, y_max = [int(value) for value in box]
-            cv2.rectangle(image, (x_min, y_min), (x_max, y_max), (41, 182, 199), 2)
+            if self.show_annotations.get():
+                cv2.rectangle(image, (x_min, y_min), (x_max, y_max), (41, 182, 199), 2)
             text = f"{label} {score:.1%}"
             font = cv2.FONT_HERSHEY_SIMPLEX
             font_scale = 0.5
@@ -906,7 +919,7 @@ class GetiCSAMInferenceGUI(tk.Tk):
             label_y = max(0, label_y)
             text_x = label_x + 4
             text_y = label_y + text_height + 4
-            if getattr(self, "show_labels", None) is None or self.show_labels.get():
+            if self.show_labels.get():
                 cv2.rectangle(image, (label_x, label_y), (label_x + label_width, label_y + label_height), (20, 24, 29), -1)
                 cv2.putText(image, text, (text_x, text_y), font, font_scale, (220, 245, 248), thickness, cv2.LINE_AA)
             lines.append(f"{visible}. {label}: {score:.1%}\n   box: ({x_min}, {y_min}) - ({x_max}, {y_max})")

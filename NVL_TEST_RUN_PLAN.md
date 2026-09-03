@@ -612,6 +612,7 @@ This phase is active for GUI behavior and output validation. Portable packaging 
 - Results navigation now shows each frame's highest score on the right side of the list and highlights the overall highest-scoring frame.
 - Analyze-tab preprocessing now supports brightness, contrast, sharpness, and denoiser controls with All frames, Current frame, or Selected frames scope. The processed copy is sent to inference and the original source remains unchanged.
 - Preprocessing is accessed through the compact gear popover in the preview lower-right corner; targeted reset restores all, current, or selected frame profiles without resetting zoom or pan.
+- The GUI launches maximized, uses higher-contrast modernized controls, and separates label visibility from annotation visibility so boxes/masks can be hidden independently.
 - Activity cleanup now uses an explicit completion event for success, error, and cancellation paths. The complete runtime dependency set remains intentionally preserved; no arbitrary percentage optimization is applied without measuring output parity and latency.
 - Portable folder assembly and standalone installer creation are on the backburner until GUI inference and representative TIFF output validation are complete.
 - The model summary displays verified deployment metadata including version, labels, precision, size, record date, score, optimization, XAI-head status, and status. The downloaded deployment does not contain the original training-image count, so that value is reported as unavailable.

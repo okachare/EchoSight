@@ -13,10 +13,13 @@ Author: Omkar Kachare
 - Apply preprocessing to all frames, the current frame, or selected frames before model inference; original images remain preserved.
 - Open preprocessing from the compact gear control in the preview's lower-right corner; reset all, current, or selected frame settings independently.
 - Preview preprocessing without changing the current image zoom or pan position.
+- The GUI launches maximized for a full-screen working view.
+- Preprocessing opens from a compact translucent-style gear popover in the preview corner rather than taking a separate pane.
 - Run one image or all loaded images with a visible progress bar.
 - Review every result in the Results tab.
 - Results list rows show each frame's highest detection/anomaly score on the right; the highest-scoring frame is highlighted in pastel green.
 - Toggle result labels on or off while retaining boxes or segmentation overlays.
+- Toggle annotations independently from labels to inspect the unmarked source image or geometry without text.
 - Adjust confidence filtering without rerunning inference.
 - Set confidence from 1% to 100% using the percentage scale.
 - Scroll-wheel zoom and click-drag pan in both preview and results viewers.

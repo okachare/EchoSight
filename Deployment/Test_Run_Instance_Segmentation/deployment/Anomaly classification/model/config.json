@@ -1,0 +1,8 @@
+{
+    "task_type": "",
+    "model_type": "AnomalyDetection",
+    "model_parameters": {
+        "labels": "Normal Anomaly",
+        "labels_ids": ""
+    }
+}

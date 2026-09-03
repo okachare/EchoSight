@@ -1,0 +1,27 @@
+{
+   "id": "6a87588a9396cb520928b91f",
+   "name": "U-FLOW OpenVINO FP16",
+   "version": 1,
+   "creation_date": "2026-08-20T19:42:02.885000+00:00",
+   "model_format": "OpenVINO",
+   "precision": [
+      "FP16"
+   ],
+   "has_xai_head": false,
+   "target_device": "CPU",
+   "target_device_type": null,
+   "performance": {
+      "score": 0.7
+   },
+   "size": 15293633,
+   "latency": 0,
+   "fps_throughput": 0,
+   "optimization_type": "MO",
+   "optimization_objectives": {},
+   "model_status": "SUCCESS",
+   "configurations": [],
+   "lifecycle_stage": "active",
+   "previous_revision_id": "6a87588a9396cb520928b91c",
+   "previous_trained_revision_id": "6a87588a9396cb520928b91c",
+   "optimization_methods": []
+}

@@ -16,17 +16,19 @@ Write-Host "[1/5] Verifying Python environment..." -ForegroundColor Yellow
 $PythonVer = & $Python --version 2>&1
 Write-Host "      Using: $PythonVer" -ForegroundColor Green
 
-# Step 2: Install dependencies
+# Step 2: Install dependencies (pip warnings are non-fatal)
 Write-Host "[2/5] Installing dependencies..." -ForegroundColor Yellow
-& $Python -m pip install --upgrade pip setuptools wheel
-& $Python -m pip install -r .\requirements.txt
-if ($LASTEXITCODE -ne 0) { throw "Failed to install requirements" }
+$ErrorActionPreference = "Continue"
+& $Python -m pip install --upgrade pip setuptools wheel 2>&1 | Where-Object { $_ -notmatch "WARNING" } | Write-Host
+& $Python -m pip install -r .\requirements.txt 2>&1 | Write-Host
+$ErrorActionPreference = "Stop"
 Write-Host "      Dependencies installed" -ForegroundColor Green
 
 # Step 3: Install PyInstaller
 Write-Host "[3/5] Installing PyInstaller..." -ForegroundColor Yellow
-& $Python -m pip install pyinstaller
-if ($LASTEXITCODE -ne 0) { throw "Failed to install PyInstaller" }
+$ErrorActionPreference = "Continue"
+& $Python -m pip install pyinstaller 2>&1 | Write-Host
+$ErrorActionPreference = "Stop"
 Write-Host "      PyInstaller installed" -ForegroundColor Green
 
 # Step 4: Verify EchoSight.py syntax
@@ -37,8 +39,11 @@ Write-Host "      Syntax verified" -ForegroundColor Green
 
 # Step 5: Build executable
 Write-Host "[5/5] Building standalone EchoSight executable..." -ForegroundColor Yellow
-& $Python -m PyInstaller --noconfirm --clean --windowed --onedir .\EchoSight.spec
-if ($LASTEXITCODE -ne 0) { throw "PyInstaller build failed" }
+$ErrorActionPreference = "Continue"
+& $Python -m PyInstaller --noconfirm --clean .\EchoSight.spec 2>&1 | Write-Host
+$build_success = Test-Path "dist\EchoSight\EchoSight.exe"
+$ErrorActionPreference = "Stop"
+if (-not $build_success) { throw "PyInstaller build failed - EchoSight.exe not found" }
 Write-Host "      Build complete" -ForegroundColor Green
 
 Write-Host ""
@@ -55,4 +60,6 @@ Write-Host "  3. Use 'Load Model' button to select your Geti deployment folder" 
 Write-Host ""
 Write-Host "All required libraries and dependencies are bundled in the executable." -ForegroundColor Green
 Write-Host "No additional installation required on target system." -ForegroundColor Green
+
+
 

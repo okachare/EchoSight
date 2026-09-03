@@ -1,0 +1,8 @@
+{
+    "task_type": "detection",
+    "model_type": "ssd",
+    "model_parameters": {
+        "labels": "Delamination No_object",
+        "labels_ids": "6a874983a636f2d7061ed64b 6a874983a636f2d7061ed64f"
+    }
+}

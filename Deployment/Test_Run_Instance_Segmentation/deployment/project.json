@@ -1,0 +1,71 @@
+{
+   "id": "6a874e71a636f2d7061ed695",
+   "name": "NVL_S_28C_Anamoly",
+   "creation_time": "2026-08-20T18:58:57.157000+00:00",
+   "creator_id": "fac4c3db-b454-4258-b023-e3cdfebd1287",
+   "pipeline": {
+      "tasks": [
+         {
+            "id": "6a874e71a636f2d7061ed696",
+            "title": "Dataset",
+            "task_type": "dataset"
+         },
+         {
+            "id": "6a874e71a636f2d7061ed698",
+            "title": "Anomaly",
+            "task_type": "anomaly",
+            "labels": [
+               {
+                  "id": "6a874e71a636f2d7061ed69c",
+                  "name": "Normal",
+                  "is_anomalous": false,
+                  "color": "#8bae46ff",
+                  "hotkey": "",
+                  "is_empty": false,
+                  "group": "default - anomaly",
+                  "parent_id": null
+               },
+               {
+                  "id": "6a874e71a636f2d7061ed69d",
+                  "name": "Anomalous",
+                  "is_anomalous": true,
+                  "color": "#ff5662ff",
+                  "hotkey": "",
+                  "is_empty": false,
+                  "group": "default - anomaly",
+                  "parent_id": null
+               }
+            ],
+            "label_schema_id": "6a874e71a636f2d7061ed69f"
+         }
+      ],
+      "connections": [
+         {
+            "from": "6a874e71a636f2d7061ed696",
+            "to": "6a874e71a636f2d7061ed698"
+         }
+      ]
+   },
+   "thumbnail": "/api/v1/organizations/745ff1f4-b3dd-4aa9-9d25-fb2e96c6c9a2/workspaces/abb5be84-4fbd-44db-b307-f9b67d8f3a2e/projects/6a874e71a636f2d7061ed695/thumbnail",
+   "performance": {
+      "score": 0.7,
+      "task_performances": [
+         {
+            "task_id": "6a874e71a636f2d7061ed698",
+            "score": {
+               "value": 0.7,
+               "metric_type": "Accuracy"
+            }
+         }
+      ]
+   },
+   "storage_info": {},
+   "datasets": [
+      {
+         "id": "6a874e71a636f2d7061ed69a",
+         "name": "Dataset",
+         "use_for_training": true,
+         "creation_time": "2026-08-20T18:58:57.157000+00:00"
+      }
+   ]
+}

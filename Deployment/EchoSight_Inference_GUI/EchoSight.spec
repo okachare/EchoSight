@@ -1,29 +1,18 @@
 # -*- mode: python ; coding: utf-8 -*-
 import os
-from PyInstaller.utils.hooks import collect_all, collect_submodules, get_module_file_attribute
 
-# Get the directory where this spec file is located
-spec_dir = os.path.dirname(os.path.abspath(__file__))
-
-# Collect all necessary hidden imports and data
 hiddenimports = [
     "cv2",
     "PIL",
     "numpy",
-    "openvino",
-    "openvino.model_api",
-    "openvino.model_api.models",
-]
-
-# Ensure tkinter modules are included
-hiddenimports += [
     "tkinter",
     "tkinter.filedialog",
     "tkinter.messagebox",
     "tkinter.ttk",
+    "openvino",
+    "openvino.model_api",
 ]
 
-# Collect OpenVINO runtime libraries
 datas = []
 try:
     import openvino
@@ -34,8 +23,8 @@ except ImportError:
     pass
 
 a = Analysis(
-    [os.path.join(spec_dir, 'EchoSight.py')],
-    pathex=[spec_dir],
+    ['EchoSight.py'],
+    pathex=[],
     binaries=[],
     datas=datas,
     hiddenimports=hiddenimports,

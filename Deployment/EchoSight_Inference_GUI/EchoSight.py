@@ -1003,7 +1003,7 @@ class EchoSightApp(tk.Tk):
                 cv2.rectangle(image, (x_min, y_min), (x_max, y_max), (41, 182, 199), 2)
             text = f"{label} {score:.1%}"
             font = cv2.FONT_HERSHEY_SIMPLEX
-            font_scale = 0.5
+            font_scale = 0.6
             thickness = 1
             (text_width, text_height), baseline = cv2.getTextSize(text, font, font_scale, thickness)
             image_height, image_width = image.shape[:2]

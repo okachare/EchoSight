@@ -14,9 +14,9 @@
 
 | Resource | Location |
 |---|---|
-| Inference GUI source and launcher | `Deployment/Geti_CSAM_Inference_GUI/` |
-| GUI instructions | `Deployment/Geti_CSAM_Inference_GUI/README.md` |
-| Windows double-click launcher | `Deployment/Geti_CSAM_Inference_GUI/Launch_Geti_CSAM_GUI.bat` |
+| EchoSight source and launcher | `Deployment/EchoSight_Inference_GUI/` |
+| EchoSight instructions | `Deployment/EchoSight_Inference_GUI/README.md` |
+| Windows double-click launcher | `Deployment/EchoSight_Inference_GUI/Launch_EchoSight.bat` |
 | Downloaded Detection deployment | `Deployment/Test_Run_Detect/` |
 
 The current Detection deployment is `MobileNetV2-ATSS` OpenVINO FP16, model version 7. The additional package `Deployment/Test_Run_Instance_Segmentation` is technically an `AnomalyDetection` export under `deployment/Anomaly classification`; its blank task metadata is normalized by the GUI wrapper. Both load through Python 3.9 and OpenVINO 2024.5; the project Python 3.14/OpenVINO 2026 environment is not compatible with this legacy wrapper.

@@ -267,7 +267,7 @@ Q3 2026 (Jul – Sep)
 
 | Task | Status | Date | Notes |
 |---|---|---|---|
-| Create dedicated GUI workspace | ✅ Done | 2026-09-02 | Created `Deployment/Geti_CSAM_Inference_GUI/` for all GUI development activities |
+| Create dedicated EchoSight workspace | ✅ Done | 2026-09-02 | Created `Deployment/EchoSight_Inference_GUI/` for all EchoSight development activities |
 | Implement dark themed desktop shell | ✅ Done | 2026-09-02 | Tkinter prototype with contrasting controls and Analyze/Results tabs |
 | Add model-folder discovery | ✅ Done | 2026-09-02 | Finds the deployment model folder containing `model.xml` and `config.json` |
 | Add image and multi-frame TIFF import | ✅ Done | 2026-09-02 | Loads supported image formats and keeps TIFF frames addressable in memory |
@@ -284,6 +284,7 @@ Q3 2026 (Jul – Sep)
 | Integrate preprocessing into preview | ✅ Done | 2026-09-03 | Replaced the full-width control panel with a lower-right gear popover, added targeted reset, and preserved zoom/pan while previewing adjustments |
 | Complete GUI visual-cue overhaul | ✅ Done | 2026-09-03 | Added maximized launch, refined control styling and slider appearance, improved popover clearance, and independent label/annotation visibility |
 | Complete EchoSight soft-touch control cleanup | ✅ Done | 2026-09-03 | Replaced rectangular action controls with reusable rounded buttons and completed stale active-branding housekeeping |
+| Complete EchoSight filename migration | ✅ Done | 2026-09-03 | Renamed the GUI package, Python entry point, launcher, and PyInstaller specs; updated active script and documentation references |
 | Build standalone offline installer | ⏸ Backburner | Later | PyInstaller scaffold and portable build script retained; resume after GUI behavior and output validation are complete |
 
 ---

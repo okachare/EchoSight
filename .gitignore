@@ -31,11 +31,10 @@ __pycache__/
 venv/
 dist/
 build/
-GetiCSAMInferenceGUI.spec
-Deployment/Geti_CSAM_Inference_GUI/portable/
-Deployment/Geti_CSAM_Inference_GUI/build/
-Deployment/Geti_CSAM_Inference_GUI/dist/
-Deployment/Geti_CSAM_Inference_GUI/*.spec
+Deployment/EchoSight_Inference_GUI/portable/
+Deployment/EchoSight_Inference_GUI/build/
+Deployment/EchoSight_Inference_GUI/dist/
+Deployment/EchoSight_Inference_GUI/*.spec
 
 # Environment
 .env

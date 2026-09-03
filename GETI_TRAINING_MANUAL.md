@@ -5,7 +5,7 @@
 **Model family:** RF-DETR-Seg (getitune backend, PyTorch Lightning)  
 **Author:** Omkar | **Project:** GeTi CSAM NVL Defect Detection  
 
-**Current deployment note (2026-09-03):** The local inference prototype supports the staged `MobileNetV2-ATSS` Detection deployment and the `Test_Run_Instance_Segmentation` package. The latter is technically an `AnomalyDetection` export with blank task metadata; Python 3.9/OpenVINO 2024.5 loading, inference, and mask rendering passed with an `Anomaly` score of 78.3%. See `Deployment/Geti_CSAM_Inference_GUI/README.md` for operator instructions.
+**Current deployment note (2026-09-03):** EchoSight supports the staged `MobileNetV2-ATSS` Detection deployment and the `Test_Run_Instance_Segmentation` package. The latter is technically an `AnomalyDetection` export with blank task metadata; Python 3.9/OpenVINO 2024.5 loading, inference, and mask rendering passed with an `Anomaly` score of 78.3%. See `Deployment/EchoSight_Inference_GUI/README.md` for operator instructions.
 
 ---
 

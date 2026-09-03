@@ -220,7 +220,7 @@ class GetiDeployment:
         return self.wrapper(image_rgb)[0]
 
 
-class GetiCSAMInferenceGUI(tk.Tk):
+class EchoSightApp(tk.Tk):
     def __init__(self) -> None:
         super().__init__()
         self.title("EchoSight")
@@ -1057,5 +1057,5 @@ class GetiCSAMInferenceGUI(tk.Tk):
 
 
 if __name__ == "__main__":
-    app = GetiCSAMInferenceGUI()
+    app = EchoSightApp()
     app.mainloop()

@@ -15,7 +15,6 @@ Author: Omkar Kachare
 - Adjust brightness, contrast, sharpness, and denoiser values, then click **Apply Processing** to mark the selected scope as processed.
 - Applied values are shown on the processed preview; navigating to another frame loads that frame's applied values or resets to original values.
 - Apply preprocessing to all frames, the current frame, or selected frames before model inference; original images remain preserved.
-- Open preprocessing from the compact gear control in the preview's lower-right corner; reset all, current, or selected frame settings independently.
 - Preview preprocessing without changing the current image zoom or pan position.
 - The GUI launches maximized for a full-screen working view.
 - Preprocessing opens from a compact translucent-style gear popover in the preview corner rather than taking a separate pane.
@@ -64,7 +63,7 @@ Deployment/Test_Run_Detect/deployment/Detection/python/
 For a double-click launch from Windows Explorer, open:
 
 ```text
-Launch_Geti_CSAM_GUI.bat
+Launch_EchoSight.bat
 ```
 
 The launcher uses the compatible Python 3.9 runtime and the currently staged OpenVINO 2024.5 packages at `C:\GetiCSAMInstallerBuild\site`. It expects this GUI folder to remain inside the project under `Deployment`. The final installer will replace this temporary runtime location with bundled files.
@@ -74,7 +73,7 @@ On normal launch, the GUI automatically searches for and loads `Deployment\Test_
 You can also launch from PowerShell:
 
 ```powershell
-python .\geti_csam_inference_gui.py
+python .\EchoSight.py
 ```
 
 Select `Deployment/Test_Run_Detect` when using the current download. The app uses the Geti deployment wrapper from the package so its preprocessing and postprocessing remain aligned with the exported model.
@@ -95,7 +94,7 @@ To create a copy/paste package containing Python, the complete verified OpenVINO
 .\\build_portable.ps1 -OutputRoot C:\\GetiCSAMPortable
 ```
 
-Copy the resulting `C:\\GetiCSAMPortable` folder to another Windows machine and double-click `Launch_Geti_CSAM_GUI.bat`. The builder intentionally preserves the full dependency set because the Geti wrapper has transitive runtime requirements; it excludes only PyInstaller build tools. It verifies the runtime, model API, GUI, launcher, and model files before reporting success.
+Copy the resulting `C:\\GetiCSAMPortable` folder to another Windows machine and double-click `Launch_EchoSight.bat`. The builder intentionally preserves the full dependency set because the Geti wrapper has transitive runtime requirements; it excludes only PyInstaller build tools. It verifies the runtime, model API, GUI, launcher, and model files before reporting success.
 
 Portable packaging is currently deferred while GUI behavior and representative model-output validation are prioritized. The build script is retained for later use.
 

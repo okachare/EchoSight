@@ -2,7 +2,7 @@
 setlocal
 
 set "GUI_DIR=%~dp0"
-set "APP=%GUI_DIR%geti_csam_inference_gui.py"
+set "APP=%GUI_DIR%EchoSight.py"
 
 if exist "%GUI_DIR%runtime\pythonw.exe" if exist "%GUI_DIR%runtime\Lib\site-packages\openvino\__init__.py" if exist "%GUI_DIR%deployment\Detection\model\model.xml" goto portable_root
 if exist "%GUI_DIR%portable\runtime\pythonw.exe" if exist "%GUI_DIR%portable\runtime\Lib\site-packages\openvino\__init__.py" if exist "%GUI_DIR%portable\deployment\Detection\model\model.xml" goto portable_nested

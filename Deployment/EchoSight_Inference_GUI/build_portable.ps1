@@ -39,14 +39,14 @@ Get-ChildItem $PackageRoot -Force | Where-Object { $_.Name -notin @("PyInstaller
 }
 if (-not (Test-Path "$OutputRoot\runtime\Lib\site-packages\openvino\__init__.py")) { throw "OpenVINO was not copied" }
 if (-not (Test-Path "$OutputRoot\runtime\Lib\site-packages\model_api\__init__.py")) { throw "Geti model API was not copied" }
-Copy-Item "$GuiRoot\geti_csam_inference_gui.py", "$GuiRoot\Launch_Geti_CSAM_GUI.bat", "$GuiRoot\README.md" $OutputRoot -Force
+Copy-Item "$GuiRoot\EchoSight.py", "$GuiRoot\Launch_EchoSight.bat", "$GuiRoot\README.md" $OutputRoot -Force
 Copy-Item -Path "$DeploymentSource\*" -Destination "$OutputRoot\deployment\Detection" -Recurse -Force
 if (-not (Test-Path "$OutputRoot\deployment\Detection\model\model.xml")) { throw "Model XML was not copied" }
 
 @"
 EchoSight - portable folder
 
-Double-click Launch_Geti_CSAM_GUI.bat.
+Double-click Launch_EchoSight.bat.
 This folder contains the Python runtime, OpenVINO dependencies, Geti wrapper, and model deployment.
 It can be copied to another Windows machine with no separate Python or OpenVINO installation.
 "@ | Set-Content "$OutputRoot\README_PORTABLE.txt" -Encoding ASCII

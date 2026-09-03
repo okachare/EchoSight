@@ -8,7 +8,7 @@ Set-Location $Root
 
 & $Python -m pip install -r .\requirements.txt
 & $Python -m pip install pyinstaller
-& $Python -m PyInstaller --noconfirm --clean --windowed --name GetiCSAMInferenceGUI .\geti_csam_inference_gui.py
+& $Python -m PyInstaller --noconfirm --clean --windowed --name EchoSight .\EchoSight.py
 
-Write-Host "Build complete: $Root\dist\GetiCSAMInferenceGUI"
+Write-Host "Build complete: $Root\dist\EchoSight"
 Write-Host "Copy the downloaded deployment folder beside the executable or select it from the GUI."

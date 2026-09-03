@@ -40,7 +40,7 @@
 | 2026-09-02 | Upstream Geti reference integration | Complete | Added the official `open-edge-platform/geti` source, release, documentation, issue, and discussion references for literature and version-aware debugging; added the fourth MCP skill/resource and source-links tool. |
 | 2026-09-02 | MCP 2.x compatibility correction | Complete | Updated the server from the removed `FastMCP` import to `MCPServer` to match `requirements-mcp.txt`; syntax validation passes. Runtime smoke testing remains limited by slow `rich` import from the network-share virtual environment. |
 | 2026-09-02 | Local inference GUI deployment planning | Active | Current workstream: load the validated Geti model, process multi-frame TIFFs, run inference frame by frame, review detections, and compare outputs. |
-| 2026-09-02 | First local inference GUI prototype | Active | Created `Deployment/Geti_CSAM_Inference_GUI/` with dark theme, model-folder discovery, common-image and multi-frame TIFF import, background inference progress, Results tab navigation, confidence filtering, and annotated/CSV/JSON export. Model loading and real inference are validated with a local Python 3.9/OpenVINO 2024.5 runtime. |
+| 2026-09-02 | First local EchoSight prototype | Active | Created `Deployment/EchoSight_Inference_GUI/` with model-folder discovery, common-image and multi-frame TIFF import, background inference progress, Results navigation, confidence filtering, and annotated/CSV/JSON export. Model loading and real inference are validated with a local Python 3.9/OpenVINO 2024.5 runtime. |
 | 2026-09-02 | Portable installer packaging | Deferred | Portable folder and standalone Windows installer remain on the backburner while GUI behavior and model-output validation are prioritized. |
 | 2026-09-02 | GUI prediction rendering fix | Complete | Updated the renderer to consume Geti SDK `DetectionResult.objects` (`xmin`, `ymin`, `xmax`, `ymax`, `score`, `str_label`); real-model smoke test produced six displayed detections with confidence values. |
 | 2026-09-02 | GUI review workflow improvements | Complete | Added zoom/pan to preview and results, lowered the initial confidence filter to 0.10 for the observed model range, highlighted the highest-confidence result in pastel green, and added selective result export. |
@@ -57,6 +57,7 @@
 | 2026-09-03 | Final GUI visual-cue overhaul | Complete | Added maximized launch, softer outlined controls, stronger pastel contrast, modern slider styling, enlarged popover clearance, and independent annotation visibility alongside label visibility. |
 | 2026-09-03 | EchoSight naming and applied preprocessing workflow | Complete | Renamed the UI to EchoSight with its model-agnostic subtitle; added explicit Apply Processing, per-frame slider profile reload, and applied-value preview badges. |
 | 2026-09-03 | Soft-touch UI housekeeping | Complete | Replaced rectangular action controls with a reusable rounded-button surface, preserved pastel action variants and disabled states, and confirmed no stale `Geti_CSAM_Inf` branding remains. |
+| 2026-09-03 | EchoSight filename migration | Complete | Renamed the GUI package, Python entry point, launcher, and PyInstaller specs to EchoSight and updated active references across scripts and documentation. |
 
 ## Management Update — 2026-08-25
 
@@ -182,7 +183,7 @@ The Windows Geti workflow could not use the organized image folder directly as t
 1. Preserve the completed 20-image Web benchmark and comparison evidence
 2. Fine-tune the NVL models with difficult and representative images
 3. Export the selected model and preserve the complete deployable package and metadata
-4. Validate offline OpenVINO inference across representative multi-frame TIFFs with `Deployment/Geti_CSAM_Inference_GUI/`
+4. Validate offline OpenVINO inference across representative multi-frame TIFFs with `Deployment/EchoSight_Inference_GUI/`
 5. Compare GUI outputs against Geti predictions and measure latency, resource use, and model size
 6. Record parity results and failure behavior before packaging for WIP use
 7. Deploy the selected model for WIPs after validation
@@ -223,7 +224,7 @@ The **Geti CSAM Helper** agent and MCP-based skills package is now operational a
 | `Debug/Run081125/jobs/` | 12 failed training logs from July 24 – Aug 11 |
 | `Debug/Run081226/` | Smoke test run artifacts (logs, screenshots, 1 failed + 1 successful) |
 | `Debug/NVL_Geti_Run/` | Completed NVL Test Run 01 artifacts: logs, model exports, copied project files, and utilization CSVs |
-| `Deployment/Geti_CSAM_Inference_GUI/` | First offline inference GUI prototype, requirements, README, and installer build script |
+| `Deployment/EchoSight_Inference_GUI/` | EchoSight offline inference prototype, requirements, README, and installer build script |
 
 ---
 

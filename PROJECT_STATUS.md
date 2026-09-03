@@ -60,6 +60,7 @@
 | 2026-09-03 | EchoSight filename migration | Complete | Renamed the GUI package, Python entry point, launcher, and PyInstaller specs to EchoSight and updated active references across scripts and documentation. |
 | 2026-09-03 | EchoSight launch initialization fix | Complete | Fixed `RoundedButton` widget initialization by using the predefined background color constant instead of querying parent widget, which failed on `ttk.Frame` widgets that don't support tk Canvas attributes. EchoSight GUI now launches without errors. |
 | 2026-09-03 | Button text contrast improvement | Complete | Brightened foreground colors across all button variants (default, run_all, run_current, cancel, apply, preprocess) to ensure readable text on pastel backgrounds. Load Model, Import Images, Export, Next, Previous, Close, and Reset buttons now have optimal contrast. |
+| 2026-09-03 | Button corner precision and uniformity | Complete | Replaced spline-based rounded corners with mathematically-precise circular arc generation using trigonometric calculations. All four corners on every button are now perfectly symmetrical and uniform, with 16 arc segments per corner ensuring smooth, professional geometry with zero sloppiness. |
 
 ## Management Update — 2026-08-25
 

@@ -11,6 +11,7 @@ Author: Omkar Kachare
 - Import common images and multi-frame TIFF files.
 - Run one image or all loaded images with a visible progress bar.
 - Review every result in the Results tab.
+- Results list rows show each frame's highest detection/anomaly score on the right; the highest-scoring frame is highlighted in pastel green.
 - Toggle result labels on or off while retaining boxes or segmentation overlays.
 - Adjust confidence filtering without rerunning inference.
 - Set confidence from 1% to 100% using the percentage scale.

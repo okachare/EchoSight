@@ -308,7 +308,8 @@ class GetiCSAMInferenceGUI(tk.Tk):
         content.rowconfigure(0, weight=1)
         nav_panel = ttk.Frame(content, style="Panel.TFrame", padding=10)
         nav_panel.grid(row=0, column=0, sticky="nsew", padx=(0, 8))
-        self.result_list = tk.Listbox(nav_panel, selectmode="extended", bg=PANEL, fg=TEXT, selectbackground="#2c6873", selectforeground=TEXT, relief="flat", highlightthickness=0, font=("Segoe UI", 9))
+        ttk.Label(nav_panel, text="Frame / highest score", style="PanelTitle.TLabel").pack(anchor="w", pady=(0, 8))
+        self.result_list = tk.Listbox(nav_panel, selectmode="extended", bg=PANEL, fg=TEXT, selectbackground="#2c6873", selectforeground=TEXT, relief="flat", highlightthickness=0, font=("Consolas", 9))
         self.result_list.pack(fill=BOTH, expand=True)
         self.result_list.bind("<<ListboxSelect>>", self._on_result_selected)
         view_panel = ttk.Frame(content, style="Panel.TFrame", padding=12)
@@ -500,7 +501,7 @@ class GetiCSAMInferenceGUI(tk.Tk):
                     result, index, total = value
                     self._animate_progress(index, total)
                     self.results.append(result)
-                    self.result_list.insert(END, self._result_title(result))
+                    self.result_list.insert(END, self._result_list_entry(result))
                     self._highlight_best_result()
                     self.progress_label.configure(text=f"{index} / {total}")
                 elif event == "complete":
@@ -617,6 +618,14 @@ class GetiCSAMInferenceGUI(tk.Tk):
     def _result_title(result: InferenceResult) -> str:
         name = result.frame.source.name
         return f"{name} [frame {result.frame.frame_number}]" if result.frame.frame_number > 1 else name
+
+    def _result_list_entry(self, result: InferenceResult) -> str:
+        title = self._result_title(result)
+        if len(title) > 34:
+            title = f"{title[:31]}..."
+        score = self._result_confidence(result)
+        score_text = f"{score:.1%}" if result.prediction is not None and not result.error else "--"
+        return f"{title:<34}  Max {score_text:>6}"
 
     def _on_image_selected(self, _event: object) -> None:
         selection = self.image_list.curselection()

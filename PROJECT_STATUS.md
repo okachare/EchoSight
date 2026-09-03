@@ -58,6 +58,7 @@
 | 2026-09-03 | EchoSight naming and applied preprocessing workflow | Complete | Renamed the UI to EchoSight with its model-agnostic subtitle; added explicit Apply Processing, per-frame slider profile reload, and applied-value preview badges. |
 | 2026-09-03 | Soft-touch UI housekeeping | Complete | Replaced rectangular action controls with a reusable rounded-button surface, preserved pastel action variants and disabled states, and confirmed no stale `Geti_CSAM_Inf` branding remains. |
 | 2026-09-03 | EchoSight filename migration | Complete | Renamed the GUI package, Python entry point, launcher, and PyInstaller specs to EchoSight and updated active references across scripts and documentation. |
+| 2026-09-03 | EchoSight launch initialization fix | Complete | Fixed `RoundedButton` widget initialization by using the predefined background color constant instead of querying parent widget, which failed on `ttk.Frame` widgets that don't support tk Canvas attributes. EchoSight GUI now launches without errors. |
 
 ## Management Update — 2026-08-25
 

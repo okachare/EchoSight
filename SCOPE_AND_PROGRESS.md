@@ -76,8 +76,8 @@ A successful demo will show:
 | 8. Geti CSAM Helper Agent & Skills Package | Build product-neutral agent, MCP server, and three shareable skills for team training and troubleshooting | ✅ Complete |
 | 9. Geti Trainer Skill Implementation | Detailed 16-step Web Geti operator training with structured 19-field intake form and 9-issue recovery playbook | ✅ Complete |
 | 10. Upstream Geti Source Integration | Add official repository literature, source navigation, release-aware debugging guidance, and MCP source links | ✅ Complete |
-| 11. Local Inference GUI Deployment | Load exported Geti model, process multi-frame TIFFs, run offline inference, display results, and validate deployment behavior | 🔄 In progress |
-| 12. First GUI Prototype | Implement dark desktop GUI, model discovery, TIFF/image import, progress reporting, result review, and export | ✅ Prototype complete; validation continuing |
+| 11. Local Inference GUI Deployment | Load exported Geti model, process multi-frame TIFFs, run offline inference, display results, and validate deployment behavior | ✅ Complete |
+| 12. First GUI Prototype | Implement dark desktop GUI, model discovery, TIFF/image import, progress reporting, result review, and export | ✅ Complete; renamed to EchoSight with launch fix applied |
 | 13. GUI Responsiveness and Metadata | Stabilize tab layout, move blocking work to workers, add activity feedback, and display model metadata | ✅ Complete |
 | 4e. NVL Test Run — Web fine-tuning | Improve the selected finalist with additional data | 📅 Planned for Q4 |
 | 5. Windows debugging & analysis | Review Windows logs, diagnose issues, improve dataset | ✅ Closed |

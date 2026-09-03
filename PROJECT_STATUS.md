@@ -50,6 +50,7 @@
 | 2026-09-02 | GUI import-progress and error-state hardening | Complete | Added per-frame TIFF import progress, guarded results-panel updates, and explicit worker cleanup. The staged deployment is preserved under `Deployment/Test_Run_Detect/` for repeatable validation. |
 | 2026-09-02 | GUI display polish | Complete | Clamped measured detection labels to image bounds, changed Run All to a smooth determinate progress fill, and expanded wrapped model metadata so labels and deployment information remain visible. |
 | 2026-09-03 | Model-independent GUI controls and rendering | Complete | Added label visibility toggle, 1%-100% confidence control, instance-mask overlay support, pastel outlined action buttons, and stronger selected-tab styling. Detection and segmentation-shaped smoke tests pass. |
+| 2026-09-03 | Anomaly deployment compatibility fix | Complete | The package named `Test_Run_Instance_Segmentation` contains an `AnomalyDetection` export with blank task metadata; normalized it through the Geti wrapper and added `AnomalyResult` mask/score rendering. Python 3.9 load validation passed. |
 
 ## Management Update — 2026-08-25
 
@@ -162,7 +163,7 @@ The Windows Geti workflow could not use the organized image folder directly as t
 - Images upload directly into Geti project — no need for COCO/VOC folder structure when using Geti GUI.
 - RF-DETR-Seg-M is the confirmed working architecture for this project.
 - The preserved NVL configuration used early-stopping patience 10.
-- The downloaded Detection code deployment includes a MobileNetV2-ATSS OpenVINO FP16 model, model version 7, and the Geti SDK wrapper under `Deployment/Test_Run_Detect/`. The first GUI prototype targets this package; single-image wrapper inference is validated, and representative multi-frame TIFF batch validation remains active.
+- The downloaded Detection code deployment includes a MobileNetV2-ATSS OpenVINO FP16 model, model version 7, and the Geti SDK wrapper under `Deployment/Test_Run_Detect/`. The GUI also accepts the local `Test_Run_Instance_Segmentation` package, which is technically an AnomalyDetection export; single-image wrapper inference is validated, and representative multi-frame TIFF batch validation remains active.
 - The compatible Python 3.9/OpenVINO 2024.5 runtime loads the deployment successfully; the current project Python 3.14/OpenVINO 2026 runtime is not compatible with this legacy wrapper.
 - The Geti SDK returns detections through `DetectionResult.objects`; the GUI renderer was corrected to use each object's `xmin`, `ymin`, `xmax`, `ymax`, `score`, and `str_label` fields. A real-model smoke test displayed six detections.
 - The downloaded deployment metadata includes model version, record date, precision, size, score, labels, optimization, XAI-head status, and CPU target, but does not include the original training-image count; the GUI displays that field as unavailable rather than inferring it.
@@ -220,4 +221,4 @@ The **Geti CSAM Helper** agent and MCP-based skills package is now operational a
 
 ---
 
-*Last updated: 2026-09-03 — Geti CSAM Helper agent and team training skills package completed and validated; the local inference GUI now supports label-free review, percentage confidence filtering, detection and instance-mask rendering, smooth determinate Run All progress, bounded labels, complete model metadata, and validated single-image detections. Representative multi-TIFF validation and output comparison remain active; portable installer packaging is deferred.*
+*Last updated: 2026-09-03 — Geti CSAM Helper agent and team training skills package completed and validated; the local inference GUI now supports label-free review, percentage confidence filtering, detection, instance-mask, and anomaly-result rendering, smooth determinate Run All progress, bounded labels, complete model metadata, and validated single-image detections. Representative multi-TIFF validation and output comparison remain active; portable installer packaging is deferred.*

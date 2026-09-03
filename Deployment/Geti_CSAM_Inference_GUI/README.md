@@ -27,8 +27,6 @@ Author: Omkar Kachare
 - Detection labels are measured and clamped to the image bounds so long labels remain fully visible.
 - Model information uses wrapped rows sized to display the complete deployment summary without requiring scrolling.
 - Run All, Run Current, and Cancel use distinct pastel colors with outlined controls; the selected Analyze or Results tab is visually emphasized.
-- Detection labels are measured and clamped to the image bounds so long labels remain fully visible.
-- Model information uses wrapped rows sized to display the complete deployment summary without requiring scrolling.
 - Model information panel with model name, version, task, labels, precision, size, record date, score, optimization, XAI-head status, and deployment status.
 
 ## Setup
@@ -70,7 +68,9 @@ Select `Deployment/Test_Run_Detect` when using the current download. The app use
 
 The initial confidence threshold is `10%` because the current model's sample detections are in the 10%-21% range. Raise or lower it in the Results tab to control which detections are shown; changing the threshold does not rerun inference. A model deployment does not always include the original training-image count; the GUI reports that field as unavailable rather than guessing.
 
-The renderer accepts Geti detection and instance-segmentation result structures. Detection boxes remain supported through `objects` or array fields; instance masks are overlaid when the prediction exposes a `masks` array. Labels can be hidden for unobstructed visual review without removing the underlying result data or export details.
+The renderer accepts Geti detection, instance-segmentation, and anomaly result structures. Detection boxes remain supported through `objects` or array fields; instance masks are overlaid when the prediction exposes a `masks` array; anomaly models use `pred_mask`, `pred_label`, and `pred_score`. Labels can be hidden for unobstructed visual review without removing the underlying result data or export details.
+
+The current `Deployment/Test_Run_Instance_Segmentation` package is actually an `AnomalyDetection` export under `deployment/Anomaly classification`. Its exported `config.json` has an empty task type, so the GUI normalizes that legacy metadata from `AnomalyDetection` to classification while preserving the anomaly mask output.
 
 The portable package intentionally keeps the complete verified inference dependency set. This is packaging compatibility, not a percentage-based inference optimization. Runtime optimization should be measured against the same model and preprocessing contract before changing it.
 

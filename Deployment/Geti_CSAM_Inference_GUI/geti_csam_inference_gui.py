@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import importlib
+import importlib.util
 import json
 import os
 import queue
@@ -105,7 +106,14 @@ class GetiDeployment:
         if not (python_dir / "demo_package").is_dir():
             raise RuntimeError(f"Geti demo package not found beside model: {python_dir}")
         sys.path.insert(0, str(python_dir))
-        module = importlib.import_module("demo_package")
+        package_name = f"_geti_demo_package_{abs(hash(python_dir))}"
+        package_init = python_dir / "demo_package" / "__init__.py"
+        spec = importlib.util.spec_from_file_location(package_name, package_init, submodule_search_locations=[str(package_init.parent)])
+        if spec is None or spec.loader is None:
+            raise RuntimeError(f"Could not load Geti demo package from {python_dir}")
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[package_name] = module
+        spec.loader.exec_module(module)
         self.wrapper = module.ModelWrapper(self.model_dir, device=device)
         self.task_type = str(self.wrapper.task_type.value)
         self.labels = self._parse_labels(self.wrapper.labels)
@@ -660,6 +668,9 @@ class GetiCSAMInferenceGUI(tk.Tk):
         objects = getattr(result.prediction, "objects", []) if result.prediction is not None else []
         if objects:
             return max((float(item.score) for item in objects), default=0.0)
+        anomaly_score = getattr(result.prediction, "pred_score", None) if result.prediction is not None else None
+        if anomaly_score is not None:
+            return float(anomaly_score)
         scores = np.asarray(getattr(result.prediction, "scores", [])) if result.prediction is not None else np.array([])
         return float(scores.max()) if scores.size else 0.0
 
@@ -672,6 +683,35 @@ class GetiCSAMInferenceGUI(tk.Tk):
         if result.error:
             return result.frame.image_rgb, f"Error\n{result.error}"
         prediction = result.prediction
+        anomaly_mask = getattr(prediction, "pred_mask", None)
+        anomaly_score = getattr(prediction, "pred_score", None)
+        anomaly_label = getattr(prediction, "pred_label", None)
+        if anomaly_mask is not None and anomaly_score is not None:
+            score = float(anomaly_score)
+            mask = np.asarray(anomaly_mask > 0, dtype=np.uint8)
+            if mask.shape == image.shape[:2] and score >= self.threshold.get() / 100.0:
+                overlay = image.copy()
+                overlay[mask.astype(bool)] = (80, 170, 220)
+                image = cv2.addWeighted(image, 0.65, overlay, 0.35, 0)
+            if self.show_labels.get():
+                text = f"{anomaly_label or 'Anomaly'} {score:.1%}"
+                cv2.putText(image, text, (8, 28), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (220, 245, 248), 1, cv2.LINE_AA)
+            details = [f"Source: {result.frame.source.name}", f"Frame: {result.frame.frame_number}", f"Classification: {anomaly_label or 'unknown'}", f"Score: {score:.1%}", f"Mask shown: {'yes' if score >= self.threshold.get() / 100.0 else 'no'}"]
+            return cv2.cvtColor(image, cv2.COLOR_BGR2RGB), "\n".join(details)
+        classifications = getattr(prediction, "top_labels", None)
+        if classifications:
+            lines = [f"Source: {result.frame.source.name}", f"Frame: {result.frame.frame_number}", "Classifications:", ""]
+            for index, item in enumerate(classifications, start=1):
+                if len(item) >= 3:
+                    _, label, score = item[:3]
+                else:
+                    label, score = item[0], item[1]
+                score = float(score)
+                lines.append(f"{index}. {label}: {score:.1%}")
+                if self.show_labels.get():
+                    text = f"{label} {score:.1%}"
+                    cv2.putText(image, text, (8, 28 + index * 24), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (220, 245, 248), 1, cv2.LINE_AA)
+            return cv2.cvtColor(image, cv2.COLOR_BGR2RGB), "\n".join(lines)
         objects = getattr(prediction, "objects", None)
         masks = getattr(prediction, "masks", None)
         if masks is not None:

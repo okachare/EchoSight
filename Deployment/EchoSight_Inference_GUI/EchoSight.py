@@ -65,7 +65,7 @@ class RoundedButton(tk.Canvas):
         self.font = kwargs.pop("font", ("Segoe UI Semibold", 10))
         self.requested_width = width
         button_width = width * 14 if width is not None and width < 20 else width
-        super().__init__(parent, height=36, width=button_width or 120, highlightthickness=0, bd=0, bg=parent.cget("background"), **kwargs)
+        super().__init__(parent, height=36, width=button_width or 120, highlightthickness=0, bd=0, bg=BACKGROUND, **kwargs)
         self.bind("<Configure>", lambda _event: self._draw())
         self.bind("<Enter>", self._on_enter)
         self.bind("<Leave>", self._on_leave)

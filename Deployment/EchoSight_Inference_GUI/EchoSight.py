@@ -80,13 +80,36 @@ class RoundedButton(tk.Canvas):
         self.delete("all")
         width = max(20, self.winfo_width())
         height = max(20, self.winfo_height())
-        radius = min(11, height // 2 - 1)
+        radius = min(10, height // 2 - 2)
         self.create_round_rect(2, 2, width - 2, height - 2, radius, fill=color, outline=outline, width=2)
         self.create_text(width / 2, height / 2, text=self.label, fill=text_color, font=self.font)
 
-    def create_round_rect(self, x1: int, y1: int, x2: int, y2: int, radius: int, **kwargs: object) -> None:
-        points = (x1 + radius, y1, x2 - radius, y1, x2, y1, x2, y1 + radius, x2, y2 - radius, x2, y2, x2 - radius, y2, x1 + radius, y2, x1, y2, x1, y2 - radius, x1, y1 + radius, x1, y1)
-        self.create_polygon(points, smooth=True, splinesteps=20, **kwargs)
+    def create_round_rect(self, x1: float, y1: float, x2: float, y2: float, radius: float, **kwargs: object) -> None:
+        import math
+        r = float(radius)
+        points: list[float] = []
+        steps = 16
+        for i in range(steps):
+            angle = math.pi / 2 * (i / (steps - 1))
+            x = r - r * math.cos(angle)
+            y = r - r * math.sin(angle)
+            points.extend([x1 + r - x, y1 + r - y])
+        for i in range(steps):
+            angle = math.pi / 2 * (i / (steps - 1))
+            x = r * math.sin(angle)
+            y = r - r * math.cos(angle)
+            points.extend([x2 - r + x, y1 + r - y])
+        for i in range(steps):
+            angle = math.pi / 2 * (i / (steps - 1))
+            x = r * math.cos(angle)
+            y = r * math.sin(angle)
+            points.extend([x2 - r + x, y2 - r + y])
+        for i in range(steps):
+            angle = math.pi / 2 * (i / (steps - 1))
+            x = r - r * math.sin(angle)
+            y = r * math.cos(angle)
+            points.extend([x1 + r - x, y2 - r + y])
+        self.create_polygon(points, **kwargs)
 
     def _on_enter(self, _event: object) -> None:
         self._hover = True

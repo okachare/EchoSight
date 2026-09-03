@@ -37,6 +37,7 @@ class LoadedFrame:
     source: Path
     frame_number: int
     image_rgb: np.ndarray
+    analysis_image_rgb: np.ndarray | None = None
 
 
 @dataclass
@@ -264,7 +265,7 @@ class GetiCSAMInferenceGUI(tk.Tk):
         file_panel = ttk.Frame(body, style="Panel.TFrame", padding=12)
         file_panel.grid(row=0, column=0, sticky="nsew", padx=(0, 8))
         ttk.Label(file_panel, text="Loaded images", style="PanelTitle.TLabel").pack(anchor="w", pady=(0, 8))
-        self.image_list = tk.Listbox(file_panel, bg=PANEL, fg=TEXT, selectbackground="#2c6873", selectforeground=TEXT, relief="flat", highlightthickness=0, font=("Segoe UI", 9))
+        self.image_list = tk.Listbox(file_panel, selectmode="extended", bg=PANEL, fg=TEXT, selectbackground="#2c6873", selectforeground=TEXT, relief="flat", highlightthickness=0, font=("Segoe UI", 9))
         self.image_list.pack(side=LEFT, fill=BOTH, expand=True)
         image_scroll = ttk.Scrollbar(file_panel, orient=VERTICAL, command=self.image_list.yview)
         image_scroll.pack(side=RIGHT, fill=Y)
@@ -282,6 +283,34 @@ class GetiCSAMInferenceGUI(tk.Tk):
         self.progress.pack(fill=X, pady=(12, 4))
         self.progress_label = ttk.Label(preview_panel, text="0 / 0", style="Muted.TLabel")
         self.progress_label.pack(anchor="e")
+        self._build_preprocess_controls(preview_panel)
+
+    def _build_preprocess_controls(self, parent: ttk.Frame) -> None:
+        panel = ttk.Frame(parent, style="Panel.TFrame", padding=(10, 8))
+        panel.pack(fill=X, pady=(8, 0))
+        ttk.Label(panel, text="Preprocess before analysis", style="PanelTitle.TLabel").grid(row=0, column=0, columnspan=8, sticky="w", pady=(0, 6))
+        ttk.Label(panel, text="Apply to", style="Muted.TLabel").grid(row=1, column=0, sticky="w")
+        self.preprocess_scope = tk.StringVar(value="Selected frames")
+        scope = ttk.Combobox(panel, textvariable=self.preprocess_scope, values=("All frames", "Current frame", "Selected frames"), state="readonly", width=16)
+        scope.grid(row=1, column=1, columnspan=2, sticky="w", padx=(6, 12))
+        scope.bind("<<ComboboxSelected>>", lambda _event: self._refresh_preprocess_preview())
+        self.preprocess_status = ttk.Label(panel, text="Original images are preserved", style="Muted.TLabel")
+        self.preprocess_status.grid(row=1, column=3, columnspan=5, sticky="e")
+        self.preprocess_values: dict[str, tk.DoubleVar] = {
+            "Brightness": tk.DoubleVar(value=0.0),
+            "Contrast": tk.DoubleVar(value=100.0),
+            "Sharpness": tk.DoubleVar(value=0.0),
+            "Denoiser": tk.DoubleVar(value=0.0),
+        }
+        ranges = {"Brightness": (-100.0, 100.0), "Contrast": (50.0, 150.0), "Sharpness": (0.0, 100.0), "Denoiser": (0.0, 100.0)}
+        for row, name in enumerate(self.preprocess_values, start=2):
+            ttk.Label(panel, text=name, style="Muted.TLabel").grid(row=row, column=0, sticky="w", pady=2)
+            scale = ttk.Scale(panel, from_=ranges[name][0], to=ranges[name][1], variable=self.preprocess_values[name], command=lambda _value: self._on_preprocess_changed())
+            scale.grid(row=row, column=1, columnspan=5, sticky="ew", padx=8, pady=2)
+            value_label = ttk.Label(panel, text=self._preprocess_value_text(name), style="Muted.TLabel", width=8)
+            value_label.grid(row=row, column=6, sticky="e")
+            setattr(self, f"{name.lower()}_value_label", value_label)
+        panel.columnconfigure(5, weight=1)
 
     def _build_results_tab(self) -> None:
         toolbar = ttk.Frame(self.results_tab, style="Panel.TFrame", padding=12)
@@ -409,7 +438,7 @@ class GetiCSAMInferenceGUI(tk.Tk):
         if not self.deployment or not selection:
             messagebox.showinfo("Ready check", "Load a model and import an image first.")
             return
-        self._start_inference([self.frames[selection[0]]])
+        self._start_inference(self._analysis_frames([self.frames[selection[0]]]))
 
     def run_all(self) -> None:
         if self.worker and self.worker.is_alive():
@@ -418,7 +447,7 @@ class GetiCSAMInferenceGUI(tk.Tk):
         if not self.deployment or not self.frames:
             messagebox.showinfo("Ready check", "Load a model and import images first.")
             return
-        self._start_inference(self.frames)
+        self._start_inference(self._analysis_frames(self.frames))
 
     def _start_inference(self, frames: list[LoadedFrame]) -> None:
         if self.worker and self.worker.is_alive():
@@ -480,7 +509,7 @@ class GetiCSAMInferenceGUI(tk.Tk):
                         messagebox.showwarning("Import warning", "\n".join(errors))
                     if frames:
                         self.image_list.selection_set(0)
-                        self._show_image(frames[0].image_rgb, self.preview_canvas, self.preview_hint)
+                        self._refresh_preprocess_preview()
                     self._stop_progress_animation()
                     self.progress.configure(mode="determinate", value=0, maximum=max(1, len(frames)))
                     self.progress_label.configure(text=f"0 / {len(frames)}")
@@ -630,7 +659,63 @@ class GetiCSAMInferenceGUI(tk.Tk):
     def _on_image_selected(self, _event: object) -> None:
         selection = self.image_list.curselection()
         if selection:
-            self._show_image(self.frames[selection[0]].image_rgb, self.preview_canvas, self.preview_hint)
+            self._refresh_preprocess_preview()
+
+    def _preprocess_value_text(self, name: str) -> str:
+        value = self.preprocess_values[name].get()
+        return f"{value:.0f}%" if name != "Brightness" else f"{value:+.0f}"
+
+    def _on_preprocess_changed(self) -> None:
+        for name in self.preprocess_values:
+            getattr(self, f"{name.lower()}_value_label").configure(text=self._preprocess_value_text(name))
+        self._refresh_preprocess_preview()
+
+    def _preprocess_image(self, image_rgb: np.ndarray) -> np.ndarray:
+        brightness = self.preprocess_values["Brightness"].get()
+        contrast = self.preprocess_values["Contrast"].get() / 100.0
+        sharpness = self.preprocess_values["Sharpness"].get() / 100.0
+        denoiser = self.preprocess_values["Denoiser"].get() / 100.0
+        processed = cv2.convertScaleAbs(image_rgb, alpha=contrast, beta=brightness)
+        if denoiser > 0:
+            filtered = cv2.bilateralFilter(processed, 5, 10 + denoiser * 90, 3 + denoiser * 7)
+            processed = cv2.addWeighted(processed, 1.0 - denoiser, filtered, denoiser, 0)
+        if sharpness > 0:
+            blurred = cv2.GaussianBlur(processed, (0, 0), 1.0 + sharpness * 2.0)
+            processed = cv2.addWeighted(processed, 1.0 + sharpness * 1.5, blurred, -sharpness * 1.5, 0)
+        return np.clip(processed, 0, 255).astype(np.uint8)
+
+    def _preprocess_target_indices(self) -> set[int]:
+        scope = self.preprocess_scope.get()
+        if scope == "All frames":
+            return set(range(len(self.frames)))
+        selected = list(self.image_list.curselection())
+        if scope == "Current frame":
+            return {selected[0]} if selected else set()
+        return set(selected)
+
+    def _analysis_frames(self, frames: list[LoadedFrame]) -> list[LoadedFrame]:
+        target_indices = self._preprocess_target_indices()
+        frame_indices = {id(frame): index for index, frame in enumerate(self.frames)}
+        prepared = []
+        for frame in frames:
+            index = frame_indices.get(id(frame), -1)
+            analysis_image = self._preprocess_image(frame.image_rgb) if index in target_indices else None
+            prepared.append(LoadedFrame(frame.source, frame.frame_number, frame.image_rgb, analysis_image))
+        return prepared
+
+    def _refresh_preprocess_preview(self) -> None:
+        if not self.frames:
+            return
+        selection = list(self.image_list.curselection())
+        index = selection[0] if selection else 0
+        image = self.frames[index].image_rgb
+        target = index in self._preprocess_target_indices()
+        if target:
+            image = self._preprocess_image(image)
+            self.preprocess_status.configure(text=f"Previewing processed frame {index + 1}")
+        else:
+            self.preprocess_status.configure(text="Previewing original image")
+        self._show_image(image, self.preview_canvas, self.preview_hint)
 
     def _on_result_selected(self, _event: object) -> None:
         selection = self.result_list.curselection()
@@ -688,7 +773,8 @@ class GetiCSAMInferenceGUI(tk.Tk):
         self._refresh_result()
 
     def _render_result(self, result: InferenceResult) -> tuple[np.ndarray, str]:
-        image = cv2.cvtColor(result.frame.image_rgb.copy(), cv2.COLOR_RGB2BGR)
+        source_image = result.frame.analysis_image_rgb if result.frame.analysis_image_rgb is not None else result.frame.image_rgb
+        image = cv2.cvtColor(source_image.copy(), cv2.COLOR_RGB2BGR)
         if result.error:
             return result.frame.image_rgb, f"Error\n{result.error}"
         prediction = result.prediction

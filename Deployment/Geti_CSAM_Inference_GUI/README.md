@@ -9,6 +9,8 @@ Author: Omkar Kachare
 - Dark theme with high-contrast controls.
 - Select the downloaded deployment parent folder; the GUI discovers the model folder.
 - Import common images and multi-frame TIFF files.
+- Preview preprocessing on the Analyze tab with brightness, contrast, sharpness, and denoiser sliders.
+- Apply preprocessing to all frames, the current frame, or selected frames before model inference; original images remain preserved.
 - Run one image or all loaded images with a visible progress bar.
 - Review every result in the Results tab.
 - Results list rows show each frame's highest detection/anomaly score on the right; the highest-scoring frame is highlighted in pastel green.

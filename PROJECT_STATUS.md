@@ -52,6 +52,7 @@
 | 2026-09-03 | Model-independent GUI controls and rendering | Complete | Added label visibility toggle, 1%-100% confidence control, instance-mask overlay support, pastel outlined action buttons, and stronger selected-tab styling. Detection and segmentation-shaped smoke tests pass. |
 | 2026-09-03 | Anomaly deployment compatibility fix | Complete | The package named `Test_Run_Instance_Segmentation` contains an `AnomalyDetection` export with blank task metadata; normalized it through the Geti wrapper and added `AnomalyResult` mask/score rendering. Python 3.9 load validation passed. |
 | 2026-09-03 | Results list score navigation | Complete | Added a right-aligned maximum score indicator for every frame, with fixed-width formatting and overall-best frame highlighting to speed visual review. |
+| 2026-09-03 | Configurable image preprocessing | Complete | Added Analyze-tab brightness, contrast, sharpness, and denoiser sliders with All/Current/Selected frame scope; processed copies feed inference while originals remain preserved. |
 
 ## Management Update — 2026-08-25
 
@@ -222,4 +223,4 @@ The **Geti CSAM Helper** agent and MCP-based skills package is now operational a
 
 ---
 
-*Last updated: 2026-09-03 — Geti CSAM Helper agent and team training skills package completed and validated; the local inference GUI now supports label-free review, percentage confidence filtering, per-frame highest-score navigation, detection, instance-mask, and anomaly-result rendering, smooth determinate Run All progress, bounded labels, complete model metadata, and validated single-image detections. Representative multi-TIFF validation and output comparison remain active; portable installer packaging is deferred.*
+*Last updated: 2026-09-03 — Geti CSAM Helper agent and team training skills package completed and validated; the local inference GUI now supports configurable brightness, contrast, sharpness, and denoising preprocessing, label-free review, percentage confidence filtering, per-frame highest-score navigation, detection, instance-mask, and anomaly-result rendering, smooth determinate Run All progress, bounded labels, complete model metadata, and validated single-image detections. Representative multi-TIFF validation and output comparison remain active; portable installer packaging is deferred.*

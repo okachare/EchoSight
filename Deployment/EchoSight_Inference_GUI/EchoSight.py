@@ -48,12 +48,12 @@ class InferenceResult:
 
 class RoundedButton(tk.Canvas):
     COLORS = {
-        "default": ("#2b3540", "#41515f", "#9fb3c1", "#182027"),
-        "run_all": ("#9ed9ad", "#bce9c6", "#386f4a", "#173622"),
-        "run_current": ("#edc77f", "#f5dcae", "#886523", "#3d2c0b"),
-        "cancel": ("#eaa0aa", "#f4bec5", "#914a56", "#42141b"),
-        "apply": ("#73c695", "#a3dfb8", "#327a51", "#153b25"),
-        "preprocess": ("#c6e3e8", "#e0f2f4", "#568c96", "#17343a"),
+        "default": ("#2b3540", "#41515f", "#9fb3c1", "#f0f5f7"),
+        "run_all": ("#9ed9ad", "#bce9c6", "#386f4a", "#0d3a15"),
+        "run_current": ("#edc77f", "#f5dcae", "#886523", "#4a3a0a"),
+        "cancel": ("#eaa0aa", "#f4bec5", "#914a56", "#4a1025"),
+        "apply": ("#73c695", "#a3dfb8", "#327a51", "#0d3a20"),
+        "preprocess": ("#c6e3e8", "#e0f2f4", "#568c96", "#1a4a55"),
     }
 
     def __init__(self, parent: tk.Misc, text: str, command: object, variant: str = "default", width: int | None = None, **kwargs: object) -> None:

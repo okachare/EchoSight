@@ -19,7 +19,7 @@
 | Windows double-click launcher | `Deployment/Geti_CSAM_Inference_GUI/Launch_Geti_CSAM_GUI.bat` |
 | Downloaded Detection deployment | `Deployment/Test_Run_Detect/` |
 
-The current deployment is `MobileNetV2-ATSS` OpenVINO FP16, model version 7. Its legacy Geti wrapper is validated with Python 3.9 and OpenVINO 2024.5; the project Python 3.14/OpenVINO 2026 environment is not compatible with that wrapper. The local GUI uses the staged package for preprocessing and postprocessing parity.
+The current Detection deployment is `MobileNetV2-ATSS` OpenVINO FP16, model version 7. The additional package `Deployment/Test_Run_Instance_Segmentation` is technically an `AnomalyDetection` export under `deployment/Anomaly classification`; its blank task metadata is normalized by the GUI wrapper. Both load through Python 3.9 and OpenVINO 2024.5; the project Python 3.14/OpenVINO 2026 environment is not compatible with this legacy wrapper.
 
 ---
 
@@ -220,4 +220,4 @@ GET    /api/projects/<id>/pipeline/metrics   ← latency, throughput
 
 ---
 
-*Last updated: 2026-09-02*
+*Last updated: 2026-09-03*

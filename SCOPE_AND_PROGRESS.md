@@ -4,7 +4,7 @@
 **Owner:** Omkar
 **Project Start:** July 14, 2026
 **Target Deadline:** End of Q3 2026 (September 30, 2026)
-**Report Last Updated:** 2026-09-02
+**Report Last Updated:** 2026-09-03
 
 > **Platform transition:** The Windows Geti/MSIX effort is closed as a completed historical track. Intel Geti Web is now the active platform for all future training, inference, evaluation, and deployment work. Windows artifacts remain preserved and are not discarded.
 
@@ -22,9 +22,9 @@ This project evaluates Intel Geti™ — an end-to-end Vision AI platform — as
 
 The end goal is a live demonstration showing Geti's ability to identify and classify defects (such as voids, delamination, and cracks) directly from CSAM scan images — reducing reliance on manual inspection and establishing a repeatable AI-assisted quality workflow for NovaLake.
 
-## Management Update — 2026-09-02
+## Management Update — 2026-09-03
 
-The local inference workstream now has a functional Tkinter prototype backed by the staged Geti Detection deployment. The GUI loads the verified `MobileNetV2-ATSS` OpenVINO FP16 model (version 7), imports common images and multi-frame TIFFs, reports per-frame progress, runs inference in worker threads, renders detections, and exports review evidence. Single-image wrapper inference and detection rendering have passed smoke validation in the compatible Python 3.9/OpenVINO 2024.5 runtime.
+The local inference workstream now has a functional Tkinter prototype backed by staged Geti deployments. The GUI loads the verified `MobileNetV2-ATSS` OpenVINO FP16 model (version 7), imports common images and multi-frame TIFFs, reports per-frame progress, runs inference in worker threads, renders detections, and exports review evidence. It also loads the package named `Test_Run_Instance_Segmentation`, whose actual model is `AnomalyDetection` with blank task metadata; real inference returned an `Anomaly` score of 78.3% and rendered the mask successfully in the compatible Python 3.9/OpenVINO 2024.5 runtime.
 
 Representative multi-frame TIFF validation, comparison against Web Geti output, and latency/resource measurements are still outstanding. The portable folder and standalone installer remain deferred until those checks pass.
 
@@ -334,4 +334,4 @@ Q3 2026 (Jul – Sep)
 
 ---
 
-*Last updated: 2026-09-02 — Web Geti validation and the NVL DOE comparison are complete. The Geti CSAM Helper includes official upstream source guidance, and the local inference GUI now loads the staged model, reports TIFF import progress, and renders validated single-image detections. Representative multi-TIFF validation, output comparison, fine-tuning, deployment, team training, and product expansion remain active; portable installer packaging is deferred.*
+*Last updated: 2026-09-03 — Web Geti validation and the NVL DOE comparison are complete. The Geti CSAM Helper includes official upstream source guidance, and the local inference GUI now loads staged detection and anomaly deployments, reports TIFF import progress, and renders validated single-image outputs. Representative multi-TIFF validation, output comparison, fine-tuning, deployment, team training, and product expansion remain active; portable installer packaging is deferred.*

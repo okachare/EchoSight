@@ -5,7 +5,7 @@
 **Model family:** RF-DETR-Seg (getitune backend, PyTorch Lightning)  
 **Author:** Omkar | **Project:** GeTi CSAM NVL Defect Detection  
 
-**Current deployment note (2026-09-02):** The local inference prototype uses the staged `MobileNetV2-ATSS` Detection deployment in `Deployment/Test_Run_Detect/`. Single-image wrapper inference is smoke-validated with Python 3.9 and OpenVINO 2024.5; representative multi-frame TIFF parity validation is still in progress. See `Deployment/Geti_CSAM_Inference_GUI/README.md` for operator instructions.
+**Current deployment note (2026-09-03):** The local inference prototype supports the staged `MobileNetV2-ATSS` Detection deployment and the `Test_Run_Instance_Segmentation` package. The latter is technically an `AnomalyDetection` export with blank task metadata; Python 3.9/OpenVINO 2024.5 loading, inference, and mask rendering passed with an `Anomaly` score of 78.3%. See `Deployment/Geti_CSAM_Inference_GUI/README.md` for operator instructions.
 
 ---
 
@@ -572,4 +572,4 @@ Predictions look good but mAP is low                             → Fine-tune (
 
 ---
 
-*Created: 2026-08-12; last updated: 2026-09-02 | Based on Smoke Test Run, NVL Test Run 01 artifacts, Web Geti evidence, and getitune training logs*
+*Created: 2026-08-12; last updated: 2026-09-03 | Based on Smoke Test Run, NVL Test Run 01 artifacts, Web Geti evidence, local deployment validation, and getitune training logs*

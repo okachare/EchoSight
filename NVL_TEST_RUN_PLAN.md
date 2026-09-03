@@ -638,4 +638,4 @@ This phase is active for GUI behavior and output validation. Portable packaging 
 
 ---
 
-*Created: 2026-08-12; last updated: 2026-09-02 — Windows run is historical, Web Geti is active, and local GUI multi-frame validation is in progress.*
+*Created: 2026-08-12; last updated: 2026-09-03 — Windows run is historical, Web Geti is active, and local GUI multi-frame validation is in progress. The anomaly deployment now loads and renders successfully.*

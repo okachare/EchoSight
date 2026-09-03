@@ -25,7 +25,7 @@ Author: Omkar Kachare
 
 ## Setup
 
-Use a Python 3.10 or 3.11 environment for the downloaded Geti SDK package. The exported package currently pins `geti-sdk==2.6.*`, while the main project environment uses Python 3.14.
+Use the compatible Python 3.9 environment for the downloaded legacy Geti SDK package. The launcher uses staged OpenVINO 2024.5 packages; the main project environment uses Python 3.14 and is not compatible with this deployment wrapper.
 
 From this folder:
 

@@ -5,6 +5,8 @@
 **Model family:** RF-DETR-Seg (getitune backend, PyTorch Lightning)  
 **Author:** Omkar | **Project:** GeTi CSAM NVL Defect Detection  
 
+**Current deployment note (2026-09-02):** The local inference prototype uses the staged `MobileNetV2-ATSS` Detection deployment in `Deployment/Test_Run_Detect/`. Single-image wrapper inference is smoke-validated with Python 3.9 and OpenVINO 2024.5; representative multi-frame TIFF parity validation is still in progress. See `Deployment/Geti_CSAM_Inference_GUI/README.md` for operator instructions.
+
 ---
 
 ## Table of Contents
@@ -555,19 +557,19 @@ Predictions look good but mAP is low                             → Fine-tune (
 | Verdict | Pipeline smoke test ✅ — not a usable model |
 | Key finding | "No object" images in val/test split crash getitune. All images must have ≥1 polygon annotation. |
 
-### NVL Test Run 01 (planned 2026-08-16/17)
+### NVL Test Run 01 (completed 2026-08-14/15)
 
-| Item | Planned value |
+| Item | Actual value |
 |---|---|
-| Run folder | `Debug/RunNVL01/` |
-| Model | RF-DETR-Seg-M |
-| Dataset | 30 NVL defect images, all delamination-annotated |
-| Labels | 1 class: `delamination` |
-| Split | 70/20/10 → Training=21, Validation=6, Test=3 |
-| Training time (estimate) | 1–3 hours (CPU) |
-| mAP@0.5 target | >30% |
-| Results | — (to be filled after run) |
+| Run folder | `Debug/NVL_Geti_Run/` |
+| Model | Mask R-CNN Swin-T |
+| Dataset | 20 NVL defect images, all `anomaly`-annotated |
+| Labels | 1 temporary class: `anomaly` |
+| Split | Training=14, Validation=4, Test=2 |
+| Training time | Approximately 15 hours 53 minutes on CPU; 140 epochs |
+| mAP@0.5 | 46.53% held-out test result |
+| Results | Directional historical baseline; OpenVINO FP16 and ONNX FP16 exports preserved |
 
 ---
 
-*Created: 2026-08-12 | Based on Smoke Test Run, Run081226 artifacts and getitune training logs*
+*Created: 2026-08-12; last updated: 2026-09-02 | Based on Smoke Test Run, NVL Test Run 01 artifacts, Web Geti evidence, and getitune training logs*

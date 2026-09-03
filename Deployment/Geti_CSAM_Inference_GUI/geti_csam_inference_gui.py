@@ -169,6 +169,7 @@ class GetiCSAMInferenceGUI(tk.Tk):
         self.operation_status = ""
         self.activity_running = False
         self.output_directory: Path | None = None
+        self.details: tk.Text | None = None
         self._build_ui()
         self.after(100, self._poll_worker)
         self.after(120, self._animate_activity)
@@ -358,20 +359,30 @@ class GetiCSAMInferenceGUI(tk.Tk):
         for path_text in paths:
             path = Path(path_text)
             try:
-                loaded_frames.extend(self._load_frames(path))
+                loaded_frames.extend(
+                    self._load_frames(
+                        path,
+                        on_frame=lambda index, total, source: self.result_queue.put(
+                            ("import_progress", (index, total, source))
+                        ),
+                    )
+                )
             except Exception as error:
                 errors.append(f"{path.name}: {error}")
         self.result_queue.put(("frames", (loaded_frames, errors)))
 
     @staticmethod
-    def _load_frames(path: Path) -> list[LoadedFrame]:
+    def _load_frames(path: Path, on_frame: object | None = None) -> list[LoadedFrame]:
         if path.suffix.lower() not in SUPPORTED_EXTENSIONS:
             raise ValueError("unsupported image format")
         with Image.open(path) as image:
             frames = []
+            total = int(getattr(image, "n_frames", 1))
             for index, frame in enumerate(ImageSequence.Iterator(image), start=1):
                 rgb = np.array(frame.convert("RGB"))
                 frames.append(LoadedFrame(path, index, rgb))
+                if on_frame is not None:
+                    on_frame(index, total, path)
             return frames
 
     def run_current(self) -> None:
@@ -462,6 +473,12 @@ class GetiCSAMInferenceGUI(tk.Tk):
                     self.operation_started_at = None
                     self._stop_activity()
                     self._set_busy(False)
+                elif event == "import_progress":
+                    index, total, source = value
+                    self.operation_status = f"Reading {source.name}, frame {index}/{total}"
+                    self.status_label.configure(text=self.operation_status)
+                    self.progress.stop()
+                    self.progress.configure(mode="determinate", maximum=total, value=index)
                 elif event == "progress":
                     index, total, frame = value
                     self.operation_status = f"Analyzing {frame.source.name}, frame {frame.frame_number} ({index}/{total})"
@@ -492,6 +509,7 @@ class GetiCSAMInferenceGUI(tk.Tk):
                         self.status_label.configure(text=f"Inference complete: {len(self.results)} image(s)")
                     self._stop_activity()
                     self._set_busy(False)
+                    self.worker = None
                 elif event == "error":
                     self.status_label.configure(text="Operation failed")
                     self._stop_activity()
@@ -499,6 +517,13 @@ class GetiCSAMInferenceGUI(tk.Tk):
                     messagebox.showerror("Geti CSAM Inference", value)
         except queue.Empty:
             pass
+        except Exception as error:
+            self.progress.stop()
+            self.progress.configure(mode="determinate")
+            self.status_label.configure(text="GUI update failed")
+            self._stop_activity()
+            self._set_busy(False)
+            messagebox.showerror("Geti CSAM Inference", f"The results panel could not update:\n{error}")
         self.after(100, self._poll_worker)
 
     def _set_busy(self, busy: bool) -> None:
@@ -596,15 +621,16 @@ class GetiCSAMInferenceGUI(tk.Tk):
         result = self.results[self.current_result_index]
         annotated, details = self._render_result(result)
         self._show_image(annotated, self.result_canvas, self.result_hint)
-        self.details.configure(state=NORMAL)
-        self.details.delete("1.0", END)
-        self.details.insert("1.0", details)
-        self.details.configure(state=DISABLED)
+        if self.details is not None:
+            self.details.configure(state=NORMAL)
+            self.details.delete("1.0", END)
+            self.details.insert("1.0", details)
+            self.details.configure(state=DISABLED)
 
     def _highlight_best_result(self) -> None:
         if not self.results:
             return
-        best_index = max(range(len(self.results)), key=self._result_confidence)
+        best_index = max(range(len(self.results)), key=lambda index: self._result_confidence(self.results[index]))
         for index in range(self.result_list.size()):
             self.result_list.itemconfigure(index, background="#b8e3c2" if index == best_index else PANEL, foreground="#10251a" if index == best_index else TEXT)
 

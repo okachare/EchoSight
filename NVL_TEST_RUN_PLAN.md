@@ -597,7 +597,7 @@ This phase is active for GUI behavior and output validation. Portable packaging 
 
 ### Prototype status — 2026-09-02
 
-- GUI workspace created at `Deployment/Geti_CSAM_Inference_GUI/`.
+- GUI workspace created at `Deployment/Geti_CSAM_Inference_GUI/`; staged deployment preserved at `Deployment/Test_Run_Detect/`.
 - First Tkinter prototype includes model discovery, image/TIFF import, progress reporting, Results review, confidence filtering, and export.
 - The downloaded package is a Detection deployment: `MobileNetV2-ATSS OpenVINO FP16`, CPU target, model version 7.
 - The downloaded wrapper is validated with Python 3.9, OpenVINO 2024.5, and `openvino-model-api==0.2.5`; the project Python 3.14/OpenVINO 2026 environment is not compatible with this legacy package.
@@ -605,6 +605,7 @@ This phase is active for GUI behavior and output validation. Portable packaging 
 - GUI review improvements are complete: wheel zoom and drag pan, initial confidence threshold 0.10, pastel-green highest-confidence result highlighting, and selected/all result export.
 - GUI responsiveness improvements are complete: fixed Analyze/Results dimensions, worker-thread model loading/image decoding/inference, top-right activity animation, and explicit current-frame status for Run All.
 - The activity indicator was refined on 2026-09-02 to one spinner glyph; duplicate loading messages were removed, and the progress bar now pulses during the active model call before returning to batch progress.
+- TIFF import now reports the current source frame and total frame count; results-panel updates are guarded and worker references are cleared after successful completion.
 - Activity cleanup now uses an explicit completion event for success, error, and cancellation paths. The complete runtime dependency set remains intentionally preserved; no arbitrary percentage optimization is applied without measuring output parity and latency.
 - Portable folder assembly and standalone installer creation are on the backburner until GUI inference and representative TIFF output validation are complete.
 - The model summary displays verified deployment metadata including version, labels, precision, size, record date, score, optimization, XAI-head status, and status. The downloaded deployment does not contain the original training-image count, so that value is reported as unavailable.
@@ -618,6 +619,7 @@ This phase is active for GUI behavior and output validation. Portable packaging 
 | Smoke Test | 2026-08-12 | 5 (delamination only) | RF-DETR-Seg-M | ~1% | — | N/A | Pipeline smoke test — not a real model |
 | NVL Test Run 01 | 2026-08-14/15 | 20 (anomaly only; 14/4/2 split) | Mask R-CNN Swin-T | 46.53% | Validation mAP@0.5 peaked at 79.21%; test result is lower, but based on only 2 test images | Historical visual review incomplete | Completed after 140 epochs in ~15h 53m; test mAP=22.82%, mAP@0.75=14.85%, mAR@1=15.71%, mAR@100=28.57%; best validation mAP=28.59% at epoch 129; OpenVINO and ONNX exports created |
 | Web Geti initial run | 2026-08-18 | 24/25 | MaskRCNN-EfficientNetB2B Speed, OpenVINO FP16 | 78 displayed test score | Earlier test score 24 on 24 images; project/live evidence displayed 69%/72% | Visible masks | Project `NVL-S-28C`; labels `Delamination` and `Inclusion/Void`; later test used Version 5 and 25 images |
+| Local GUI smoke test | 2026-09-02 | 1 image | MobileNetV2-ATSS, OpenVINO FP16, model version 7 | Not applicable | Six detections rendered from the Geti SDK wrapper | Single-image smoke validation | Python 3.9/OpenVINO 2024.5; representative multi-frame TIFF parity and latency measurements remain open |
 
 ---
 
@@ -633,4 +635,4 @@ This phase is active for GUI behavior and output validation. Portable packaging 
 
 ---
 
-*Created: 2026-08-12 — Plan for NVL Test Run weekend 2026-08-16/17*
+*Created: 2026-08-12; last updated: 2026-09-02 — Windows run is historical, Web Geti is active, and local GUI multi-frame validation is in progress.*

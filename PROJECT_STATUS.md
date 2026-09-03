@@ -47,6 +47,7 @@
 | 2026-09-02 | GUI responsiveness and metadata improvements | Complete | Stabilized Analyze/Results tab dimensions, moved model loading/image decoding/inference work off the UI thread, added a live top-right activity indicator and explicit progress status, and added verified model metadata display. |
 | 2026-09-02 | GUI activity and Run All feedback fix | Complete | Removed duplicate top-right loading text, added a single animated spinner glyph with elapsed time, pulsed progress during active frame inference, and reported the current frame so Run All cannot appear idle. |
 | 2026-09-02 | GUI activity cleanup and runtime packaging clarification | Complete | Added explicit completion cleanup for success/error/cancel paths so the spinner cannot persist after inference; retained the complete dependency set because packaging preservation is not a percentage-based inference optimization. |
+| 2026-09-02 | GUI import-progress and error-state hardening | Complete | Added per-frame TIFF import progress, guarded results-panel updates, and explicit worker cleanup. The staged deployment is preserved under `Deployment/Test_Run_Detect/` for repeatable validation. |
 
 ## Management Update — 2026-08-25
 
@@ -158,9 +159,9 @@ The Windows Geti workflow could not use the organized image folder directly as t
 - getitune **cannot handle `"No object"` annotations in val/test split** for instance segmentation — empty bbox tensor crashes DataLoader collate. Workaround: defect-only datasets until fixed.
 - Images upload directly into Geti project — no need for COCO/VOC folder structure when using Geti GUI.
 - RF-DETR-Seg-M is the confirmed working architecture for this project.
-- The preserved NVL configuration used early-stopping patience 10, despite the earlier planning note listing 15.
-- The downloaded Detection code deployment includes a MobileNetV2-ATSS OpenVINO FP16 model and Geti SDK wrapper. The first GUI prototype targets this package; single-image wrapper inference is validated, and multi-frame TIFF batch validation remains active.
-- The downloaded Detection code deployment includes a MobileNetV2-ATSS OpenVINO FP16 model and Geti SDK wrapper. The compatible Python 3.9/OpenVINO 2024.5 runtime loads it successfully; the current project Python 3.14/OpenVINO 2026 runtime is not compatible with this legacy wrapper.
+- The preserved NVL configuration used early-stopping patience 10.
+- The downloaded Detection code deployment includes a MobileNetV2-ATSS OpenVINO FP16 model, model version 7, and the Geti SDK wrapper under `Deployment/Test_Run_Detect/`. The first GUI prototype targets this package; single-image wrapper inference is validated, and representative multi-frame TIFF batch validation remains active.
+- The compatible Python 3.9/OpenVINO 2024.5 runtime loads the deployment successfully; the current project Python 3.14/OpenVINO 2026 runtime is not compatible with this legacy wrapper.
 - The Geti SDK returns detections through `DetectionResult.objects`; the GUI renderer was corrected to use each object's `xmin`, `ymin`, `xmax`, `ymax`, `score`, and `str_label` fields. A real-model smoke test displayed six detections.
 - The downloaded deployment metadata includes model version, record date, precision, size, score, labels, optimization, XAI-head status, and CPU target, but does not include the original training-image count; the GUI displays that field as unavailable rather than inferring it.
 - Portable packaging now preserves the complete verified inference dependency set rather than aggressively pruning transitive packages; only PyInstaller build tooling is excluded.
@@ -172,9 +173,9 @@ The Windows Geti workflow could not use the organized image folder directly as t
 1. Preserve the completed 20-image Web benchmark and comparison evidence
 2. Fine-tune the NVL models with difficult and representative images
 3. Export the selected model and preserve the complete deployable package and metadata
-4. Iterate on `Deployment/Geti_CSAM_Inference_GUI/` and validate offline OpenVINO inference across representative TIFFs
+4. Validate offline OpenVINO inference across representative multi-frame TIFFs with `Deployment/Geti_CSAM_Inference_GUI/`
 5. Compare GUI outputs against Geti predictions and measure latency, resource use, and model size
-6. Complete GUI validation on representative TIFF inputs and compare outputs with Geti
+6. Record parity results and failure behavior before packaging for WIP use
 7. Deploy the selected model for WIPs after validation
 8. **Use Geti CSAM Helper agent and skills package for team training on Web Geti workflow**
 9. Bring in team support to extend the approach to other products using the product-neutral skills package
@@ -217,4 +218,4 @@ The **Geti CSAM Helper** agent and MCP-based skills package is now operational a
 
 ---
 
-*Last updated: 2026-09-02 — Geti CSAM Helper agent and team training skills package completed and validated; the first local inference GUI prototype now loads the downloaded Geti model and renders validated detections. GUI multi-TIFF validation and output comparison are active; portable installer packaging is deferred.*
+*Last updated: 2026-09-02 — Geti CSAM Helper agent and team training skills package completed and validated; the local inference GUI now reports TIFF import progress, loads the staged Geti deployment, and renders validated single-image detections. Representative multi-TIFF validation and output comparison remain active; portable installer packaging is deferred.*

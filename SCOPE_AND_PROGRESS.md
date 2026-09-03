@@ -278,6 +278,7 @@ Q3 2026 (Jul – Sep)
 | Improve GUI responsiveness and state visibility | ✅ Done | 2026-09-02 | Model loading, image decoding, and inference run in workers with top-right activity status and current-frame progress messages |
 | Add model metadata summary | ✅ Done | 2026-09-02 | Displays version, labels, task, precision, size, record date, score, optimization, XAI-head status, and model status; training-image count is marked unavailable when absent |
 | Polish GUI display and progress behavior | ✅ Done | 2026-09-02 | Clamped long detection labels to image bounds, added smooth determinate progress fill for Run All, and expanded wrapped model metadata display to avoid scrolling |
+| Add model-independent review controls | ✅ Done | 2026-09-03 | Added label visibility toggle, 1%-100% confidence scale, instance-mask overlays, pastel outlined action buttons, and stronger selected-tab emphasis |
 | Build standalone offline installer | ⏸ Backburner | Later | PyInstaller scaffold and portable build script retained; resume after GUI behavior and output validation are complete |
 
 ---

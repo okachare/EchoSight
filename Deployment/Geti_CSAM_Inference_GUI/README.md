@@ -11,7 +11,9 @@ Author: Omkar Kachare
 - Import common images and multi-frame TIFF files.
 - Run one image or all loaded images with a visible progress bar.
 - Review every result in the Results tab.
+- Toggle result labels on or off while retaining boxes or segmentation overlays.
 - Adjust confidence filtering without rerunning inference.
+- Set confidence from 1% to 100% using the percentage scale.
 - Scroll-wheel zoom and click-drag pan in both preview and results viewers.
 - Pastel-green highlighting for the result image with the highest confidence detection.
 - Select one or more result images for export, or export the complete result set.
@@ -22,6 +24,9 @@ Author: Omkar Kachare
 - Run All pulses the progress bar while each frame is actively inside model inference and reports the current frame and elapsed time.
 - Progress uses a determinate, smoothly eased fill from imported/inferred frame count instead of an indeterminate animation.
 - Activity state is explicitly closed on completion, error, or cancellation so the spinner cannot remain running after inference finishes.
+- Detection labels are measured and clamped to the image bounds so long labels remain fully visible.
+- Model information uses wrapped rows sized to display the complete deployment summary without requiring scrolling.
+- Run All, Run Current, and Cancel use distinct pastel colors with outlined controls; the selected Analyze or Results tab is visually emphasized.
 - Detection labels are measured and clamped to the image bounds so long labels remain fully visible.
 - Model information uses wrapped rows sized to display the complete deployment summary without requiring scrolling.
 - Model information panel with model name, version, task, labels, precision, size, record date, score, optimization, XAI-head status, and deployment status.
@@ -63,7 +68,9 @@ python .\geti_csam_inference_gui.py
 
 Select `Deployment/Test_Run_Detect` when using the current download. The app uses the Geti deployment wrapper from the package so its preprocessing and postprocessing remain aligned with the exported model.
 
-The initial confidence threshold is `0.10` because the current model's sample detections are in the 10%-21% range. Raise or lower it in the Results tab to control which detections are shown; changing the threshold does not rerun inference. A model deployment does not always include the original training-image count; the GUI reports that field as unavailable rather than guessing.
+The initial confidence threshold is `10%` because the current model's sample detections are in the 10%-21% range. Raise or lower it in the Results tab to control which detections are shown; changing the threshold does not rerun inference. A model deployment does not always include the original training-image count; the GUI reports that field as unavailable rather than guessing.
+
+The renderer accepts Geti detection and instance-segmentation result structures. Detection boxes remain supported through `objects` or array fields; instance masks are overlaid when the prediction exposes a `masks` array. Labels can be hidden for unobstructed visual review without removing the underlying result data or export details.
 
 The portable package intentionally keeps the complete verified inference dependency set. This is packaging compatibility, not a percentage-based inference optimization. Runtime optimization should be measured against the same model and preprocessing contract before changing it.
 

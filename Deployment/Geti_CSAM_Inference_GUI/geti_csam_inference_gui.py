@@ -183,14 +183,18 @@ class GetiCSAMInferenceGUI(tk.Tk):
         self.style.configure("Muted.TLabel", background=BACKGROUND, foreground=MUTED, font=("Segoe UI", 9))
         self.style.configure("PanelTitle.TLabel", background=PANEL, foreground=TEXT, font=("Segoe UI Semibold", 11))
         self.style.configure("Header.TLabel", background=BACKGROUND, foreground=TEXT, font=("Segoe UI Semibold", 18))
-        self.style.configure("TButton", background=PANEL_LIGHT, foreground=TEXT, borderwidth=0, padding=(12, 8), font=("Segoe UI Semibold", 10))
+        button_options = {"borderwidth": 2, "relief": "solid", "padding": (12, 8), "font": ("Segoe UI Semibold", 10)}
+        self.style.configure("TButton", background=PANEL_LIGHT, foreground=TEXT, **button_options)
         self.style.map("TButton", background=[("pressed", ACCENT), ("active", "#354452"), ("disabled", "#30353b")], foreground=[("pressed", "#081217")])
-        self.style.configure("Accent.TButton", background=PANEL_LIGHT, foreground=TEXT)
-        self.style.map("Accent.TButton", background=[("active", "#52d2df"), ("pressed", ACCENT), ("disabled", "#30353b")], foreground=[("pressed", "#081217")])
-        self.style.configure("Danger.TButton", background=DANGER, foreground="#180b0e")
+        self.style.configure("RunAll.TButton", background="#b8e3c2", foreground="#10251a", bordercolor="#6d9f7a", lightcolor="#d9f0de", darkcolor="#6d9f7a", **button_options)
+        self.style.map("RunAll.TButton", background=[("active", "#ccebd2"), ("pressed", "#8fc99b"), ("disabled", "#68786d")])
+        self.style.configure("RunCurrent.TButton", background="#f2d19b", foreground="#35250d", bordercolor="#b08b45", lightcolor="#fae8c4", darkcolor="#b08b45", **button_options)
+        self.style.map("RunCurrent.TButton", background=[("active", "#f7dfb4"), ("pressed", "#dfb96f"), ("disabled", "#817664")])
+        self.style.configure("Cancel.TButton", background="#efb0b8", foreground="#3b1017", bordercolor="#b96a75", lightcolor="#f8d3d8", darkcolor="#b96a75", **button_options)
+        self.style.map("Cancel.TButton", background=[("active", "#f5c4ca"), ("pressed", "#df8994"), ("disabled", "#80696c")])
         self.style.configure("TNotebook", background=BACKGROUND, borderwidth=0, tabmargins=(0, 0, 0, 0), padding=0)
-        self.style.configure("TNotebook.Tab", background=PANEL_LIGHT, foreground=MUTED, padding=(18, 10), font=("Segoe UI Semibold", 10))
-        self.style.map("TNotebook.Tab", background=[("selected", ACCENT), ("active", "#354452")], foreground=[("selected", "#081217"), ("active", TEXT)])
+        self.style.configure("TNotebook.Tab", background=PANEL_LIGHT, foreground=MUTED, padding=(14, 8), font=("Segoe UI Semibold", 10), borderwidth=2, relief="solid")
+        self.style.map("TNotebook.Tab", background=[("selected", ACCENT), ("active", "#354452")], foreground=[("selected", "#081217"), ("active", TEXT)], padding=[("selected", (22, 13)), ("!selected", (14, 8))])
         self.style.configure("Horizontal.TProgressbar", troughcolor="#0e1115", background=ACCENT, borderwidth=0, thickness=12)
         self.style.configure("Treeview", background=PANEL, fieldbackground=PANEL, foreground=TEXT, rowheight=28, borderwidth=0)
         self.style.configure("Treeview.Heading", background=PANEL_LIGHT, foreground=MUTED, font=("Segoe UI Semibold", 9))
@@ -234,11 +238,11 @@ class GetiCSAMInferenceGUI(tk.Tk):
         self.load_model_button.grid(row=0, column=0, padx=(0, 8), sticky="w")
         self.import_button = ttk.Button(controls, text="Import Images", command=self.import_images)
         self.import_button.grid(row=0, column=1, padx=8, sticky="w")
-        self.run_button = ttk.Button(controls, text="Run All", command=self.run_all)
+        self.run_button = ttk.Button(controls, text="Run All", style="RunAll.TButton", command=self.run_all)
         self.run_button.grid(row=0, column=3, padx=8, sticky="e")
-        self.run_current_button = ttk.Button(controls, text="Run Current", command=self.run_current)
+        self.run_current_button = ttk.Button(controls, text="Run Current", style="RunCurrent.TButton", command=self.run_current)
         self.run_current_button.grid(row=0, column=4, padx=8, sticky="e")
-        self.cancel_button = ttk.Button(controls, text="Cancel", style="Danger.TButton", command=self.cancel_run, state=DISABLED)
+        self.cancel_button = ttk.Button(controls, text="Cancel", style="Cancel.TButton", command=self.cancel_run, state=DISABLED)
         self.cancel_button.grid(row=0, column=5, padx=(8, 0), sticky="e")
         self.model_info = tk.Text(controls, height=7, bg=PANEL, fg=TEXT, relief="flat", wrap="char", font=("Segoe UI", 9), state=DISABLED)
         self.model_info.grid(row=1, column=0, columnspan=6, sticky="ew", pady=(14, 0))
@@ -275,13 +279,15 @@ class GetiCSAMInferenceGUI(tk.Tk):
         toolbar = ttk.Frame(self.results_tab, style="Panel.TFrame", padding=12)
         toolbar.pack(fill=X, padx=8, pady=8)
         ttk.Label(toolbar, text="Confidence", style="PanelTitle.TLabel").pack(side=LEFT, padx=(0, 8))
-        self.threshold = tk.DoubleVar(value=0.1)
-        self.threshold_scale = ttk.Scale(toolbar, from_=0.0, to=1.0, variable=self.threshold, command=lambda _: self._refresh_result())
+        self.threshold = tk.DoubleVar(value=10.0)
+        self.threshold_scale = ttk.Scale(toolbar, from_=1.0, to=100.0, variable=self.threshold, command=self._on_threshold_changed)
         self.threshold_scale.pack(side=LEFT, fill=X, expand=True, padx=(0, 10))
-        self.threshold_value = ttk.Label(toolbar, text="0.10", style="Muted.TLabel")
+        self.threshold_value = ttk.Label(toolbar, text="10%", style="Muted.TLabel")
         self.threshold_value.pack(side=LEFT, padx=(0, 18))
         self.hide_no_object = tk.BooleanVar(value=True)
         ttk.Checkbutton(toolbar, text="Hide No_object", variable=self.hide_no_object, command=self._refresh_result).pack(side=LEFT, padx=8)
+        self.show_labels = tk.BooleanVar(value=True)
+        ttk.Checkbutton(toolbar, text="Show labels", variable=self.show_labels, command=self._refresh_result).pack(side=LEFT, padx=8)
         ttk.Button(toolbar, text="Export Current", command=self.export_current).pack(side=LEFT, padx=8)
         ttk.Button(toolbar, text="Export Selected", command=self.export_selected).pack(side=LEFT, padx=8)
         ttk.Button(toolbar, text="Export All", command=self.export_all).pack(side=LEFT, padx=(8, 0))
@@ -632,7 +638,7 @@ class GetiCSAMInferenceGUI(tk.Tk):
     def _refresh_result(self) -> None:
         if not self.results:
             return
-        self.threshold_value.configure(text=f"{self.threshold.get():.2f}")
+        self.threshold_value.configure(text=f"{self.threshold.get():.0f}%")
         result = self.results[self.current_result_index]
         annotated, details = self._render_result(result)
         self._show_image(annotated, self.result_canvas, self.result_hint)
@@ -652,7 +658,14 @@ class GetiCSAMInferenceGUI(tk.Tk):
     @staticmethod
     def _result_confidence(result: InferenceResult) -> float:
         objects = getattr(result.prediction, "objects", []) if result.prediction is not None else []
-        return max((float(item.score) for item in objects), default=0.0)
+        if objects:
+            return max((float(item.score) for item in objects), default=0.0)
+        scores = np.asarray(getattr(result.prediction, "scores", [])) if result.prediction is not None else np.array([])
+        return float(scores.max()) if scores.size else 0.0
+
+    def _on_threshold_changed(self, _value: str) -> None:
+        self.threshold_value.configure(text=f"{self.threshold.get():.0f}%")
+        self._refresh_result()
 
     def _render_result(self, result: InferenceResult) -> tuple[np.ndarray, str]:
         image = cv2.cvtColor(result.frame.image_rgb.copy(), cv2.COLOR_RGB2BGR)
@@ -660,6 +673,16 @@ class GetiCSAMInferenceGUI(tk.Tk):
             return result.frame.image_rgb, f"Error\n{result.error}"
         prediction = result.prediction
         objects = getattr(prediction, "objects", None)
+        masks = getattr(prediction, "masks", None)
+        if masks is not None:
+            mask_array = np.asarray(masks)
+            if mask_array.ndim == 3:
+                overlay = image.copy()
+                for mask in mask_array:
+                    binary_mask = np.asarray(mask > 0, dtype=np.uint8)
+                    if binary_mask.shape == image.shape[:2]:
+                        overlay[binary_mask.astype(bool)] = (80, 170, 220)
+                image = cv2.addWeighted(image, 0.65, overlay, 0.35, 0)
         if objects is not None:
             detections = [
                 (
@@ -682,7 +705,7 @@ class GetiCSAMInferenceGUI(tk.Tk):
         visible = 0
         for box, score, label in detections:
             score = float(score)
-            if score < self.threshold.get() or (self.hide_no_object.get() and str(label).lower() == "no_object"):
+            if score < self.threshold.get() / 100.0 or (self.hide_no_object.get() and str(label).lower() == "no_object"):
                 continue
             visible += 1
             x_min, y_min, x_max, y_max = [int(value) for value in box]
@@ -700,8 +723,9 @@ class GetiCSAMInferenceGUI(tk.Tk):
             label_y = max(0, label_y)
             text_x = label_x + 4
             text_y = label_y + text_height + 4
-            cv2.rectangle(image, (label_x, label_y), (label_x + label_width, label_y + label_height), (20, 24, 29), -1)
-            cv2.putText(image, text, (text_x, text_y), font, font_scale, (220, 245, 248), thickness, cv2.LINE_AA)
+            if getattr(self, "show_labels", None) is None or self.show_labels.get():
+                cv2.rectangle(image, (label_x, label_y), (label_x + label_width, label_y + label_height), (20, 24, 29), -1)
+                cv2.putText(image, text, (text_x, text_y), font, font_scale, (220, 245, 248), thickness, cv2.LINE_AA)
             lines.append(f"{visible}. {label}: {score:.1%}\n   box: ({x_min}, {y_min}) - ({x_max}, {y_max})")
         lines[2] = f"Detections shown: {visible}"
         return cv2.cvtColor(image, cv2.COLOR_BGR2RGB), "\n".join(lines)
@@ -747,7 +771,7 @@ class GetiCSAMInferenceGUI(tk.Tk):
             writer = csv.DictWriter(handle, fieldnames=rows[0].keys())
             writer.writeheader()
             writer.writerows(rows)
-        session = {"model": str(self.deployment.model_dir) if self.deployment else None, "device": self.deployment.device if self.deployment else None, "threshold": self.threshold.get(), "results": len(results), "created": datetime.now().isoformat()}
+        session = {"model": str(self.deployment.model_dir) if self.deployment else None, "device": self.deployment.device if self.deployment else None, "threshold_percent": self.threshold.get(), "show_labels": self.show_labels.get(), "results": len(results), "created": datetime.now().isoformat()}
         (run_folder / "session.json").write_text(json.dumps(session, indent=2), encoding="utf-8")
         messagebox.showinfo("Export complete", f"Saved results to:\n{run_folder}")
 

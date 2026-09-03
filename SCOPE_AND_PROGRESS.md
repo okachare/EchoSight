@@ -70,6 +70,9 @@ A successful demo will show:
 | 8. Geti CSAM Helper Agent & Skills Package | Build product-neutral agent, MCP server, and three shareable skills for team training and troubleshooting | ✅ Complete |
 | 9. Geti Trainer Skill Implementation | Detailed 16-step Web Geti operator training with structured 19-field intake form and 9-issue recovery playbook | ✅ Complete |
 | 10. Upstream Geti Source Integration | Add official repository literature, source navigation, release-aware debugging guidance, and MCP source links | ✅ Complete |
+| 11. Local Inference GUI Deployment | Load exported Geti model, process multi-frame TIFFs, run offline inference, display results, and validate deployment behavior | 🔄 In progress |
+| 12. First GUI Prototype | Implement dark desktop GUI, model discovery, TIFF/image import, progress reporting, result review, and export | ✅ Prototype complete; validation continuing |
+| 13. GUI Responsiveness and Metadata | Stabilize tab layout, move blocking work to workers, add activity feedback, and display model metadata | ✅ Complete |
 | 4e. NVL Test Run — Web fine-tuning | Improve the selected finalist with additional data | 📅 Planned for Q4 |
 | 5. Windows debugging & analysis | Review Windows logs, diagnose issues, improve dataset | ✅ Closed |
 | 6. Web results analysis | Validate Web scores and prediction quality; prepare demo materials | ✅ Complete for the comparison deck |
@@ -114,6 +117,7 @@ Q3 2026 (Jul – Sep)
 ├── Sep 2, 2026 ──── Integrated the official Geti GitHub repository as a source-reference skill:
 │                    • Added literature/source navigation, release-aware debugging, and MCP source links
 │                    • Updated the MCP server import for the declared MCP 2.x dependency
+│                    • Added local inference GUI deployment as the next planned workstream
 ├── Sep 2026 ─────── Q4 follow-up: fine-tuning, deployment validation, and demo preparation
 │
 └── Sep 30, 2026 ── DEMO DEADLINE (next-quarter follow-up activities continue beyond the DOE closeout)
@@ -210,6 +214,19 @@ Q3 2026 (Jul – Sep)
 | Accept/correct/reject finalist predictions | 📅 Planned | Q4 2026 | Owner: Omkar; use the predict-review-correct loop to expand annotations |
 | Retrain and compare finalist results | 📅 Planned | Q4 2026 | Owner: Omkar; validate improvement on new data and the locked benchmark |
 
+### Phase 4f — Local Inference GUI Deployment
+**Status:** 📅 Planned for Q4
+
+| Task | Status | Date | Notes |
+|---|---|---|---|
+| Select and export the finalist | 📅 Planned | Q4 2026 | Preserve the complete OpenVINO model package (`.xml` and `.bin`) plus labels, task type, precision, and preprocessing details |
+| Implement model-loading inference service | 📅 Planned | Q4 2026 | Use OpenVINO Runtime; keep model loading and inference separate from the GUI presentation layer |
+| Add multi-frame TIFF input | 📅 Planned | Q4 2026 | Decode the source TIFF, expose frame navigation, preserve frame identity, and avoid modifying the original source |
+| Reproduce Geti preprocessing and postprocessing | 📅 Planned | Q4 2026 | Match image mode, scaling, resizing/tiling, confidence filtering, label mapping, and segmentation mask rendering |
+| Build GUI result review | 📅 Planned | Q4 2026 | Display the source frame, boxes or masks, labels, confidence, processing time, and exportable evidence |
+| Validate against Geti | 📅 Planned | Q4 2026 | Compare representative frames and record agreement, misses, false positives, latency, resource use, and model size |
+| Package for WIP deployment | 📅 Planned | Q4 2026 | Create a repeatable Windows deployment package only after offline inference validation passes |
+
 ### Phase 5 — Windows Debugging & Analysis
 **Status:** ✅ Closed
 **Duration:** 2026-08-11 – 2026-08-12
@@ -237,6 +254,23 @@ Q3 2026 (Jul – Sep)
 | Run live inference on new NovaLake scans | 📅 Planned | Q4 2026 | Owner: Omkar; deploy the selected model for WIPs and validate inference behavior |
 | Present results to management | 📅 Planned | Q4 2026 | Owner: Omkar; management deck is ready, with live demo to follow deployment validation |
 
+### Phase 8 — Local Inference GUI Prototype
+**Status:** 🔄 In progress
+
+| Task | Status | Date | Notes |
+|---|---|---|---|
+| Create dedicated GUI workspace | ✅ Done | 2026-09-02 | Created `Deployment/Geti_CSAM_Inference_GUI/` for all GUI development activities |
+| Implement dark themed desktop shell | ✅ Done | 2026-09-02 | Tkinter prototype with contrasting controls and Analyze/Results tabs |
+| Add model-folder discovery | ✅ Done | 2026-09-02 | Finds the deployment model folder containing `model.xml` and `config.json` |
+| Add image and multi-frame TIFF import | ✅ Done | 2026-09-02 | Loads supported image formats and keeps TIFF frames addressable in memory |
+| Add background inference and progress bar | ✅ Done | 2026-09-02 | Runs one/current or all frames without blocking the UI; single-image runtime wrapper validation is complete |
+| Add results review and export | ✅ Done | 2026-09-02 | Per-frame navigation, confidence filtering, overlays, annotated images, CSV, and session JSON |
+| Validate downloaded Geti wrapper on compatible environment | ✅ Done | 2026-09-02 | Python 3.9 with OpenVINO 2024.5 and `openvino-model-api` loaded the model; model metadata reports Detection, CPU, FP16, Version 7 |
+| Validate prediction rendering | ✅ Done | 2026-09-02 | Corrected the renderer to use `DetectionResult.objects`; real-model smoke test displayed six detections and confidence values |
+| Improve GUI responsiveness and state visibility | ✅ Done | 2026-09-02 | Model loading, image decoding, and inference run in workers with top-right activity status and current-frame progress messages |
+| Add model metadata summary | ✅ Done | 2026-09-02 | Displays version, labels, task, precision, size, record date, score, optimization, XAI-head status, and model status; training-image count is marked unavailable when absent |
+| Build standalone offline installer | ⏸ Backburner | Later | PyInstaller scaffold and portable build script retained; resume after GUI behavior and output validation are complete |
+
 ---
 
 ## Challenges & Decisions
@@ -247,6 +281,7 @@ Q3 2026 (Jul – Sep)
 | 1 | Expand the Web taxonomy beyond `Delamination` and `Inclusion/Void` as needed | Defines annotation scope for additional products and defect types |
 | 2 | Select the final WIP deployment host and export precision | Determines OpenVINO packaging and runtime validation |
 | 3 | Establish the clean-image training workflow | Controls false-positive evaluation and anomaly-screening quality |
+| 4 | Define and validate the local GUI inference contract | Controls compatibility between exported Geti models, multi-frame TIFF input, and displayed results |
 
 ### Challenges Faced
 | # | Date | Challenge | Resolution |
@@ -283,10 +318,10 @@ Q3 2026 (Jul – Sep)
 | **Tool** | Intel Geti™ (open-source, Apache 2.0) |
 | **Hardware** | PVA SAM501 CSAM tool |
 | **Current Phase** | Web validation and DOE comparison complete; technical deck ready for management |
-| **Next Milestone** | Q4 fine-tuning, deployment for WIPs, team training, and product expansion |
+| **Next Milestone** | GUI multi-TIFF validation, output comparison, fine-tuning, deployment validation, team training, and product expansion |
 | **Demo Target** | Q4 management demonstration after model tuning and deployment validation |
 | **Overall Status** | ✅ Web feasibility demonstrated; Q4 engineering follow-up remains |
 
 ---
 
-*Last updated: 2026-09-02 — Web Geti validation and the NVL DOE comparison are complete. The Geti CSAM Helper now includes official upstream source guidance for literature and release-aware debugging; fine-tuning, deployment, team training, and product expansion continue in Q4.*
+*Last updated: 2026-09-02 — Web Geti validation and the NVL DOE comparison are complete. The Geti CSAM Helper includes official upstream source guidance, and the first local inference GUI prototype loads the downloaded model and renders validated detections. GUI multi-TIFF validation, output comparison, fine-tuning, deployment, team training, and product expansion are active; portable installer packaging is deferred.*

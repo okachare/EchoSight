@@ -18,6 +18,7 @@
 | **4c — Web initial run** | Train, test, and infer in Web Geti | Baseline Web model and first live predictions |
 | **4d — Web task comparison** | Compare instance segmentation, bounding-box detection, and anomaly detection on the same 20-image set | Select the best task/model combination for NVL |
 | **4e — Web fine-tuning** | Improve the selected model with additional data | Demo-ready accuracy and deployment path |
+| **4f — Local GUI deployment** | Load exported model → open multi-frame TIFF → run offline inference | Repeatable WIP inference with visible and exportable results |
 
 ---
 
@@ -558,6 +559,55 @@ If mAP@0.5 is below ~30% after the first run:
 - Save each comparison or fine-tuning run under `Debug/NVL_Geti_WB_Run/`
 - Record mAP@0.5 and visual score per run in the Run Log table below
 - Stop iterating when mAP@0.5 >50% and visual inspection passes consistently
+
+## Phase 4f — Local Inference GUI Deployment
+
+This phase is active for GUI behavior and output validation. Portable packaging and the standalone installer are deferred until the inference workflow is stable.
+
+### Step 13 — Export and preserve the deployable model
+
+- Export the selected Geti model in the chosen OpenVINO precision, initially FP16 for Intel hardware experiments.
+- Preserve the complete model package, including `.xml`, `.bin`, label mapping, task type, model/version, precision, and preprocessing notes.
+- Do not treat a checkpoint alone as the deployment package.
+
+### Step 14 — Implement TIFF ingestion and inference
+
+- Open the original `.tif` or `.tiff` without overwriting it.
+- Decode multi-frame TIFFs into addressable frames while retaining source filename and frame number.
+- Match the training input mode, bit depth, scaling, resizing, and tiling behavior.
+- Run the OpenVINO model on each frame and apply the correct task-specific postprocessing: classification labels, detection boxes, or instance-segmentation masks.
+
+### Step 15 — Build and validate the GUI
+
+- Provide model selection, TIFF selection, frame navigation, confidence controls, and result export.
+- Display the original frame with overlays and show label, confidence, frame number, and inference time.
+- Compare the same frames in the GUI and Geti Web, recording agreement, missed defects, false positives, latency, resource use, and model size.
+- Package for Windows only after representative positive, negative, and multi-frame tests pass. **Deferred.**
+
+### Deployment acceptance checklist
+
+- [ ] Complete OpenVINO model package and metadata preserved.
+- [ ] Multi-frame TIFF opens and frame count matches the source.
+- [ ] GUI preprocessing matches the Geti training/inference contract.
+- [ ] Labels and confidence values map correctly.
+- [ ] Segmentation masks or detection boxes render at the correct coordinates.
+- [ ] Results can be saved with source/frame traceability.
+- [ ] GUI output agrees with Geti on representative validation frames.
+- [ ] Latency, memory, model size, and failure behavior are recorded.
+
+### Prototype status — 2026-09-02
+
+- GUI workspace created at `Deployment/Geti_CSAM_Inference_GUI/`.
+- First Tkinter prototype includes model discovery, image/TIFF import, progress reporting, Results review, confidence filtering, and export.
+- The downloaded package is a Detection deployment: `MobileNetV2-ATSS OpenVINO FP16`, CPU target, model version 7.
+- The downloaded wrapper is validated with Python 3.9, OpenVINO 2024.5, and `openvino-model-api==0.2.5`; the project Python 3.14/OpenVINO 2026 environment is not compatible with this legacy package.
+- Prediction rendering was corrected on 2026-09-02 to use the Geti SDK `DetectionResult.objects` schema; a real model smoke test now displays six detections with confidence values and bounding boxes.
+- GUI review improvements are complete: wheel zoom and drag pan, initial confidence threshold 0.10, pastel-green highest-confidence result highlighting, and selected/all result export.
+- GUI responsiveness improvements are complete: fixed Analyze/Results dimensions, worker-thread model loading/image decoding/inference, top-right activity animation, and explicit current-frame status for Run All.
+- The activity indicator was refined on 2026-09-02 to one spinner glyph; duplicate loading messages were removed, and the progress bar now pulses during the active model call before returning to batch progress.
+- Activity cleanup now uses an explicit completion event for success, error, and cancellation paths. The complete runtime dependency set remains intentionally preserved; no arbitrary percentage optimization is applied without measuring output parity and latency.
+- Portable folder assembly and standalone installer creation are on the backburner until GUI inference and representative TIFF output validation are complete.
+- The model summary displays verified deployment metadata including version, labels, precision, size, record date, score, optimization, XAI-head status, and status. The downloaded deployment does not contain the original training-image count, so that value is reported as unavailable.
 
 ---
 

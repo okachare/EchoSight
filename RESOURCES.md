@@ -10,6 +10,15 @@
 | Installation Guide | https://docs.geti.intel.com/docs/user-guide/getting-started/installation/installation-guide |
 | getitune Library Docs | https://docs.geti.intel.com/docs/user-guide/library/get-started/intro |
 
+## Project Deployment GUI
+
+| Resource | Location |
+|---|---|
+| Inference GUI source and launcher | `Deployment/Geti_CSAM_Inference_GUI/` |
+| GUI instructions | `Deployment/Geti_CSAM_Inference_GUI/README.md` |
+| Windows double-click launcher | `Deployment/Geti_CSAM_Inference_GUI/Launch_Geti_CSAM_GUI.bat` |
+| Downloaded Detection deployment | `Deployment/Test_Run_Detect/` |
+
 ---
 
 ## Installation Options (Windows)

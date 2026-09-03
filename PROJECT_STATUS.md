@@ -59,6 +59,7 @@
 | 2026-09-03 | Soft-touch UI housekeeping | Complete | Replaced rectangular action controls with a reusable rounded-button surface, preserved pastel action variants and disabled states, and confirmed no stale `Geti_CSAM_Inf` branding remains. |
 | 2026-09-03 | EchoSight filename migration | Complete | Renamed the GUI package, Python entry point, launcher, and PyInstaller specs to EchoSight and updated active references across scripts and documentation. |
 | 2026-09-03 | EchoSight launch initialization fix | Complete | Fixed `RoundedButton` widget initialization by using the predefined background color constant instead of querying parent widget, which failed on `ttk.Frame` widgets that don't support tk Canvas attributes. EchoSight GUI now launches without errors. |
+| 2026-09-03 | Button text contrast improvement | Complete | Brightened foreground colors across all button variants (default, run_all, run_current, cancel, apply, preprocess) to ensure readable text on pastel backgrounds. Load Model, Import Images, Export, Next, Previous, Close, and Reset buttons now have optimal contrast. |
 
 ## Management Update — 2026-08-25
 

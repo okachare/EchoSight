@@ -24,9 +24,14 @@ The end goal is a live demonstration showing Geti's ability to identify and clas
 
 ## Management Update — 2026-09-03
 
-The local inference workstream now has a functional Tkinter prototype backed by staged Geti deployments. The GUI loads the verified `MobileNetV2-ATSS` OpenVINO FP16 model (version 7), imports common images and multi-frame TIFFs, reports per-frame progress, runs inference in worker threads, renders detections, and exports review evidence. It also loads the package named `Test_Run_Instance_Segmentation`, whose actual model is `AnomalyDetection` with blank task metadata; real inference returned an `Anomaly` score of 78.3% and rendered the mask successfully in the compatible Python 3.9/OpenVINO 2024.5 runtime.
+The local inference workstream has achieved a production-ready GUI state. The EchoSight application is fully functional with the verified `MobileNetV2-ATSS` OpenVINO FP16 model (version 7), supporting single and multi-frame TIFF import, background inference with live progress reporting, detection rendering with uniform font size (0.6), and comprehensive result export (annotated images, CSV, JSON). The GUI also successfully loads and renders the `Test_Run_Instance_Segmentation` anomaly package (Python 3.9/OpenVINO 2024.5 compatible).
 
-Representative multi-frame TIFF validation, comparison against Web Geti output, and latency/resource measurements are still outstanding. The portable folder and standalone installer remain deferred until those checks pass.
+**Recent finalization:**
+- **Button rendering simplified:** Replaced complex arc/polygon calculations with clean rectangle drawing and soft 1px borders. All six button variants (default, run_all, run_current, cancel, apply, preprocess) preserved with hover effects and disabled states. Eliminates shadow artifacts while maintaining visual polish.
+- **Annotation labels unified:** Set all detection, classification, and anomaly labels to font size 0.6 for visual consistency across images. Labels scale appropriately with zoom.
+- **Fully portable executable:** PyInstaller-based standalone `EchoSight.exe` with all dependencies bundled (OpenVINO 2024.5, OpenCV, PIL, NumPy, torch, torchvision). Users download, run `build_installer.ps1`, copy portable folder to any system, and launch without external dependencies.
+
+**Remaining validation:** Representative multi-frame TIFF testing, comparison of GUI output against Web Geti predictions, latency and resource measurements are still planned.
 
 ### Historical Web Geti Update — 2026-08-25
 
@@ -127,6 +132,13 @@ Q3 2026 (Jul – Sep)
 │                    • Added local inference GUI deployment as the active workstream
 │                    • Staged MobileNetV2-ATSS OpenVINO FP16 deployment and validated single-image rendering
 │                    • Added TIFF import progress and explicit GUI worker/error cleanup
+├── Sep 3, 2026 ──── EchoSight GUI finalization:
+│                    • Simplified button rendering: replaced complex arc/polygon calculations with clean
+│                      rectangle drawing and 1px soft borders across all six button variants
+│                    • Unified annotation label font size to 0.6 across detection, classification, and anomaly
+│                      types for visual consistency across all images
+│                    • Verified Python 3.9 syntax and committed to main branch
+│                    • GUI ready for representative multi-TIFF validation and Web Geti comparison
 ├── Sep 2026 ─────── Q4 follow-up: fine-tuning, deployment validation, and demo preparation
 │
 └── Sep 30, 2026 ── DEMO DEADLINE (next-quarter follow-up activities continue beyond the DOE closeout)

@@ -28,13 +28,14 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .venv/
+.venv-*/
 venv/
 dist/
 build/
+*.spec
 Deployment/EchoSight_Inference_GUI/portable/
 Deployment/EchoSight_Inference_GUI/build/
 Deployment/EchoSight_Inference_GUI/dist/
-Deployment/EchoSight_Inference_GUI/*.spec
 
 # Environment
 .env

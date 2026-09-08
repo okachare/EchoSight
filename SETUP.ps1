@@ -1,41 +1,23 @@
 #!/usr/bin/env powershell
-<#
-.SYNOPSIS
-EchoSight Setup - Foolproof One-Command Setup
-
-.DESCRIPTION
-Handles Python checking, virtual environment, and dependencies.
-Window stays open so you can see any errors!
-
-.EXAMPLE
-.\SETUP.ps1
-#>
+# EchoSight Setup - Clean, Simple, Foolproof
 
 param()
 
 $ErrorActionPreference = "Continue"
-$WarningPreference = "SilentlyContinue"
 
-# ============================================================
-# Keep window open on error - trap all exceptions
-# ============================================================
-function Exit-With-Pause {
-    param([int]$Code = 1)
+function Exit-Pause {
+    param([int]$Code = 0)
     Write-Host ""
-    Read-Host "Press Enter to close this window"
+    Read-Host "Press Enter to close"
     exit $Code
 }
 
 trap {
     Write-Host ""
     Write-Host "ERROR: $($_.Exception.Message)" -ForegroundColor Red
-    Write-Host ""
-    Exit-With-Pause 1
+    Exit-Pause 1
 }
 
-# ============================================================
-# Setup Starts Here
-# ============================================================
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $Root
 
@@ -45,187 +27,112 @@ Write-Host "EchoSight Setup" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
-# ============================================================
-# STEP 1: Check Python 3.9
-# ============================================================
+# Step 1: Check Python
 Write-Host "[1/4] Checking Python 3.9..." -ForegroundColor Yellow
-Write-Host ""
 
 $Python = $null
 
-# Try python command first
 try {
-    $Version = & python --version 2>&1
-    if ($Version -match "3\.9") {
+    $Ver = & python --version 2>&1
+    if ($Ver -match "3\.9") {
         $Python = "python"
-        Write-Host "✓ Found: $Version" -ForegroundColor Green
-    } else {
-        Write-Host "⚠ Found Python but not 3.9: $Version" -ForegroundColor Yellow
+        Write-Host "  Found: $Ver" -ForegroundColor Green
     }
 } catch {}
 
-# If not found, try common locations
 if (-not $Python) {
-    $Paths = @(
-        "C:\Python39\python.exe",
-        "$env:LOCALAPPDATA\Programs\Python\Python39\python.exe"
-    )
-    
-    foreach ($Path in $Paths) {
-        if (Test-Path $Path) {
-            try {
-                $Version = & $Path --version 2>&1
-                if ($Version -match "3\.9") {
-                    $Python = $Path
-                    Write-Host "✓ Found: $Path" -ForegroundColor Green
-                    break
-                }
-            } catch {}
+    $Path = "C:\Python39\python.exe"
+    if (Test-Path $Path) {
+        $Ver = & $Path --version 2>&1
+        if ($Ver -match "3\.9") {
+            $Python = $Path
+            Write-Host "  Found: $Path" -ForegroundColor Green
         }
     }
 }
 
-# If Python not found, show error and exit
 if (-not $Python) {
-    Write-Host ""
-    Write-Host "✗ Python 3.9 NOT FOUND" -ForegroundColor Red
-    Write-Host ""
-    Write-Host "REQUIRED: Python 3.9 (NOT 3.10 or 3.11+)" -ForegroundColor Yellow
-    Write-Host ""
-    Write-Host "SOLUTION:" -ForegroundColor Yellow
-    Write-Host "1. Download Python 3.9.13:" -ForegroundColor White
-    Write-Host "   https://www.python.org/downloads/release/python-3913/" -ForegroundColor Cyan
-    Write-Host ""
-    Write-Host "2. Run installer" -ForegroundColor White
-    Write-Host "3. IMPORTANT: Check 'Add Python 3.9 to PATH'" -ForegroundColor Green
-    Write-Host "4. Restart PowerShell" -ForegroundColor White
-    Write-Host "5. Run setup again: .\SETUP.ps1" -ForegroundColor White
-    Write-Host ""
-    Exit-With-Pause 1
-}
-
-Write-Host ""
-
-# ============================================================
-# STEP 2: Create Virtual Environment
-# ============================================================
-Write-Host "[2/4] Setting up environment..." -ForegroundColor Yellow
-Write-Host ""
-
-$VenvPath = "$Root\.venv"
-
-if (-not (Test-Path $VenvPath)) {
-    Write-Host "  Creating virtual environment..." -ForegroundColor White
-    & $Python -m venv $VenvPath 2>&1 | Out-Null
-    
-    if ($LASTEXITCODE -ne 0 -or -not (Test-Path $VenvPath)) {
-        Write-Host "✗ Failed to create virtual environment" -ForegroundColor Red
-        Exit-With-Pause 1
+    $Path = "$env:LOCALAPPDATA\Programs\Python\Python39\python.exe"
+    if (Test-Path $Path) {
+        $Ver = & $Path --version 2>&1
+        if ($Ver -match "3\.9") {
+            $Python = $Path
+            Write-Host "  Found: $Path" -ForegroundColor Green
+        }
     }
 }
 
-Write-Host "✓ Environment ready" -ForegroundColor Green
+if (-not $Python) {
+    Write-Host ""
+    Write-Host "ERROR: Python 3.9 not found" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "Download Python 3.9.13:" -ForegroundColor Yellow
+    Write-Host "https://www.python.org/downloads/release/python-3913/" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "During install: CHECK 'Add Python 3.9 to PATH'" -ForegroundColor Yellow
+    Write-Host ""
+    Exit-Pause 1
+}
+
 Write-Host ""
 
-# ============================================================
-# STEP 3: Install Dependencies
-# ============================================================
+# Step 2: Virtual environment
+Write-Host "[2/4] Setting up environment..." -ForegroundColor Yellow
+
+$Venv = "$Root\.venv"
+
+if (-not (Test-Path $Venv)) {
+    Write-Host "  Creating virtual environment..." -ForegroundColor Gray
+    & $Python -m venv $Venv 2>&1 | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "ERROR: Failed to create venv" -ForegroundColor Red
+        Exit-Pause 1
+    }
+}
+
+Write-Host "  Environment ready" -ForegroundColor Green
+Write-Host ""
+
+# Step 3: Install dependencies
 Write-Host "[3/4] Installing dependencies..." -ForegroundColor Yellow
-Write-Host ""
 
-$VenvActivate = "$VenvPath\Scripts\activate.ps1"
+$Activate = "$Venv\Scripts\activate.ps1"
+& $Activate
 
-Write-Host "  Activating environment..." -ForegroundColor White
-& $VenvActivate
-
-Write-Host "  Installing pip, setuptools, wheel..." -ForegroundColor White
-python -m pip install -q --upgrade pip setuptools wheel 2>$null
-
-Write-Host "  Installing EchoSight and dependencies..." -ForegroundColor White
+Write-Host "  Installing packages..." -ForegroundColor Gray
+python -m pip install -q --upgrade pip 2>$null
 python -m pip install -q -e $Root 2>$null
 
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "⚠ Some dependencies may have issues (continuing)" -ForegroundColor Yellow
-} else {
-    Write-Host "✓ Dependencies installed" -ForegroundColor Green
-}
-
+Write-Host "  Dependencies installed" -ForegroundColor Green
 Write-Host ""
 
-# ============================================================
-# STEP 4: Create Launcher
-# ============================================================
+# Step 4: Create launcher
 Write-Host "[4/4] Creating launcher..." -ForegroundColor Yellow
-Write-Host ""
 
-$LauncherContent = @"
-@echo off
-REM EchoSight Launcher - Generated by SETUP.ps1
+$Bat = "$Root\Launch_EchoSight.bat"
 
-setlocal enabledelayedexpansion
-set "SCRIPT_DIR=%~dp0"
+$Launcher = "@echo off`nsetlocal enabledelayedexpansion`nset `"SCRIPT_DIR=%~dp0`"`ncall `"!SCRIPT_DIR!.venv\Scripts\activate.bat`"`nif errorlevel 1 (`n    echo ERROR: Failed to activate`n    pause`n    exit /b 1`n)`npython -c `"from echosight.EchoSight import main; main()`" %*`ndeactivate 2>nul"
 
-REM Activate virtual environment
-call "!SCRIPT_DIR!.venv\Scripts\activate.bat"
-if errorlevel 1 (
-    echo.
-    echo ERROR: Failed to activate virtual environment
-    echo Run SETUP.ps1 again
-    echo.
-    pause
-    exit /b 1
-)
+$Launcher | Set-Content $Bat -Encoding ASCII
 
-REM Run EchoSight
-python -c "from echosight.EchoSight import main; main()" %*
-set EXIT_CODE=%errorlevel%
-
-REM Deactivate and exit
-deactivate 2>nul
-exit /b %EXIT_CODE%
-"@
-
-$LauncherPath = "$Root\Launch_EchoSight.bat"
-Set-Content -Path $LauncherPath -Value $LauncherContent -Encoding ASCII -Force
-
-if (-not (Test-Path $LauncherPath)) {
-    Write-Host "✗ Failed to create launcher" -ForegroundColor Red
-    Exit-With-Pause 1
+if (-not (Test-Path $Bat)) {
+    Write-Host "ERROR: Failed to create launcher" -ForegroundColor Red
+    Exit-Pause 1
 }
 
-Write-Host "✓ Launcher created: Launch_EchoSight.bat" -ForegroundColor Green
+Write-Host "  Launcher created" -ForegroundColor Green
 Write-Host ""
 
-# Deactivate venv for cleanup
 deactivate 2>$null
 
-# ============================================================
-# Complete
-# ============================================================
+# Done
 Write-Host "========================================" -ForegroundColor Green
 Write-Host "Setup Complete!" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Green
 Write-Host ""
-
-Write-Host "NEXT STEPS:" -ForegroundColor Green
-Write-Host ""
+Write-Host "Next:" -ForegroundColor Green
 Write-Host "1. Double-click: Launch_EchoSight.bat" -ForegroundColor White
-Write-Host "   (in this folder)" -ForegroundColor Gray
-Write-Host ""
-Write-Host "2. Wait for GUI to appear" -ForegroundColor White
-Write-Host "   (first run: 1-2 minutes)" -ForegroundColor Gray
-Write-Host ""
-Write-Host "3. Load model and run inference!" -ForegroundColor White
+Write-Host "2. Wait for GUI (first run: 1-2 min)" -ForegroundColor White
 Write-Host ""
 
-Write-Host "FILES CREATED:" -ForegroundColor Green
-Write-Host "  .venv/                (virtual environment)" -ForegroundColor White
-Write-Host "  Launch_EchoSight.bat  (launcher - DOUBLE-CLICK THIS)" -ForegroundColor White
-Write-Host ""
-
-Write-Host "TROUBLESHOOTING:" -ForegroundColor Yellow
-Write-Host "  Launcher fails?  Run: .\DIAGNOSE.ps1" -ForegroundColor White
-Write-Host "  Need help?       See: MANUAL_SETUP.md" -ForegroundColor White
-Write-Host ""
-
-Exit-With-Pause 0
+Exit-Pause 0

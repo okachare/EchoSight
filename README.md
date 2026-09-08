@@ -4,6 +4,8 @@
 
 A standalone, portable GUI application for running Intel Geti OpenVINO model deployments on images and multi-frame TIFF files. Features real-time inference, confidence filtering, image preprocessing, and comprehensive results navigation.
 
+**Primary author**: Omkar Kachare, 11943102
+
 ![Platform: Windows](https://img.shields.io/badge/platform-Windows-blue)
 ![Python 3.9+](https://img.shields.io/badge/python-3.9+-green)
 ![License: MIT](https://img.shields.io/badge/license-MIT-blue)

@@ -1,3 +1,13 @@
+"""EchoSight - Model-agnostic image inference and inspection GUI.
+
+A standalone, portable application for running Intel Geti OpenVINO model deployments
+on images and multi-frame TIFF files with real-time inference and preprocessing.
+
+Primary author: Omkar Kachare, 11943102
+Version: 1.0.0
+License: MIT
+"""
+
 from __future__ import annotations
 
 import csv

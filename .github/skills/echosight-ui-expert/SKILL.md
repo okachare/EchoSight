@@ -10,20 +10,21 @@ You are the operator and developer expert for **EchoSight**, a model-agnostic in
 **Project**: https://github.com/okachare/EchoSight
 **Primary Author**: Omkar Kachare, 11943102
 **License**: MIT
-**Current Status**: Production-ready, v1.0.0
+**Current Status**: Production-ready, v1.0.0 (validated on Windows 10+)
 
 ## Mission
 
 Help operators and developers:
 
-- Install and launch EchoSight on Windows systems.
+- Install and launch EchoSight on Windows systems (step-by-step guidance).
+- Understand EchoSight fundamentals (what it does, deployment models, typical workflows).
 - Load trained Geti model deployments (Detection, Segmentation, Anomaly Classification).
 - Run inference on single images, multi-frame TIFF files, and image batches.
 - Understand and navigate the UI: tabs, controls, canvas, and results view.
 - Apply image preprocessing (brightness, contrast, sharpness, denoiser) before inference.
 - Review results with confidence filtering and annotation controls.
 - Export results in CSV, PNG, and JSON formats.
-- Troubleshoot model loading, inference, and performance issues.
+- **Debug installation, model loading, inference, and UI issues systematically**.
 - Build, extend, and contribute to the codebase.
 - Integrate EchoSight into larger analysis workflows.
 
@@ -35,17 +36,106 @@ EchoSight is a **standalone, portable Windows GUI** that runs on any Windows 10+
 
 | Feature | Details |
 |---------|---------|
-| **Model Support** | Detection, Instance Segmentation, Anomaly Classification from Geti |
-| **Image Input** | Single files: PNG, JPG, BMP, WebP; Multi-frame: TIFF |
-| **Inference** | Real-time with background threading; 1%-100% confidence filtering |
-| **Preprocessing** | Brightness, contrast, sharpness, denoiser; per-frame profiles |
-| **Output** | CSV results, annotated PNG, JSON metadata |
-| **Deployment** | Standalone executable or Python 3.9 + pip install |
-| **Portability** | PyInstaller-bundled portable package; no external dependencies |
+| **Model Support** | Detection, Instance Segmentation, Anomaly Classification from Geti exports |
+| **Image Input** | Single files: PNG, JPG, BMP, WebP; Multi-frame: TIFF (auto-decomposed) |
+| **Inference** | Real-time with background threading; 1%-100% confidence filtering; live results |
+| **Preprocessing** | Brightness, contrast, sharpness, denoiser; per-frame profiles; reversible |
+| **Output** | CSV results, annotated PNG, JSON metadata; batch export |
+| **Deployment** | Portable executable, Python 3.9 pip install, pre-built binaries |
+| **Portability** | PyInstaller-bundled; runs offline; no external dependencies after setup |
+| **Validation** | ✅ Tested on Windows 10+, Python 3.9; ~5 minute setup; zero manual configuration |
 
 ---
 
-## Installation and Setup
+## Basics & First Steps
+
+### What is EchoSight?
+
+EchoSight is a **model deployment and inference platform**. It takes trained machine learning models (specifically Intel Geti OpenVINO exports) and lets you run predictions on images without needing to train or modify anything. Think of it as a viewer that shows you what the model "sees" in each image.
+
+### What can it do?
+
+1. **Load a trained model** from a Geti export folder
+2. **Import images** (single files, batches, or multi-frame TIFF files)
+3. **Run inference** on every image to generate predictions
+4. **Optionally enhance images** (adjust brightness, contrast, etc.) before prediction
+5. **Review results** frame-by-frame with filtering and annotation controls
+6. **Export results** as spreadsheets, annotated images, and metadata files
+
+### Typical Workflow (5-10 minutes)
+
+```
+Step 1: Install EchoSight (one-time: 5 minutes)
+        ↓ (Complete; skip on repeat use)
+        
+Step 2: Obtain Geti model export folder
+        (from your trained Geti project; contains Detection/, model.xml, model.bin)
+        ↓
+        
+Step 3: Launch EchoSight
+        (Double-click Launch_EchoSight.bat)
+        ↓
+        
+Step 4: Load Model
+        (Click "Load Model" → browse to export folder → Open)
+        ↓
+        
+Step 5: Import Images
+        (Click "Load Images" → select PNG/JPG/TIFF files → Open)
+        ↓
+        
+Step 6: Run Inference
+        (Click "Run All" → watch progress → results populate)
+        ↓
+        
+Step 7: Review & Export
+        (Navigate results → adjust confidence filter → export CSV/PNG)
+```
+
+### What You Need
+
+**Required:**
+- Windows 10 or later
+- Python 3.9 (or use pre-built portable executable)
+- A Geti model export folder
+- Image files (PNG, JPG, TIFF, etc.)
+
+**Optional:**
+- 4GB+ RAM (recommended; 2GB minimum works)
+- 3GB free disk space
+
+### What You DON'T Need
+
+- Machine learning knowledge
+- Coding experience
+- GPU (CPU inference works fine)
+- External model conversion tools
+- Geti Web access (offline deployment)
+
+### Key Concepts
+
+**Model Format**: EchoSight expects Geti OpenVINO exports with this structure:
+```
+my-model/
+├── Detection/           (or Instance Segmentation / Anomaly classification)
+│   └── model/
+│       ├── model.xml   (required)
+│       ├── model.bin   (required)
+│       └── config.json (optional but recommended)
+```
+
+**Task Types**: EchoSight auto-detects task type from folder name:
+- `Detection/` → Bounding boxes + confidence scores
+- `Instance Segmentation/` → Pixel masks + class labels
+- `Anomaly classification/` → Anomaly heatmap + score
+
+**Inference**: Runs on background thread; UI stays responsive during processing. Original images never modified; preprocessed copies used for inference only.
+
+**Results**: Frame-by-frame confidence scores, detections per frame, export-ready format (CSV, annotated PNG, JSON metadata).
+
+---
+
+## Installation & Setup
 
 ### Quick Setup (Recommended)
 
@@ -101,33 +191,265 @@ python src/echosight/EchoSight.py
 
 ---
 
-## Troubleshooting Setup
+## Debugging & Diagnostics
 
-### If SETUP.ps1 Fails
+Use this section when installation fails, the application won't launch, models don't load, or inference produces unexpected results.
 
-1. **Check Python 3.9 is installed:**
-   ```powershell
-   python --version
-   ```
-   Expected output: `Python 3.9.x` (not 3.10, 3.11, etc.)
+### Diagnostic Approach
 
-2. **Run diagnostic tool:**
-   ```powershell
-   .\DIAGNOSE.ps1
-   ```
-   Generates detailed report on Python, environment, and dependency availability.
+Follow this systematic method:
 
-3. **For manual step-by-step setup**, see `MANUAL_SETUP.md` in the repository.
+1. **Identify the failure point** — Where exactly does it fail? (Install / Launch / Model load / Inference)
+2. **Gather evidence** — What's the exact error message? Screenshot or error text?
+3. **Check prerequisites** — Does the system meet minimum requirements?
+4. **Run diagnostic tools** — Use DIAGNOSE.ps1 or manual checks
+5. **Apply smallest fix** — Address the root cause, not symptoms
+6. **Verify repair** — Test the specific failure point
 
-### Common Issues
+---
 
-| Issue | Solution |
-|-------|----------|
-| "Python 3.9 not found" | Download from [python.org](https://www.python.org/downloads/release/python-3913/); during install, check "Add Python 3.9 to PATH" |
-| Script blocked by Windows | Run: `Unblock-File -Path .\SETUP.ps1` before executing |
-| "ModuleNotFoundError: openvino" | Re-run SETUP.ps1 or manually: `pip install openvino==2024.5` |
-| Slow startup (first launch) | OpenVINO model compilation takes 30-60 seconds on first use; subsequent launches are fast |
-| "No module named echosight" | Ensure pip editable install worked: `pip install -e .` from project root |
+### Installation Debugging
+
+**Symptom**: SETUP.ps1 script runs but fails or window closes immediately
+
+**Immediate check**:
+```powershell
+cd C:\EchoSight
+.\DIAGNOSE.ps1
+```
+
+This generates a detailed report of:
+- Python 3.9 detection and version
+- Virtual environment state
+- Installed packages and versions
+- Windows path configuration
+
+**Step-by-step diagnosis**:
+
+| Issue | Check | Fix |
+|-------|-------|-----|
+| "Python 3.9 not found" | `python --version` in PowerShell | Install Python 3.9 from [python.org](https://www.python.org/downloads/release/python-3913/); add to PATH; restart PowerShell |
+| "Command not recognized: .\SETUP.ps1" | Execution policy | Run: `Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned` then retry |
+| "Access denied" error | File permissions or antivirus | Right-click SETUP.ps1 → Properties → Uncheck "Read-only" → Apply; disable antivirus temporarily |
+| Script blocked by Windows | Downloaded from internet | Run: `Unblock-File -Path .\SETUP.ps1` before executing |
+| Pip install fails ("No matching distribution") | Network or package index issue | Check internet connection; try: `pip install --upgrade pip setuptools wheel` |
+| "ModuleNotFoundError: openvino" | Incomplete install | Re-run SETUP.ps1 or manually: `pip install openvino==2024.5` |
+| Virtual environment not created | Permissions or disk space | Check free disk space (3GB+ needed); run PowerShell as Administrator; check `.venv/` folder exists |
+| Launcher batch file not generated | Script error or permissions | Check if SETUP.ps1 completed successfully (look for success message); manually verify `.venv/Scripts/Activate.ps1` exists |
+
+**Manual verification**:
+
+```powershell
+# After setup, test each component
+cd C:\EchoSight
+.\venv\Scripts\Activate.ps1
+
+# Test Python version
+python --version
+# Expected: Python 3.9.x
+
+# Test each dependency
+python -c "import openvino; print('OpenVINO OK:', openvino.__version__)"
+python -c "import cv2; print('OpenCV OK:', cv2.__version__)"
+python -c "import numpy; print('NumPy OK')"
+python -c "import PIL; print('PIL OK')"
+python -c "import tkinter; print('Tkinter OK')"
+
+# Test EchoSight package
+python -c "from echosight.EchoSight import main; print('EchoSight import OK')"
+```
+
+**If all checks pass**: Installation is complete. Go to **Launch Debugging** section.
+
+---
+
+### Launch Debugging
+
+**Symptom**: SETUP.ps1 succeeds, but EchoSight window won't open
+
+**First check**: Launcher file exists and is executable
+
+```powershell
+cd C:\EchoSight
+Get-Item Launch_EchoSight.bat
+# Should return file details; if not found, SETUP.ps1 failed to create it
+```
+
+**Try launching manually**:
+
+```powershell
+# Activate venv
+.\venv\Scripts\Activate.ps1
+
+# Launch directly
+python src/echosight/EchoSight.py
+```
+
+If this works, the launcher batch file needs to be regenerated:
+```powershell
+# Recreate launcher
+echo @echo off > Launch_EchoSight.bat
+echo cd /d "%~dp0" >> Launch_EchoSight.bat
+echo call .venv\Scripts\Activate.bat >> Launch_EchoSight.bat
+echo python src/echosight/EchoSight.py >> Launch_EchoSight.bat
+echo pause >> Launch_EchoSight.bat
+```
+
+**If launch still fails**, check error in terminal:
+
+```powershell
+.\venv\Scripts\Activate.ps1
+python src/echosight/EchoSight.py 2>&1 | Tee-Object error.log
+# Check error.log file for detailed error message
+```
+
+| Error Message | Cause | Fix |
+|---------------|-------|-----|
+| "No module named 'tkinter'" | Python installed without tkinter | Reinstall Python 3.9; ensure "tcl/tk and IDLE" is checked during setup |
+| "ModuleNotFoundError: openvino" | Dependency missing | Activate venv and run: `pip install openvino==2024.5` |
+| "CUDA out of memory" or GPU errors | GPU inference misconfiguration | Edit EchoSight.py line ~400: change `device_name="GPU"` to `device_name="CPU"` |
+| "Could not connect to display" | Display/graphics issue (rare on Windows) | Ensure no headless environment; run on normal user account with display |
+| "Permission denied: .venv/..." | File permissions issue | Run PowerShell as Administrator; check folder is not marked read-only |
+
+**Startup time expectations**:
+- **First launch**: 30-60 seconds (OpenVINO runtime initialization)
+- **Subsequent launches**: 5-10 seconds (cached)
+
+If launch takes >90 seconds, check Task Manager for hung python.exe process and kill it.
+
+---
+
+### Model Loading Debugging
+
+**Symptom**: Model won't load; error like "Cannot find model.xml" or "Unsupported task type"
+
+**Check model folder structure**:
+
+Correct structure:
+```
+my-model-export/
+├── Detection/              (or Instance Segmentation / Anomaly classification)
+│   └── model/
+│       ├── model.xml       ✓ Must exist
+│       ├── model.bin       ✓ Must exist
+│       └── config.json     (optional)
+```
+
+Incorrect structures (common mistakes):
+```
+❌ model/model/model.xml        (nested too deep)
+❌ model.xml directly in root    (missing Detection/ folder)
+❌ Instance_Segmentation/        (underscore instead of space)
+❌ Segmentation/                 (missing "Instance")
+```
+
+**Diagnosis**:
+
+| Error | Check | Fix |
+|-------|-------|-----|
+| "Cannot find model.xml" | Folder structure | Ensure `Detection/model/model.xml` exists; navigate to parent folder (containing Detection/), not model/ subfolder |
+| "Unsupported task type" | Folder name spelling | Rename folder to exactly one of: `Detection`, `Instance Segmentation`, `Anomaly classification` |
+| "OpenVINO model incompatible" | Model format mismatch | Verify model exported from Intel Geti, not hand-edited; check `model.xml` format with: `file model.xml` |
+| "Device not supported" or GPU error | Hardware/OpenVINO config | Ensure model is OpenVINO format; if error persists, try CPU-only mode (see Launch Debugging section) |
+| File permissions error | Access rights | Ensure model folder and files are readable; check antivirus isn't blocking model files |
+
+**Manual model verification**:
+
+```powershell
+# Check model files exist and are readable
+$modelPath = "C:\path\to\model"
+Get-Item "$modelPath\Detection\model\model.xml"
+Get-Item "$modelPath\Detection\model\model.bin"
+
+# Check config.json exists (optional but recommended)
+Get-Item "$modelPath\Detection\model\config.json" -ErrorAction SilentlyContinue
+```
+
+**If model loads but shows errors during inference**, see **Inference Debugging** section.
+
+---
+
+### Inference Debugging
+
+**Symptom**: Model loads but inference fails, produces no results, or is very slow
+
+| Issue | Cause | Check | Fix |
+|-------|-------|-------|-----|
+| "No detections" on known images | Model confidence too high or insufficient training | Lower confidence slider to 1%; check model was trained on similar images | Retrain model in Geti with more data; check training convergence in Geti logs |
+| Inference very slow (>30 sec per image) | Large model, insufficient RAM, or CPU bottleneck | Check system RAM in Task Manager; check CPU usage during inference | Close other applications; upgrade RAM to 8GB+; try inference on smaller images |
+| "Out of memory" error | Insufficient system RAM | Check available RAM in Task Manager | Close other applications; reduce number of loaded frames; upgrade to 8GB+ RAM |
+| TIFF import fails | Corrupted TIFF or unsupported format | Try opening TIFF in image viewer (Windows Photos, IrfanView) | Re-export TIFF from source; use TiffSplitter to pre-convert to PNG |
+| Results don't match Geti training results | Model variant (FP16 vs FP32), input preprocessing, or resolution differences | Check model precision in config.json; verify image resolution matches training | Ensure inference using same model variant as Geti export; check preprocessing settings |
+| Inference runs but canvas doesn't update | UI thread blocked or render error | Check if UI is responsive (buttons clickable); look for errors in terminal | Stop inference (Cancel button); reduce confidence slider; restart application |
+
+**Performance profiling**:
+
+```powershell
+# Time a single frame inference
+# Add this temporarily to src/echosight/EchoSight.py:
+import time
+start = time.time()
+# ... inference code ...
+elapsed = time.time() - start
+print(f"Inference time: {elapsed:.2f} seconds")
+```
+
+Expected times:
+- Small detection model: 0.5-2 seconds per image
+- Segmentation model: 2-5 seconds per image
+- Large models: 5-10+ seconds per image
+
+If times are significantly longer, check system resources or model format.
+
+---
+
+### UI and Display Debugging
+
+**Symptom**: Buttons unresponsive, canvas doesn't update, or window appearance issues
+
+| Issue | Cause | Check | Fix |
+|-------|-------|-------|-----|
+| Buttons unresponsive during inference | UI on background thread (expected) | Check Cancel button appears during inference | Wait for inference to complete; use Cancel button to stop processing |
+| Canvas doesn't show detections | Annotation toggles off or confidence too high | Check "Show Boxes", "Show Labels", "Show Masks" toggles | Enable annotation toggles; lower confidence slider to 1% |
+| Zoom not working | Scroll wheel not detected or disabled | Try middle mouse button + scroll; try trackpad gestures | Use slider controls instead; check mouse driver is updated |
+| Window too small on high-DPI monitor | DPI scaling not configured | Check monitor DPI in Windows Display settings | Manually resize window; set DPI scaling to 100% for EchoSight launcher |
+| Results panel empty after inference | No results to display or filtering too strict | Check confidence slider is low (1%); check inference actually ran | Lower confidence threshold; re-run inference; check for inference errors in terminal |
+| Flickering or tearing on canvas | Rendering performance issue | Check GPU vs CPU load in Task Manager | Disable other GPU-intensive applications; reduce canvas zoom; use CPU inference only |
+
+---
+
+### Common Error Messages & Solutions
+
+| Error | Root Cause | Solution |
+|-------|-----------|----------|
+| `ModuleNotFoundError: No module named 'openvino'` | OpenVINO not installed | `pip install openvino==2024.5` |
+| `ValueError: Boxes batch must have 4 coordinates` | Model export issue or config mismatch | Verify model exported from Geti with correct settings; reimport model |
+| `FileNotFoundError: [Errno 2] No such file or directory` | Missing image or model file | Check file paths; verify model folder structure; re-download if corrupted |
+| `AttributeError: module has no attribute 'xyz'` | OpenVINO version mismatch or API change | Pin OpenVINO to 2024.5: `pip install openvino==2024.5 --force-reinstall` |
+| `RuntimeError: Failed to allocate memory` | GPU or system RAM exhausted | Close other applications; restart EchoSight; check available RAM |
+| `ConnectionError: Failed to fetch model` | Network issue (rare for offline use) | Check internet (if needed); verify model files locally accessible |
+
+---
+
+### Getting Help
+
+If debugging doesn't resolve the issue:
+
+1. **Gather evidence**:
+   - Screenshot of error or symptom
+   - Output from `.\DIAGNOSE.ps1`
+   - Terminal error messages (save from `2>&1 | Tee-Object error.log`)
+   - System info: Windows version, RAM, Python version
+
+2. **Check documentation**:
+   - README.md in repository
+   - SETUP.md for installation details
+   - USAGE.md for workflows
+
+3. **File a GitHub issue**:
+   - Visit https://github.com/okachare/EchoSight/issues
+   - Include evidence from step 1
+   - Describe exact steps to reproduce
 
 ---
 

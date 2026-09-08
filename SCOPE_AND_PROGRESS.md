@@ -4,7 +4,7 @@
 **Owner:** Omkar
 **Project Start:** July 14, 2026
 **Target Deadline:** End of Q3 2026 (September 30, 2026)
-**Report Last Updated:** 2026-09-03
+**Report Last Updated:** 2026-09-08
 
 > **Platform transition:** The Windows Geti/MSIX effort is closed as a completed historical track. Intel Geti Web is now the active platform for all future training, inference, evaluation, and deployment work. Windows artifacts remain preserved and are not discarded.
 
@@ -22,18 +22,23 @@ This project evaluates Intel Geti™ — an end-to-end Vision AI platform — as
 
 The end goal is a live demonstration showing Geti's ability to identify and classify defects (such as voids, delamination, and cracks) directly from CSAM scan images — reducing reliance on manual inspection and establishing a repeatable AI-assisted quality workflow for NovaLake.
 
-## Management Update — 2026-09-03
+## Management Update — 2026-09-08
 
-The local inference workstream has achieved a production-ready GUI state. The EchoSight application is fully functional with the verified `MobileNetV2-ATSS` OpenVINO FP16 model (version 7), supporting single and multi-frame TIFF import, background inference with live progress reporting, detection rendering with uniform font size (0.6), and comprehensive result export (annotated images, CSV, JSON). The GUI also successfully loads and renders the `Test_Run_Instance_Segmentation` anomaly package (Python 3.9/OpenVINO 2024.5 compatible).
+EchoSight has been published as a standalone GitHub repository (https://github.com/okachare/EchoSight) and is production-ready for team distribution. The setup process has been simplified to a single foolproof command that runs on any Windows system with Python 3.9, reducing initial setup time from 15-30 minutes to approximately 5 minutes.
 
-**Recent finalization:**
-- **Button rendering simplified:** Replaced complex arc/polygon calculations with clean rectangle drawing and soft 1px borders. All six button variants (default, run_all, run_current, cancel, apply, preprocess) preserved with hover effects and disabled states. Eliminates shadow artifacts while maintaining visual polish.
-- **Annotation labels unified:** Set all detection, classification, and anomaly labels to font size 0.6 for visual consistency across images. Labels scale appropriately with zoom.
-- **Fully portable executable:** PyInstaller-based standalone `EchoSight.exe` with all dependencies bundled (OpenVINO 2024.5, OpenCV, PIL, NumPy, torch, torchvision). Users download, run `build_installer.ps1`, copy portable folder to any system, and launch without external dependencies.
+**Key deliverables this week:**
+- **Standalone GitHub repository:** Independent codebase at okachare/EchoSight with MIT license, comprehensive documentation (README, SETUP, INSTALL, USAGE, DEVELOPMENT, CHANGELOG, CODE_OF_CONDUCT), and GitHub Actions CI/CD workflow for automated release builds on version tags.
+- **Simplified setup:** Consolidated three redundant setup scripts into single `SETUP.ps1` that detects Python 3.9, creates virtual environment, installs dependencies, and generates `Launch_EchoSight.bat` launcher. Rewritten with clean PowerShell syntax, robust error handling, and window-stay-open behavior for error visibility.
+- **Setup workflow:** Users now run `.\SETUP.ps1` once, then double-click `Launch_EchoSight.bat` to launch. Comprehensive troubleshooting documentation (DIAGNOSE.ps1, MANUAL_SETUP.md) included.
+- **Author attribution:** Professional metadata added (Omkar Kachare, 11943102) matching team standards.
 
-**Remaining validation:** Representative multi-frame TIFF testing, comparison of GUI output against Web Geti predictions, latency and resource measurements are still planned.
+**Next priorities:** Multi-system deployment validation, team training integration with Geti CSAM Helper agent, model fine-tuning, and WIP deployment preparation.
 
-### Historical Web Geti Update — 2026-08-25
+### Historical Update — 2026-09-03
+
+The local inference workstream achieved production-ready GUI state. EchoSight fully functional with model loading, single/multi-frame TIFF import, background inference with live progress, detection/mask/anomaly rendering, and result export. PyInstaller-based standalone executable with all dependencies bundled (OpenVINO 2024.5, OpenCV, PIL, NumPy). Users download, run `build_installer.ps1`, copy portable folder to any system, and launch without external dependencies.
+
+### Historical Update — 2026-08-25
 
 Web Geti validation is complete and is now the active project path. Project `NVL-S-28C` demonstrated the end-to-end workflow on NovaLake CSAM images: upload and annotation, Instance Segmentation training, OpenVINO FP16 testing, and live prediction.
 

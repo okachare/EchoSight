@@ -14,7 +14,7 @@ A standalone, portable GUI application for running Intel Geti OpenVINO model dep
 
 ## Quick Start
 
-### The Simple Way (Recommended)
+### The Simple Way (Recommended) ✅ Validated
 
 **Requires Python 3.9** ([download here](https://www.python.org/downloads/release/python-3913/)):
 
@@ -26,7 +26,9 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
 
 Then double-click **`Launch_EchoSight.bat`**
 
-**That's it!** See [SETUP.md](SETUP.md) for details.
+**Complete installation in ~5 minutes!** No manual configuration needed.
+
+✅ **Tested and validated** on Windows 10+ with Python 3.9. See [SETUP.md](SETUP.md) for details.
 
 ### Alternative: Pre-Built (No Python Needed)
 

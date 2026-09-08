@@ -37,8 +37,9 @@ Use the repository skills below as focused knowledge modules:
 - `Geti Setup Helper` (`.github/skills/geti-setup-helper/SKILL.md`) for access, Web Geti setup, `TiffSplitter`, dataset preparation, RTC/readiness checks, evidence capture, and pre-run validation.
 - `Geti Trainer` (`.github/skills/geti-trainer/SKILL.md`) for detailed Web Geti operator training, buttons, navigation, annotations, training, testing, prediction, export, and recovery.
 - `Geti Source Reference` (`.github/skills/geti-source-reference/SKILL.md`) for official upstream Geti literature, source navigation, version-aware debugging, and `getitune`/application understanding.
+- `EchoSight UI Expert` (`.github/skills/echosight-ui-expert/SKILL.md`) for EchoSight inference GUI setup, model loading, image inference workflows, image preprocessing, results navigation, UI troubleshooting, and development guidance. Use this when operators need help with offline inference, model deployment, TIFF batch processing, or integrating EchoSight into analysis workflows.
 
-When a request concerns setup or pre-work, start with `Geti Setup Helper`. When it concerns CSAM image meaning or annotation decisions, start with `CSAM Basics`. When it asks how to operate Web Geti step by step, start with `Geti Trainer`. Use multiple skills when the request spans domains.
+When a request concerns setup or pre-work, start with `Geti Setup Helper`. When it concerns CSAM image meaning or annotation decisions, start with `CSAM Basics`. When it asks how to operate Web Geti step by step, start with `Geti Trainer`. When it involves offline inference or model deployment with EchoSight, start with `EchoSight UI Expert`. Use multiple skills when the request spans domains.
 
 ## General Ground Truth
 
@@ -54,9 +55,10 @@ Use the repository documentation and supplied evidence as the first source of tr
    - CPU training can be slow on resource-constrained systems.
    - Inference output requires explicit visual verification.
 4. Web Geti is generally the active path when operators need practical dataset management and repeatable testing.
-5. Instance segmentation is suited to engineering review, detection to fast screening, and anomaly detection to alerting and prioritization.
-6. Small benchmarks provide feasibility evidence, not production qualification.
-7. The official upstream reference is `https://github.com/open-edge-platform/geti`; its `application/`, `library/`, and `skills/` trees are useful for understanding and debugging Geti, but moving `develop` content must not be presented as installed-release behavior.
+5. **EchoSight** is the production-ready inference GUI for offline model deployment. It supports Detection, Instance Segmentation, and Anomaly Classification models from Geti exports, runs on Windows 10+ with Python 3.9, includes preprocessing and results export, and is portable via PyInstaller bundling or pre-built executables.
+6. Instance segmentation is suited to engineering review, detection to fast screening, and anomaly detection to alerting and prioritization.
+7. Small benchmarks provide feasibility evidence, not production qualification.
+8. The official upstream reference is `https://github.com/open-edge-platform/geti`; its `application/`, `library/`, and `skills/` trees are useful for understanding and debugging Geti, but moving `develop` content must not be presented as installed-release behavior.
 
 ## Operating Rules
 

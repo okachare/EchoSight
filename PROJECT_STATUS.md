@@ -42,6 +42,7 @@
 | 2026-09-08 | EchoSight standalone GitHub repository | Complete | Created independent repository at https://github.com/okachare/EchoSight with comprehensive documentation (README, SETUP, INSTALL, USAGE, DEVELOPMENT, CHANGELOG, CODE_OF_CONDUCT), MIT license, GitHub Actions CI/CD workflow for automated release builds on version tags, and author attribution (Omkar Kachare, 11943102). Repository structured with src/echosight package layout, setup.py for pip installation, and PyInstaller build configuration. |
 | 2026-09-08 | EchoSight setup process simplified | Complete | Consolidated three redundant setup scripts into single foolproof `SETUP.ps1` that handles Python 3.9 detection, virtual environment creation, dependency installation, and launcher generation. Rewrote with clean PowerShell syntax (no heredoc string issues), robust error handling, and window-stay-open behavior for error visibility. Created `SETUP.md` with simple one-command flow: `.\SETUP.ps1` → double-click `Launch_EchoSight.bat`. Includes comprehensive troubleshooting (DIAGNOSE.ps1 for Python/environment checks, MANUAL_SETUP.md for step-by-step reference). |
 | 2026-09-08 | EchoSight installation validation | Complete | Successfully tested SETUP.ps1 on Windows system with Python 3.9. Virtual environment created, all dependencies installed (OpenVINO 2024.5, OpenCV, PIL, NumPy), and `Launch_EchoSight.bat` launcher auto-generated without errors. EchoSight GUI launches successfully and is fully operational. Installation time: ~5 minutes. Setup process is production-ready and foolproof with zero manual configuration required. |
+| 2026-09-08 | Continuous Learning & Model Improvement Plan | Active | Created comprehensive 3-month roadmap for evolving 37-image anomaly detection baseline: Week 1–2 rapid iteration (v1→v2), Week 3–4 quality focus (v2→v3), Month 2+ sustainable weekly retraining pipeline (v4–v8→Production). Includes daily EchoSight validation workflow, weekly Geti retraining cycle, accuracy improvement strategies (normal baseline expansion, defect diversity, data augmentation, threshold optimization), evidence organization, and metrics tracking dashboard. Roadmap documented in `CONTINUOUS_LEARNING_PLAN.md` with checklists, timelines, and tool integration. Starting today: collect new defects, target v2 by end of Week 2. |
 
 ## Management Update — 2026-08-25
 
@@ -162,7 +163,45 @@ The Windows Geti workflow could not use the organized image folder directly as t
 
 ---
 
-## Next Steps: Web Geti
+## Next Steps: Web Geti & Continuous Learning (Primary Focus)
+
+### Phase 1: Model Evolution & Continuous Learning (Weeks 1–12, Starting 2026-09-08)
+
+**Roadmap:** Scale 37-image anomaly detection baseline to production-ready model through systematic continuous learning pipeline.
+
+**Reference:** `CONTINUOUS_LEARNING_PLAN.md` (Comprehensive 3-month playbook with checklists, timelines, tool integration)
+
+**Week 1–2 Milestone: v1 → v2**
+- [ ] Daily: Collect 3–5 new anomalies from production via EchoSight + operator validation
+- [ ] Use TiffSplitter to batch-process production TIFFs → PNG frames
+- [ ] Validate predictions in EchoSight (operator reviews flagged images)
+- [ ] Retrain v2 in Geti Web with augmentation disabled (baseline comparison)
+- [ ] Test v2 on 10 held-out images → Expect F1 improvement (81%+ target)
+- [ ] **Expected outcome:** v2 operational, improvement validated
+
+**Week 3–4 Milestone: v2 → v3 (Quality Focus)**
+- [ ] Expand normal/reference baseline: Collect 10–15 diverse normal images
+- [ ] Increase defect diversity: Ensure ≥3 distinct defect types in dataset
+- [ ] Retrain v3 with augmentation enabled (brightness/contrast ±10%, rotation ±30°, noise σ=0.03)
+- [ ] Optimize inference threshold: Test 0.5–0.9, choose best precision/recall tradeoff
+- [ ] **Expected outcome:** False-alarm rate <5%, F1 ≥ 86%, production-ready foundation
+
+**Month 2+ Milestone: Sustainable Weekly Loop (v4–v8)**
+- [ ] Establish repeatable Friday retraining cycle (~2 hours active + 1–2 hours auto)
+- [ ] Grow dataset: 37 → 80–120 images (65–80 anomalies + 15–40 normals)
+- [ ] Track metrics weekly: Precision, Recall, F1, false-alarm rate
+- [ ] Collect borderline/ambiguous cases for model refinement
+- [ ] **Expected outcome:** Stable weekly pipeline, F1 ≥ 90%, <3% false-alarm rate
+
+**Quarter 1 Milestone: Production Hardening (Weeks 9–12)**
+- [ ] Finalize training dataset (120+ images, ≥5 defect types)
+- [ ] Validate production model on 50+ held-out images
+- [ ] Measure inference latency (<100 ms per image target)
+- [ ] Document rollback procedure and escalation path
+- [ ] Operator handover and team training
+- [ ] **Expected outcome:** Model deployed to production with documented continuous learning pipeline
+
+### Phase 2: Model Deployment & Validation (Parallel Track)
 
 1. Preserve the completed 20-image Web benchmark and comparison evidence
 2. Fine-tune the NVL models with difficult and representative images

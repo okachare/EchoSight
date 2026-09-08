@@ -14,43 +14,33 @@ A standalone, portable GUI application for running Intel Geti OpenVINO model dep
 
 ## Quick Start
 
-### Option 1: Simplest Setup (Recommended) ⚡
+### The Simple Way (Recommended)
 
-Requires **Python 3.9** installed ([download here](https://www.python.org/downloads/release/python-3913/)):
+**Requires Python 3.9** ([download here](https://www.python.org/downloads/release/python-3913/)):
 
-1. Download this repository
-2. In PowerShell, run:
-   ```powershell
-   cd EchoSight
-   Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
-   .\SETUP_SIMPLE.ps1
-   ```
-3. Double-click **`Launch_EchoSight.bat`** to start
-4. Load a Geti model folder and run inference!
+```powershell
+cd EchoSight
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
+.\SETUP.ps1
+```
 
-**First run takes 1-2 minutes** (installs dependencies). Subsequent runs are faster.
+Then double-click **`Launch_EchoSight.bat`**
 
-### Option 2: Pre-built Executable (No Python Needed)
+**That's it!** See [SETUP.md](SETUP.md) for details.
 
-1. Download the latest release from [GitHub Releases](https://github.com/okachare/EchoSight/releases)
+### Alternative: Pre-Built (No Python Needed)
+
+1. Download from [GitHub Releases](https://github.com/okachare/EchoSight/releases)
 2. Extract `EchoSight-portable.zip`
 3. Double-click `Launch_EchoSight.bat`
-4. Load a model and run inference!
 
-### Option 3: Python Development Install
+### For Developers
 
 ```powershell
 git clone https://github.com/okachare/EchoSight.git
 cd EchoSight
 pip install -e .
 python src/echosight/EchoSight.py
-```
-
-### Option 4: Build Executable from Source
-
-```powershell
-cd build
-.\build_portable.ps1   # Creates portable package with bundled Python
 ```
 
 ---
@@ -199,32 +189,35 @@ Contributions welcome! Please:
 
 ## Troubleshooting
 
-**Setup script won't run or exits with warnings?**
-- See [MANUAL_SETUP.md](MANUAL_SETUP.md) for step-by-step instructions
-- Run `.\DIAGNOSE.ps1` to check your Python installation
+**Setup.ps1 won't run?**
+- Make sure you have Python 3.9 installed first
+- Run PowerShell as Administrator
+- Set execution policy: `Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned`
 
-**"Python 3.9 not found" error?**
-- Download and install Python 3.9: https://www.python.org/downloads/release/python-3913/
-- **IMPORTANT**: During installation, check "Add Python 3.9 to PATH"
-- Restart PowerShell after installing
+**"Python 3.9 not found"?**
+- Download: https://www.python.org/downloads/release/python-3913/
+- Install and **CHECK: "Add Python 3.9 to PATH"**
+- Restart PowerShell
+- Run SETUP.ps1 again
 
-**Launcher won't work?**
-- Manually create `Launch_EchoSight.bat` — see [MANUAL_SETUP.md](MANUAL_SETUP.md)
-- Or run: `python src/echosight/EchoSight.py` in PowerShell
+**Launcher won't start?**
+- Run diagnostic: `.\DIAGNOSE.ps1`
+- Check: [MANUAL_SETUP.md](MANUAL_SETUP.md) for step-by-step help
 
-**Model not loading or inference crashes?**
-- Verify folder structure has `model.xml` and `config.json`
-- Check [USAGE.md](USAGE.md) for supported model formats
+**Model won't load?**
+- Verify folder has `model.xml` and `config.json`
+- Check [USAGE.md](USAGE.md) for supported formats
 
-**Slow performance or out of memory?**
-- Reduce image resolution or use smaller models
-- Ensure you have 4GB+ RAM available
+**Slow or crashes?**
+- Ensure 4GB+ RAM available
+- Try smaller images or models
 - Close other applications
 
-**More help?**
-- Check [MANUAL_SETUP.md](MANUAL_SETUP.md) for detailed setup
-- Check [USAGE.md](USAGE.md) for full user guide
-- Check [GitHub Issues](https://github.com/okachare/EchoSight/issues)
+**Still stuck?**
+- Check [SETUP.md](SETUP.md) for setup details
+- Check [MANUAL_SETUP.md](MANUAL_SETUP.md) for manual install
+- Check [USAGE.md](USAGE.md) for usage guide
+- File an issue: [GitHub Issues](https://github.com/okachare/EchoSight/issues)
 
 ---
 

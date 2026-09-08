@@ -20,15 +20,16 @@ from PIL import Image, ImageTk, ImageSequence
 
 
 SUPPORTED_EXTENSIONS = {".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff", ".webp"}
-BACKGROUND = "#14181d"
-PANEL = "#1d232b"
-PANEL_LIGHT = "#252d36"
-TEXT = "#edf2f7"
-MUTED = "#9aa8b6"
-ACCENT = "#29b6c7"
-SUCCESS = "#39c27f"
-WARNING = "#e7ad4b"
-DANGER = "#dc6470"
+BACKGROUND = "#0f0f0f"
+PANEL = "#1a1a1a"
+PANEL_LIGHT = "#252525"
+TEXT = "#f5f5f5"
+MUTED = "#a0a0a0"
+ACCENT = "#00d4aa"
+SECONDARY_ACCENT = "#ff6b35"
+SUCCESS = "#00d4aa"
+WARNING = "#ff6b35"
+DANGER = "#ff5555"
 
 
 @dataclass
@@ -48,12 +49,12 @@ class InferenceResult:
 
 class RoundedButton(tk.Canvas):
     COLORS = {
-        "default": ("#2b3540", "#41515f", "#9fb3c1", "#f0f5f7"),
-        "run_all": ("#9ed9ad", "#bce9c6", "#386f4a", "#0d3a15"),
-        "run_current": ("#edc77f", "#f5dcae", "#886523", "#4a3a0a"),
-        "cancel": ("#eaa0aa", "#f4bec5", "#914a56", "#4a1025"),
-        "apply": ("#73c695", "#a3dfb8", "#327a51", "#0d3a20"),
-        "preprocess": ("#c6e3e8", "#e0f2f4", "#568c96", "#1a4a55"),
+        "default": ("#3d3d3d", "#4a4a4a", "#707070", "#ffffff"),
+        "run_all": ("#00d4aa", "#33ddb8", "#008060", "#0a0a0a"),
+        "run_current": ("#ff6b35", "#ff8a52", "#c04020", "#0a0a0a"),
+        "cancel": ("#ff5555", "#ff7575", "#cc0000", "#0a0a0a"),
+        "apply": ("#00d4aa", "#33ddb8", "#008060", "#0a0a0a"),
+        "preprocess": ("#252525", "#333333", "#666666", "#d4d4d4"),
     }
 
     def __init__(self, parent: tk.Misc, text: str, command: object, variant: str = "default", width: int | None = None, **kwargs: object) -> None:
@@ -70,7 +71,7 @@ class RoundedButton(tk.Canvas):
             button_width = width
         else:
             button_width = 110
-        super().__init__(parent, height=34, width=button_width, highlightthickness=0, bd=0, bg=BACKGROUND, cursor="hand2", **kwargs)
+        super().__init__(parent, height=36, width=button_width, highlightthickness=0, bd=0, bg=BACKGROUND, cursor="hand2", **kwargs)
         self.bind("<Configure>", self._on_configure)
         self.bind("<Enter>", self._on_enter)
         self.bind("<Leave>", self._on_leave)
@@ -83,8 +84,8 @@ class RoundedButton(tk.Canvas):
 
     def _draw(self) -> None:
         normal, hover, outline, foreground = self.COLORS.get(self.variant, self.COLORS["default"])
-        color = hover if self._hover and self.enabled else normal if self.enabled else "#59636a"
-        text_color = foreground if self.enabled else "#a8afb3"
+        color = hover if self._hover and self.enabled else normal if self.enabled else "#505050"
+        text_color = foreground if self.enabled else "#808080"
         self.delete("all")
         # Get canvas dimensions
         canvas_width = self.winfo_width()
@@ -93,8 +94,15 @@ class RoundedButton(tk.Canvas):
             canvas_width = self.winfo_reqwidth()
         if canvas_height <= 1:
             canvas_height = self.winfo_reqheight()
-        # Simple rectangle with soft edge (1px border)
-        self.create_rectangle(0, 0, canvas_width, canvas_height, fill=color, outline=outline, width=1)
+        # Draw rounded rectangle with 8px radius
+        radius = 8
+        # Draw rounded background
+        self.create_oval(0, 0, radius * 2, radius * 2, fill=color, outline="")
+        self.create_oval(canvas_width - radius * 2, 0, canvas_width, radius * 2, fill=color, outline="")
+        self.create_oval(0, canvas_height - radius * 2, radius * 2, canvas_height, fill=color, outline="")
+        self.create_oval(canvas_width - radius * 2, canvas_height - radius * 2, canvas_width, canvas_height, fill=color, outline="")
+        self.create_rectangle(radius, 0, canvas_width - radius, canvas_height, fill=color, outline="")
+        self.create_rectangle(0, radius, canvas_width, canvas_height - radius, fill=color, outline="")
         # Draw text centered
         self.create_text(canvas_width // 2, canvas_height // 2, text=self.label, fill=text_color, font=self.font, anchor="center")
 
@@ -123,7 +131,7 @@ class RoundedButton(tk.Canvas):
 
 class ZoomPanCanvas(tk.Canvas):
     def __init__(self, parent: tk.Misc, **kwargs: object) -> None:
-        super().__init__(parent, background="#101419", highlightthickness=0, **kwargs)
+        super().__init__(parent, background="#151515", highlightthickness=0, **kwargs)
         self.source_image: Image.Image | None = None
         self.photo: ImageTk.PhotoImage | None = None
         self.zoom = 1.0
@@ -264,45 +272,44 @@ class EchoSightApp(tk.Tk):
 
     def _configure_styles(self) -> None:
         self.style.configure("TFrame", background=BACKGROUND)
-        self.style.configure("Panel.TFrame", background=PANEL)
+        self.style.configure("Panel.TFrame", background=PANEL, relief="flat")
         self.style.configure("TLabel", background=BACKGROUND, foreground=TEXT, font=("Segoe UI", 10))
         self.style.configure("Muted.TLabel", background=BACKGROUND, foreground=MUTED, font=("Segoe UI", 9))
-        self.style.configure("PanelTitle.TLabel", background=PANEL, foreground=TEXT, font=("Segoe UI Semibold", 11))
-        self.style.configure("Header.TLabel", background=BACKGROUND, foreground=TEXT, font=("Segoe UI Semibold", 18))
-        button_options = {"borderwidth": 2, "relief": "solid", "padding": (12, 8), "font": ("Segoe UI Semibold", 10)}
+        self.style.configure("PanelTitle.TLabel", background=PANEL, foreground=TEXT, font=("Segoe UI Semibold", 12), padding=(0, 2))
+        self.style.configure("Header.TLabel", background=BACKGROUND, foreground=TEXT, font=("Segoe UI Semibold", 24))
+        button_options = {"borderwidth": 0, "relief": "flat", "padding": (14, 10), "font": ("Segoe UI Semibold", 10)}
         self.style.configure("TButton", background=PANEL_LIGHT, foreground=TEXT, **button_options)
-        self.style.map("TButton", background=[("pressed", ACCENT), ("active", "#354452"), ("disabled", "#30353b")], foreground=[("pressed", "#081217")])
-        self.style.configure("RunAll.TButton", background="#b8e3c2", foreground="#10251a", bordercolor="#6d9f7a", lightcolor="#d9f0de", darkcolor="#6d9f7a", **button_options)
-        self.style.map("RunAll.TButton", background=[("active", "#ccebd2"), ("pressed", "#8fc99b"), ("disabled", "#68786d")])
-        self.style.configure("RunCurrent.TButton", background="#f2d19b", foreground="#35250d", bordercolor="#b08b45", lightcolor="#fae8c4", darkcolor="#b08b45", **button_options)
-        self.style.map("RunCurrent.TButton", background=[("active", "#f7dfb4"), ("pressed", "#dfb96f"), ("disabled", "#817664")])
-        self.style.configure("Cancel.TButton", background="#efb0b8", foreground="#3b1017", bordercolor="#b96a75", lightcolor="#f8d3d8", darkcolor="#b96a75", **button_options)
-        self.style.map("Cancel.TButton", background=[("active", "#f5c4ca"), ("pressed", "#df8994"), ("disabled", "#80696c")])
-        self.style.configure("Preprocess.TButton", background="#d5e7ec", foreground="#10252a", bordercolor="#7ba4ad", lightcolor="#eef8fa", darkcolor="#7ba4ad", padding=(4, 4), font=("Segoe UI Symbol", 12))
-        self.style.map("Preprocess.TButton", background=[("active", "#e6f4f6"), ("pressed", "#a9d0d7")])
-        self.style.configure("Apply.TButton", background="#79c99a", foreground="#10251a", bordercolor="#4d9a6d", lightcolor="#b9e8c8", darkcolor="#4d9a6d", padding=(10, 5), font=("Segoe UI Semibold", 9))
-        self.style.map("Apply.TButton", background=[("active", "#91d9aa"), ("pressed", "#5caf7d")])
-        self.style.configure("PreviewBadge.TLabel", background="#10252a", foreground="#d9f5f3", padding=(8, 4), font=("Consolas", 8))
-        self.style.configure("Review.TCheckbutton", background=PANEL, foreground=TEXT, padding=(8, 5), font=("Segoe UI Semibold", 9))
-        self.style.map("Review.TCheckbutton", foreground=[("active", TEXT), ("disabled", MUTED)], background=[("active", PANEL_LIGHT)])
+        self.style.map("TButton", background=[("pressed", "#404040"), ("active", "#333333"), ("disabled", "#252525")], foreground=[("pressed", TEXT), ("disabled", "#606060")])
+        self.style.configure("RunAll.TButton", background="#00d4aa", foreground="#0a0a0a", bordercolor="#008060", lightcolor="#00d4aa", darkcolor="#008060", **button_options)
+        self.style.map("RunAll.TButton", background=[("active", "#1ae5bb"), ("pressed", "#00b890"), ("disabled", "#4a7570")])
+        self.style.configure("RunCurrent.TButton", background="#ff6b35", foreground="#0a0a0a", bordercolor="#cc4400", lightcolor="#ff6b35", darkcolor="#cc4400", **button_options)
+        self.style.map("RunCurrent.TButton", background=[("active", "#ff8252"), ("pressed", "#e55a24"), ("disabled", "#8c5a4a")])
+        self.style.configure("Cancel.TButton", background="#ff5555", foreground="#0a0a0a", bordercolor="#cc0000", lightcolor="#ff5555", darkcolor="#cc0000", **button_options)
+        self.style.map("Cancel.TButton", background=[("active", "#ff7575"), ("pressed", "#dd2222"), ("disabled", "#8c5555")])
+        self.style.configure("Preprocess.TButton", background="#333333", foreground="#d4d4d4", bordercolor="#555555", lightcolor="#404040", darkcolor="#252525", padding=(6, 6), font=("Segoe UI Symbol", 12))
+        self.style.map("Preprocess.TButton", background=[("active", "#404040"), ("pressed", "#252525")])
+        self.style.configure("Apply.TButton", background="#00d4aa", foreground="#0a0a0a", bordercolor="#008060", lightcolor="#00d4aa", darkcolor="#008060", padding=(10, 8), font=("Segoe UI Semibold", 10))
+        self.style.map("Apply.TButton", background=[("active", "#1ae5bb"), ("pressed", "#00b890")])
+        self.style.configure("PreviewBadge.TLabel", background="#151515", foreground="#00d4aa", padding=(8, 6), font=("Consolas", 8))
+        self.style.configure("Review.TCheckbutton", background=PANEL, foreground=TEXT, padding=(8, 6), font=("Segoe UI Semibold", 9))
+        self.style.map("Review.TCheckbutton", foreground=[("active", ACCENT), ("disabled", MUTED)], background=[("active", PANEL_LIGHT)])
         self.style.configure("TNotebook", background=BACKGROUND, borderwidth=0, tabmargins=(0, 0, 0, 0), padding=0)
-        self.style.configure("TNotebook.Tab", background=PANEL_LIGHT, foreground=MUTED, padding=(14, 8), font=("Segoe UI Semibold", 10), borderwidth=2, relief="solid")
-        self.style.map("TNotebook.Tab", background=[("selected", ACCENT), ("active", "#354452")], foreground=[("selected", "#081217"), ("active", TEXT)], padding=[("selected", (22, 13)), ("!selected", (14, 8))])
-        self.style.configure("Horizontal.TScale", troughcolor="#0e1115", background="#5fc6d1", sliderlength=18, borderwidth=0)
-        self.style.configure("Horizontal.TProgressbar", troughcolor="#0e1115", background=ACCENT, borderwidth=0, thickness=12)
-        self.style.configure("Treeview", background=PANEL, fieldbackground=PANEL, foreground=TEXT, rowheight=28, borderwidth=0)
+        self.style.configure("TNotebook.Tab", background=PANEL_LIGHT, foreground=MUTED, padding=(16, 10), font=("Segoe UI Semibold", 10), borderwidth=0, relief="flat")
+        self.style.map("TNotebook.Tab", background=[("selected", ACCENT), ("active", "#333333")], foreground=[("selected", "#0a0a0a"), ("active", TEXT)], padding=[("selected", (24, 12)), ("!selected", (16, 10))])
+        self.style.configure("Horizontal.TScale", troughcolor="#1a1a1a", background=ACCENT, sliderlength=16, borderwidth=0)
+        self.style.configure("Horizontal.TProgressbar", troughcolor="#1a1a1a", background=ACCENT, borderwidth=0, thickness=14)
+        self.style.configure("Treeview", background=PANEL, fieldbackground=PANEL, foreground=TEXT, rowheight=30, borderwidth=0)
         self.style.configure("Treeview.Heading", background=PANEL_LIGHT, foreground=MUTED, font=("Segoe UI Semibold", 9))
-        self.style.map("Treeview", background=[("selected", "#2c6873")])
+        self.style.map("Treeview", background=[("selected", ACCENT)], foreground=[("selected", "#0a0a0a")])
 
     def _build_ui(self) -> None:
         header = ttk.Frame(self)
-        header.pack(fill=X, padx=22, pady=(18, 8))
+        header.pack(fill=X, padx=24, pady=(20, 10))
         title_group = ttk.Frame(header)
         title_group.pack(side=LEFT)
         ttk.Label(title_group, text="EchoSight", style="Header.TLabel").pack(anchor="w")
-        ttk.Label(title_group, text="Model-agnostic image inference and inspection", style="Muted.TLabel").pack(anchor="w", pady=(2, 0))
         self.style.configure("AccentLine.TFrame", background=ACCENT)
-        ttk.Frame(self, height=2, style="AccentLine.TFrame").pack(fill=X, padx=22, pady=(0, 4))
+        ttk.Frame(self, height=3, style="AccentLine.TFrame").pack(fill=X, padx=24, pady=(0, 6))
         activity_group = ttk.Frame(header)
         activity_group.pack(side=RIGHT, pady=4)
         self.activity_label = ttk.Label(activity_group, text="", foreground=ACCENT, background=BACKGROUND, font=("Segoe UI Semibold", 10))
@@ -311,7 +318,7 @@ class EchoSightApp(tk.Tk):
         self.status_label.pack(side=LEFT)
 
         self.notebook = ttk.Notebook(self)
-        self.notebook.pack(fill=BOTH, expand=True, padx=16, pady=(0, 16))
+        self.notebook.pack(fill=BOTH, expand=True, padx=20, pady=(8, 20))
         self.notebook.pack_propagate(False)
         self.analyze_tab = ttk.Frame(self.notebook)
         self.results_tab = ttk.Frame(self.notebook)
@@ -331,8 +338,8 @@ class EchoSightApp(tk.Tk):
             self.attributes("-fullscreen", True)
 
     def _build_analyze_tab(self) -> None:
-        controls = ttk.Frame(self.analyze_tab, style="Panel.TFrame", padding=16)
-        controls.pack(fill=X, padx=8, pady=8)
+        controls = ttk.Frame(self.analyze_tab, style="Panel.TFrame", padding=18)
+        controls.pack(fill=X, padx=12, pady=12)
         for column in range(6):
             controls.columnconfigure(column, weight=1 if column == 2 else 0)
         self.load_model_button = RoundedButton(controls, "Load Model", self.load_model)
@@ -350,12 +357,12 @@ class EchoSightApp(tk.Tk):
         self._set_model_info("No model loaded")
 
         body = ttk.Frame(self.analyze_tab)
-        body.pack(fill=BOTH, expand=True, padx=8, pady=(0, 8))
+        body.pack(fill=BOTH, expand=True, padx=12, pady=(8, 12))
         body.columnconfigure(0, weight=1)
         body.columnconfigure(1, weight=3)
         body.rowconfigure(0, weight=1)
-        file_panel = ttk.Frame(body, style="Panel.TFrame", padding=12)
-        file_panel.grid(row=0, column=0, sticky="nsew", padx=(0, 8))
+        file_panel = ttk.Frame(body, style="Panel.TFrame", padding=14)
+        file_panel.grid(row=0, column=0, sticky="nsew", padx=(0, 12))
         ttk.Label(file_panel, text="Loaded images", style="PanelTitle.TLabel").pack(anchor="w", pady=(0, 8))
         self.image_list = tk.Listbox(file_panel, selectmode="extended", bg=PANEL, fg=TEXT, selectbackground="#2c6873", selectforeground=TEXT, relief="flat", highlightthickness=0, font=("Segoe UI", 9))
         self.image_list.pack(side=LEFT, fill=BOTH, expand=True)
@@ -364,11 +371,11 @@ class EchoSightApp(tk.Tk):
         self.image_list.configure(yscrollcommand=image_scroll.set)
         self.image_list.bind("<<ListboxSelect>>", self._on_image_selected)
 
-        preview_panel = ttk.Frame(body, style="Panel.TFrame", padding=12)
+        preview_panel = ttk.Frame(body, style="Panel.TFrame", padding=14)
         preview_panel.grid(row=0, column=1, sticky="nsew")
-        ttk.Label(preview_panel, text="Preview", style="PanelTitle.TLabel").pack(anchor="w", pady=(0, 8))
+        ttk.Label(preview_panel, text="Preview", style="PanelTitle.TLabel").pack(anchor="w", pady=(0, 10))
         preview_stage = ttk.Frame(preview_panel, style="Panel.TFrame")
-        preview_stage.pack(fill=BOTH, expand=True)
+        preview_stage.pack(fill=BOTH, expand=True, padx=0, pady=0)
         self.preview_canvas = ZoomPanCanvas(preview_stage)
         self.preview_canvas.pack(fill=BOTH, expand=True)
         self.preview_hint = ttk.Label(preview_stage, text="Import an image or TIFF to begin", style="Muted.TLabel")
@@ -422,8 +429,8 @@ class EchoSightApp(tk.Tk):
             self.preprocess_panel.place(relx=1.0, rely=1.0, anchor="se", x=-8, y=-8, width=365, height=245)
 
     def _build_results_tab(self) -> None:
-        toolbar = ttk.Frame(self.results_tab, style="Panel.TFrame", padding=12)
-        toolbar.pack(fill=X, padx=8, pady=8)
+        toolbar = ttk.Frame(self.results_tab, style="Panel.TFrame", padding=14)
+        toolbar.pack(fill=X, padx=12, pady=12)
         ttk.Label(toolbar, text="Confidence", style="PanelTitle.TLabel").pack(side=LEFT, padx=(0, 8))
         self.threshold = tk.DoubleVar(value=10.0)
         self.threshold_scale = ttk.Scale(toolbar, from_=1.0, to=100.0, variable=self.threshold, command=self._on_threshold_changed)
@@ -441,19 +448,19 @@ class EchoSightApp(tk.Tk):
         RoundedButton(toolbar, "Export All", self.export_all).pack(side=LEFT, padx=(8, 0))
 
         content = ttk.Frame(self.results_tab)
-        content.pack(fill=BOTH, expand=True, padx=8, pady=(0, 8))
+        content.pack(fill=BOTH, expand=True, padx=12, pady=(8, 12))
         content.columnconfigure(0, weight=1)
         content.columnconfigure(1, weight=3)
         content.columnconfigure(2, weight=1)
         content.rowconfigure(0, weight=1)
-        nav_panel = ttk.Frame(content, style="Panel.TFrame", padding=10)
-        nav_panel.grid(row=0, column=0, sticky="nsew", padx=(0, 8))
+        nav_panel = ttk.Frame(content, style="Panel.TFrame", padding=12)
+        nav_panel.grid(row=0, column=0, sticky="nsew", padx=(0, 12))
         ttk.Label(nav_panel, text="Frame / highest score", style="PanelTitle.TLabel").pack(anchor="w", pady=(0, 8))
         self.result_list = tk.Listbox(nav_panel, selectmode="extended", bg=PANEL, fg=TEXT, selectbackground="#2c6873", selectforeground=TEXT, relief="flat", highlightthickness=0, font=("Consolas", 9))
         self.result_list.pack(fill=BOTH, expand=True)
         self.result_list.bind("<<ListboxSelect>>", self._on_result_selected)
-        view_panel = ttk.Frame(content, style="Panel.TFrame", padding=12)
-        view_panel.grid(row=0, column=1, sticky="nsew", padx=(0, 8))
+        view_panel = ttk.Frame(content, style="Panel.TFrame", padding=14)
+        view_panel.grid(row=0, column=1, sticky="nsew", padx=(0, 12))
         self.result_canvas = ZoomPanCanvas(view_panel)
         self.result_canvas.pack(fill=BOTH, expand=True)
         self.result_hint = ttk.Label(view_panel, text="Run inference to see results", style="Muted.TLabel")
@@ -462,7 +469,7 @@ class EchoSightApp(tk.Tk):
         buttons.pack(fill=X, pady=(10, 0))
         RoundedButton(buttons, "Previous", self.previous_result).pack(side=LEFT)
         RoundedButton(buttons, "Next", self.next_result).pack(side=RIGHT)
-        detail_panel = ttk.Frame(content, style="Panel.TFrame", padding=12)
+        detail_panel = ttk.Frame(content, style="Panel.TFrame", padding=14)
         detail_panel.grid(row=0, column=2, sticky="nsew")
         ttk.Label(detail_panel, text="Detection details", style="PanelTitle.TLabel").pack(anchor="w", pady=(0, 8))
         self.details = tk.Text(detail_panel, bg=PANEL, fg=TEXT, insertbackground=TEXT, relief="flat", wrap="word", font=("Consolas", 9), state=DISABLED)
@@ -782,6 +789,7 @@ class EchoSightApp(tk.Tk):
     def _on_preprocess_changed(self) -> None:
         for name in self.preprocess_values:
             getattr(self, f"{name.lower()}_value_label").configure(text=self._preprocess_value_text(name))
+        self._refresh_preprocess_preview()
 
     def _apply_preprocessing(self) -> None:
         settings = self._current_preprocess_settings()
@@ -910,7 +918,7 @@ class EchoSightApp(tk.Tk):
             return
         best_index = max(range(len(self.results)), key=lambda index: self._result_confidence(self.results[index]))
         for index in range(self.result_list.size()):
-            self.result_list.itemconfigure(index, background="#b8e3c2" if index == best_index else PANEL, foreground="#10251a" if index == best_index else TEXT)
+            self.result_list.itemconfigure(index, background=ACCENT if index == best_index else PANEL, foreground="#0a0a0a" if index == best_index else TEXT)
 
     @staticmethod
     def _result_confidence(result: InferenceResult) -> float:

@@ -269,7 +269,6 @@ class EchoSightApp(tk.Tk):
         self._build_ui()
         self.after(100, self._poll_worker)
         self.after(120, self._animate_activity)
-        self.after(250, self._auto_load_default_model)
 
     def _configure_styles(self) -> None:
         self.style.configure("TFrame", background=BACKGROUND)
@@ -495,22 +494,6 @@ class EchoSightApp(tk.Tk):
         self.status_label.configure(text="Loading model...")
         self._start_activity("Loading model")
         threading.Thread(target=self._load_model_worker, args=(Path(folder),), daemon=True).start()
-
-    def _auto_load_default_model(self) -> None:
-        gui_root = Path(__file__).resolve().parent
-        candidates = [
-            Path(os.environ["GETI_DEFAULT_DEPLOYMENT"]) if os.environ.get("GETI_DEFAULT_DEPLOYMENT") else None,
-            gui_root.parent / "Test_Run_Detect",
-            gui_root / "portable" / "deployment",
-        ]
-        deployment_root = next((path for path in candidates if path and path.is_dir()), None)
-        if deployment_root is None:
-            self.status_label.configure(text="Ready - select a deployment model")
-            return
-        self._set_busy(True)
-        self.status_label.configure(text="Loading default model...")
-        self._start_activity("Loading model")
-        threading.Thread(target=self._load_model_worker, args=(deployment_root,), daemon=True).start()
 
     def _load_model_worker(self, folder: Path) -> None:
         try:

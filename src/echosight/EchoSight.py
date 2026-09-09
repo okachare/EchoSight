@@ -266,6 +266,8 @@ class EchoSightApp(tk.Tk):
         self.progress_animation_id: str | None = None
         self.preprocess_profiles: dict[int, tuple[float, float, float, float]] = {}
         self.results_display_mapping: list[int] = []
+        self.hidden_annotations: dict[int, set[int]] = {}  # Maps result_index -> set of hidden annotation indices
+        self.annotation_checkboxes: dict[int, tk.BooleanVar] = {}  # Maps annotation_index -> visibility state
         self._build_ui()
         self.after(100, self._poll_worker)
         self.after(120, self._animate_activity)
@@ -432,14 +434,6 @@ class EchoSightApp(tk.Tk):
     def _build_results_tab(self) -> None:
         toolbar = ttk.Frame(self.results_tab, style="Panel.TFrame", padding=14)
         toolbar.pack(fill=X, padx=12, pady=12)
-        ttk.Label(toolbar, text="Confidence", style="PanelTitle.TLabel").pack(side=LEFT, padx=(0, 8))
-        self.threshold = tk.DoubleVar(value=10.0)
-        self.threshold_scale = ttk.Scale(toolbar, from_=1.0, to=100.0, variable=self.threshold, command=self._on_threshold_changed)
-        self.threshold_scale.pack(side=LEFT, fill=X, expand=True, padx=(0, 10))
-        self.threshold_value = ttk.Label(toolbar, text="10%", style="Muted.TLabel")
-        self.threshold_value.pack(side=LEFT, padx=(0, 18))
-        self.hide_no_object = tk.BooleanVar(value=True)
-        ttk.Checkbutton(toolbar, text="Hide no-object", style="Review.TCheckbutton", variable=self.hide_no_object, command=self._refresh_result).pack(side=LEFT, padx=4)
         self.show_labels = tk.BooleanVar(value=True)
         ttk.Checkbutton(toolbar, text="Show labels", style="Review.TCheckbutton", variable=self.show_labels, command=self._refresh_result).pack(side=LEFT, padx=4)
         self.show_annotations = tk.BooleanVar(value=True)
@@ -483,9 +477,17 @@ class EchoSightApp(tk.Tk):
         RoundedButton(buttons, "Next", self.next_result).pack(side=RIGHT)
         detail_panel = ttk.Frame(content, style="Panel.TFrame", padding=14)
         detail_panel.grid(row=0, column=2, sticky="nsew")
-        ttk.Label(detail_panel, text="Detection details", style="PanelTitle.TLabel").pack(anchor="w", pady=(0, 8))
-        self.details = tk.Text(detail_panel, bg=PANEL, fg=TEXT, insertbackground=TEXT, relief="flat", wrap="word", font=("Consolas", 9), state=DISABLED)
-        self.details.pack(fill=BOTH, expand=True)
+        detail_label = ttk.Label(detail_panel, text="Annotations", style="PanelTitle.TLabel")
+        detail_label.pack(anchor="w", pady=(0, 8))
+        self.annotations_canvas = tk.Canvas(detail_panel, bg=PANEL, highlightthickness=0, highlightcolor=PANEL)
+        self.annotations_scrollbar = ttk.Scrollbar(detail_panel, orient=VERTICAL, command=self.annotations_canvas.yview)
+        self.annotations_frame = ttk.Frame(self.annotations_canvas, style="Panel.TFrame")
+        self.annotations_frame.bind("<Configure>", lambda event: self.annotations_canvas.configure(scrollregion=self.annotations_canvas.bbox("all")))
+        self.annotations_canvas.create_window((0, 0), window=self.annotations_frame, anchor="nw")
+        self.annotations_canvas.configure(yscrollcommand=self.annotations_scrollbar.set)
+        self.annotations_canvas.pack(fill=BOTH, expand=True, side=LEFT)
+        self.annotations_scrollbar.pack(fill=Y, side=RIGHT)
+        self.details = self.annotations_frame  # For legacy compatibility
 
     def load_model(self) -> None:
         folder = filedialog.askdirectory(title="Select Geti deployment parent folder")
@@ -962,15 +964,10 @@ class EchoSightApp(tk.Tk):
     def _refresh_result(self) -> None:
         if not self.results:
             return
-        self.threshold_value.configure(text=f"{self.threshold.get():.0f}%")
         result = self.results[self.current_result_index]
         annotated, details = self._render_result(result)
         self._show_image(annotated, self.result_canvas, self.result_hint)
-        if self.details is not None:
-            self.details.configure(state=NORMAL)
-            self.details.delete("1.0", END)
-            self.details.insert("1.0", details)
-            self.details.configure(state=DISABLED)
+        self._build_annotation_checkboxes(result, self.current_result_index)
 
     def _highlight_best_result(self) -> None:
         if not self.results or not self.results_display_mapping:
@@ -1012,11 +1009,93 @@ class EchoSightApp(tk.Tk):
             return len(np.asarray(bboxes))
         return 0
 
-
+    def _build_annotation_checkboxes(self, result: InferenceResult, result_index: int) -> None:
+        """Build checkboxes for all annotations in the current result frame."""
+        # Clear existing checkboxes
+        for widget in self.annotations_frame.winfo_children():
+            widget.destroy()
+        self.annotation_checkboxes.clear()
+        
+        if not result.prediction:
+            ttk.Label(self.annotations_frame, text="No predictions", style="Muted.TLabel").pack(anchor="w")
+            return
+        
+        # Collect all annotations (anomaly, classifications, detections)
+        annotations = []
+        
+        # Anomaly mask
+        anomaly_mask = getattr(result.prediction, "pred_mask", None)
+        if anomaly_mask is not None:
+            anomaly_label = getattr(result.prediction, "pred_label", None)
+            anomaly_score = getattr(result.prediction, "pred_score", None)
+            score = float(anomaly_score) if anomaly_score is not None else 0.0
+            annotations.append((0, f"Anomaly: {anomaly_label or 'unknown'} ({score:.1%})", "anomaly"))
+        
+        # Classifications
+        classifications = getattr(result.prediction, "top_labels", None)
+        if classifications:
+            for idx, item in enumerate(classifications, start=1):
+                if len(item) >= 3:
+                    _, label, score = item[:3]
+                else:
+                    label, score = item[0], item[1]
+                score = float(score)
+                annotations.append((idx, f"{label}: {score:.1%}", "classification"))
+        
+        # Detections
+        objects = getattr(result.prediction, "objects", None)
+        detections = []
+        if objects is not None:
+            detections = [(item.xmin, item.ymin, item.xmax, item.ymax, item.score, item.str_label) for item in objects]
+        else:
+            boxes = np.asarray(getattr(result.prediction, "bboxes", []))
+            scores = np.asarray(getattr(result.prediction, "scores", []))
+            labels = list(getattr(result.prediction, "label_names", []))
+            if not labels and hasattr(result.prediction, "labels"):
+                numeric = np.asarray(result.prediction.labels)
+                labels = [self.deployment.labels[int(item)] if self.deployment and int(item) < len(self.deployment.labels) else str(item) for item in numeric]
+            if len(boxes) > 0 and len(scores) > 0:
+                for box, score in zip(boxes, scores):
+                    x_min, y_min, x_max, y_max = [int(v) for v in box]
+                    label_idx = len(labels) - 1 if labels else 0
+                    label = labels[min(label_idx, len(labels)-1)] if labels else "unknown"
+                    detections.append((x_min, y_min, x_max, y_max, float(score), label))
+        
+        ann_idx = len(annotations)
+        for det_idx, (x_min, y_min, x_max, y_max, score, label) in enumerate(detections):
+            annotations.append((ann_idx + det_idx, f"{label}: {score:.1%} [{x_min},{y_min}-{x_max},{y_max}]", "detection"))
+        
+        # Get hidden set for this result
+        hidden_set = self.hidden_annotations.get(result_index, set())
+        
+        # Create checkboxes
+        if not annotations:
+            ttk.Label(self.annotations_frame, text="No annotations", style="Muted.TLabel").pack(anchor="w")
+            return
+        
+        for ann_idx, text, ann_type in annotations:
+            var = tk.BooleanVar(value=(ann_idx not in hidden_set))
+            self.annotation_checkboxes[ann_idx] = var
+            
+            def on_toggle(idx=ann_idx, result_idx=result_index, v=var):
+                if v.get():
+                    self.hidden_annotations.get(result_idx, set()).discard(idx)
+                else:
+                    self.hidden_annotations.setdefault(result_idx, set()).add(idx)
+                self._refresh_result()
+            
+            cb = ttk.Checkbutton(
+                self.annotations_frame,
+                text=text,
+                variable=var,
+                command=on_toggle,
+                style="Review.TCheckbutton"
+            )
+            cb.pack(anchor="w", pady=2)
 
     def _on_threshold_changed(self, _value: str) -> None:
-        self.threshold_value.configure(text=f"{self.threshold.get():.0f}%")
-        self._refresh_result()
+        # Deprecated - threshold slider removed
+        pass
 
     def _render_result(self, result: InferenceResult) -> tuple[np.ndarray, str]:
         source_image = result.frame.analysis_image_rgb if result.frame.analysis_image_rgb is not None else result.frame.image_rgb
@@ -1024,35 +1103,42 @@ class EchoSightApp(tk.Tk):
         if result.error:
             return result.frame.image_rgb, f"Error\n{result.error}"
         prediction = result.prediction
+        hidden_set = self.hidden_annotations.get(self.current_result_index, set())
+        
+        # Handle anomaly mask
         anomaly_mask = getattr(prediction, "pred_mask", None)
         anomaly_score = getattr(prediction, "pred_score", None)
         anomaly_label = getattr(prediction, "pred_label", None)
         if anomaly_mask is not None and anomaly_score is not None:
             score = float(anomaly_score)
             mask = np.asarray(anomaly_mask > 0, dtype=np.uint8)
-            if self.show_annotations.get() and mask.shape == image.shape[:2] and score >= self.threshold.get() / 100.0:
+            # Anomaly annotations use index 0
+            if self.show_annotations.get() and mask.shape == image.shape[:2] and 0 not in hidden_set:
                 overlay = image.copy()
                 overlay[mask.astype(bool)] = (80, 170, 220)
                 image = cv2.addWeighted(image, 0.65, overlay, 0.35, 0)
-            if self.show_labels.get():
+            if self.show_labels.get() and 0 not in hidden_set:
                 text = f"{anomaly_label or 'Anomaly'} {score:.1%}"
                 cv2.putText(image, text, (8, 28), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (220, 245, 248), 1, cv2.LINE_AA)
-            details = [f"Source: {result.frame.source.name}", f"Frame: {result.frame.frame_number}", f"Classification: {anomaly_label or 'unknown'}", f"Score: {score:.1%}", f"Mask shown: {'yes' if score >= self.threshold.get() / 100.0 else 'no'}"]
-            return cv2.cvtColor(image, cv2.COLOR_BGR2RGB), "\n".join(details)
+            return cv2.cvtColor(image, cv2.COLOR_BGR2RGB), f"Source: {result.frame.source.name}\nFrame: {result.frame.frame_number}\nClassification: {anomaly_label or 'unknown'}\nScore: {score:.1%}"
+        
+        # Handle classifications
         classifications = getattr(prediction, "top_labels", None)
         if classifications:
-            lines = [f"Source: {result.frame.source.name}", f"Frame: {result.frame.frame_number}", "Classifications:", ""]
             for index, item in enumerate(classifications, start=1):
+                if index in hidden_set:
+                    continue
                 if len(item) >= 3:
                     _, label, score = item[:3]
                 else:
                     label, score = item[0], item[1]
                 score = float(score)
-                lines.append(f"{index}. {label}: {score:.1%}")
                 if self.show_labels.get():
                     text = f"{label} {score:.1%}"
                     cv2.putText(image, text, (8, 28 + index * 24), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (220, 245, 248), 1, cv2.LINE_AA)
-            return cv2.cvtColor(image, cv2.COLOR_BGR2RGB), "\n".join(lines)
+            return cv2.cvtColor(image, cv2.COLOR_BGR2RGB), f"Source: {result.frame.source.name}\nFrame: {result.frame.frame_number}\nClassifications visible"
+        
+        # Handle detections (both instance segmentation and object detection)
         objects = getattr(prediction, "objects", None)
         masks = getattr(prediction, "masks", None)
         if self.show_annotations.get() and masks is not None:
@@ -1064,15 +1150,9 @@ class EchoSightApp(tk.Tk):
                     if binary_mask.shape == image.shape[:2]:
                         overlay[binary_mask.astype(bool)] = (80, 170, 220)
                 image = cv2.addWeighted(image, 0.65, overlay, 0.35, 0)
+        
         if objects is not None:
-            detections = [
-                (
-                    (item.xmin, item.ymin, item.xmax, item.ymax),
-                    item.score,
-                    item.str_label,
-                )
-                for item in objects
-            ]
+            detections = [(item.xmin, item.ymin, item.xmax, item.ymax, item.score, item.str_label) for item in objects]
         else:
             boxes = np.asarray(getattr(prediction, "bboxes", []))
             scores = np.asarray(getattr(prediction, "scores", []))
@@ -1080,16 +1160,19 @@ class EchoSightApp(tk.Tk):
             if not labels:
                 numeric = np.asarray(getattr(prediction, "labels", []))
                 labels = [self.deployment.labels[int(item)] if self.deployment and int(item) < len(self.deployment.labels) else str(item) for item in numeric]
-            detections = zip(boxes, scores, labels)
-        detections = list(detections)
+            detections = [(box[0], box[1], box[2], box[3], float(score), label) for box, score, label in zip(boxes, scores, labels)]
+        
         lines = [f"Source: {result.frame.source.name}", f"Frame: {result.frame.frame_number}", f"Detections: {len(detections)}", ""]
         visible = 0
-        for box, score, label in detections:
-            score = float(score)
-            if score < self.threshold.get() / 100.0 or (self.hide_no_object.get() and str(label).lower() == "no_object"):
+        # Anomalies use index 0, classifications use 1+, detections use later indices
+        ann_idx_offset = len(getattr(prediction, "top_labels", [])) + 1
+        
+        for det_idx, (x_min, y_min, x_max, y_max, score, label) in enumerate(detections):
+            ann_idx = ann_idx_offset + det_idx
+            if ann_idx in hidden_set:
                 continue
             visible += 1
-            x_min, y_min, x_max, y_max = [int(value) for value in box]
+            x_min, y_min, x_max, y_max = [int(value) for value in (x_min, y_min, x_max, y_max)]
             if self.show_annotations.get():
                 cv2.rectangle(image, (x_min, y_min), (x_max, y_max), (41, 182, 199), 2)
             text = f"{label} {score:.1%}"

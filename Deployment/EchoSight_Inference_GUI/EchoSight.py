@@ -470,6 +470,7 @@ class EchoSightApp(tk.Tk):
         self.result_tree.bind("<<TreeviewSelect>>", self._on_result_selected)
         self.sort_column = "Frame"
         self.sort_reverse = False
+        self._update_tree_headings()
         view_panel = ttk.Frame(content, style="Panel.TFrame", padding=14)
         view_panel.grid(row=0, column=1, sticky="nsew", padx=(0, 12))
         self.result_canvas = ZoomPanCanvas(view_panel)
@@ -772,13 +773,27 @@ class EchoSightApp(tk.Tk):
         region = self.result_tree.identify_region(event.x, event.y)
         column = self.result_tree.identify_column(event.x)
         if region == "heading" and column:
-            column_name = self.result_tree.heading(column)["text"]
+            heading_text = self.result_tree.heading(column)["text"]
+            # Strip triangle indicators from heading to get pure column name
+            column_name = heading_text.replace(" ▲", "").replace(" ▼", "")
             if self.sort_column == column_name:
                 self.sort_reverse = not self.sort_reverse
             else:
                 self.sort_column = column_name
                 self.sort_reverse = False
+            self._update_tree_headings()
             self._populate_result_tree()
+
+    def _update_tree_headings(self) -> None:
+        """Update column headings with sort direction indicators (▲ ascending, ▼ descending)."""
+        columns = ["Frame", "Confidence", "Annotations"]
+        for column in columns:
+            if column == self.sort_column:
+                indicator = " ▼" if self.sort_reverse else " ▲"
+                text = f"{column}{indicator}"
+            else:
+                text = column
+            self.result_tree.heading(column, text=text)
 
     def _populate_result_tree(self) -> None:
         if not self.results:

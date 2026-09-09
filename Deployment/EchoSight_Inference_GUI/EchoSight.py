@@ -460,7 +460,7 @@ class EchoSightApp(tk.Tk):
         ttk.Label(nav_panel, text="Results", style="PanelTitle.TLabel").pack(anchor="w", pady=(0, 8))
         self.result_tree = ttk.Treeview(nav_panel, columns=("Frame", "Confidence", "Annotations"), height=20, selectmode="extended")
         self.result_tree.column("#0", width=0, stretch=False)
-        self.result_tree.column("Frame", anchor="center", width=70)
+        self.result_tree.column("Frame", anchor="w", width=250)
         self.result_tree.column("Confidence", anchor="center", width=85)
         self.result_tree.column("Annotations", anchor="center", width=75)
         self.result_tree.heading("Frame", text="Frame")
@@ -802,16 +802,16 @@ class EchoSightApp(tk.Tk):
             return
         for item in self.result_tree.get_children():
             self.result_tree.delete(item)
-        sort_map = {"Frame": lambda i: self.results[i].frame.frame_number, "Confidence": lambda i: self._result_confidence(self.results[i]), "Annotations": lambda i: self._count_annotations(self.results[i])}
+        sort_map = {"Frame": lambda i: self.results[i].frame.source.name, "Confidence": lambda i: self._result_confidence(self.results[i]), "Annotations": lambda i: self._count_annotations(self.results[i])}
         sorted_indices = sorted(range(len(self.results)), key=sort_map.get(self.sort_column, sort_map["Frame"]), reverse=(self.sort_reverse if self.sort_column in ("Confidence", "Annotations") else False))
         self.results_display_mapping = sorted_indices
         for display_idx, result_idx in enumerate(sorted_indices):
             result = self.results[result_idx]
-            frame_num = result.frame.frame_number
+            frame_name = self._result_title(result)
             confidence = self._result_confidence(result)
             annotations = self._count_annotations(result)
             conf_text = f"{confidence:.1%}" if result.prediction is not None and not result.error else "--"
-            self.result_tree.insert("", "end", values=(frame_num, conf_text, annotations))
+            self.result_tree.insert("", "end", values=(frame_name, conf_text, annotations))
         self._highlight_best_result()
 
     def _on_image_selected(self, _event: object) -> None:

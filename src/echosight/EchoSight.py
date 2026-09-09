@@ -1,13 +1,3 @@
-"""EchoSight - Model-agnostic image inference and inspection GUI.
-
-A standalone, portable application for running Intel Geti OpenVINO model deployments
-on images and multi-frame TIFF files with real-time inference and preprocessing.
-
-Primary author: Omkar Kachare, 11943102
-Version: 1.0.0
-License: MIT
-"""
-
 from __future__ import annotations
 
 import csv
@@ -30,15 +20,16 @@ from PIL import Image, ImageTk, ImageSequence
 
 
 SUPPORTED_EXTENSIONS = {".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff", ".webp"}
-BACKGROUND = "#14181d"
-PANEL = "#1d232b"
-PANEL_LIGHT = "#252d36"
-TEXT = "#edf2f7"
-MUTED = "#9aa8b6"
-ACCENT = "#29b6c7"
-SUCCESS = "#39c27f"
-WARNING = "#e7ad4b"
-DANGER = "#dc6470"
+BACKGROUND = "#0f0f0f"
+PANEL = "#1a1a1a"
+PANEL_LIGHT = "#252525"
+TEXT = "#f5f5f5"
+MUTED = "#a0a0a0"
+ACCENT = "#00d4aa"
+SECONDARY_ACCENT = "#ff6b35"
+SUCCESS = "#00d4aa"
+WARNING = "#ff6b35"
+DANGER = "#ff5555"
 
 
 @dataclass
@@ -58,12 +49,12 @@ class InferenceResult:
 
 class RoundedButton(tk.Canvas):
     COLORS = {
-        "default": ("#2b3540", "#41515f", "#9fb3c1", "#f0f5f7"),
-        "run_all": ("#9ed9ad", "#bce9c6", "#386f4a", "#0d3a15"),
-        "run_current": ("#edc77f", "#f5dcae", "#886523", "#4a3a0a"),
-        "cancel": ("#eaa0aa", "#f4bec5", "#914a56", "#4a1025"),
-        "apply": ("#73c695", "#a3dfb8", "#327a51", "#0d3a20"),
-        "preprocess": ("#c6e3e8", "#e0f2f4", "#568c96", "#1a4a55"),
+        "default": ("#3d3d3d", "#4a4a4a", "#707070", "#ffffff"),
+        "run_all": ("#00d4aa", "#33ddb8", "#008060", "#0a0a0a"),
+        "run_current": ("#ff6b35", "#ff8a52", "#c04020", "#0a0a0a"),
+        "cancel": ("#ff5555", "#ff7575", "#cc0000", "#0a0a0a"),
+        "apply": ("#00d4aa", "#33ddb8", "#008060", "#0a0a0a"),
+        "preprocess": ("#252525", "#333333", "#666666", "#d4d4d4"),
     }
 
     def __init__(self, parent: tk.Misc, text: str, command: object, variant: str = "default", width: int | None = None, **kwargs: object) -> None:
@@ -80,7 +71,7 @@ class RoundedButton(tk.Canvas):
             button_width = width
         else:
             button_width = 110
-        super().__init__(parent, height=34, width=button_width, highlightthickness=0, bd=0, bg=BACKGROUND, cursor="hand2", **kwargs)
+        super().__init__(parent, height=36, width=button_width, highlightthickness=0, bd=0, bg=BACKGROUND, cursor="hand2", **kwargs)
         self.bind("<Configure>", self._on_configure)
         self.bind("<Enter>", self._on_enter)
         self.bind("<Leave>", self._on_leave)
@@ -93,8 +84,8 @@ class RoundedButton(tk.Canvas):
 
     def _draw(self) -> None:
         normal, hover, outline, foreground = self.COLORS.get(self.variant, self.COLORS["default"])
-        color = hover if self._hover and self.enabled else normal if self.enabled else "#59636a"
-        text_color = foreground if self.enabled else "#a8afb3"
+        color = hover if self._hover and self.enabled else normal if self.enabled else "#505050"
+        text_color = foreground if self.enabled else "#808080"
         self.delete("all")
         # Get canvas dimensions
         canvas_width = self.winfo_width()
@@ -103,10 +94,18 @@ class RoundedButton(tk.Canvas):
             canvas_width = self.winfo_reqwidth()
         if canvas_height <= 1:
             canvas_height = self.winfo_reqheight()
-        # Simple rectangle with soft edge (1px border)
-        self.create_rectangle(0, 0, canvas_width, canvas_height, fill=color, outline=outline, width=1)
+        # Draw rounded rectangle with 8px radius
+        radius = 8
+        # Draw rounded background
+        self.create_oval(0, 0, radius * 2, radius * 2, fill=color, outline="")
+        self.create_oval(canvas_width - radius * 2, 0, canvas_width, radius * 2, fill=color, outline="")
+        self.create_oval(0, canvas_height - radius * 2, radius * 2, canvas_height, fill=color, outline="")
+        self.create_oval(canvas_width - radius * 2, canvas_height - radius * 2, canvas_width, canvas_height, fill=color, outline="")
+        self.create_rectangle(radius, 0, canvas_width - radius, canvas_height, fill=color, outline="")
+        self.create_rectangle(0, radius, canvas_width, canvas_height - radius, fill=color, outline="")
         # Draw text centered
         self.create_text(canvas_width // 2, canvas_height // 2, text=self.label, fill=text_color, font=self.font, anchor="center")
+
 
     def _on_enter(self, _event: object) -> None:
         self._hover = True
@@ -132,7 +131,7 @@ class RoundedButton(tk.Canvas):
 
 class ZoomPanCanvas(tk.Canvas):
     def __init__(self, parent: tk.Misc, **kwargs: object) -> None:
-        super().__init__(parent, background="#101419", highlightthickness=0, **kwargs)
+        super().__init__(parent, background="#151515", highlightthickness=0, **kwargs)
         self.source_image: Image.Image | None = None
         self.photo: ImageTk.PhotoImage | None = None
         self.zoom = 1.0
@@ -266,52 +265,52 @@ class EchoSightApp(tk.Tk):
         self.details: tk.Text | None = None
         self.progress_animation_id: str | None = None
         self.preprocess_profiles: dict[int, tuple[float, float, float, float]] = {}
+        self.results_display_mapping: list[int] = []
         self._build_ui()
         self.after(100, self._poll_worker)
         self.after(120, self._animate_activity)
-        self.after(250, self._auto_load_default_model)
 
     def _configure_styles(self) -> None:
         self.style.configure("TFrame", background=BACKGROUND)
-        self.style.configure("Panel.TFrame", background=PANEL)
+        self.style.configure("Panel.TFrame", background=PANEL, relief="flat")
         self.style.configure("TLabel", background=BACKGROUND, foreground=TEXT, font=("Segoe UI", 10))
         self.style.configure("Muted.TLabel", background=BACKGROUND, foreground=MUTED, font=("Segoe UI", 9))
-        self.style.configure("PanelTitle.TLabel", background=PANEL, foreground=TEXT, font=("Segoe UI Semibold", 11))
-        self.style.configure("Header.TLabel", background=BACKGROUND, foreground=TEXT, font=("Segoe UI Semibold", 18))
-        button_options = {"borderwidth": 2, "relief": "solid", "padding": (12, 8), "font": ("Segoe UI Semibold", 10)}
+        self.style.configure("PanelTitle.TLabel", background=PANEL, foreground=TEXT, font=("Segoe UI Semibold", 12), padding=(0, 2))
+        self.style.configure("Header.TLabel", background=BACKGROUND, foreground=TEXT, font=("Segoe UI Semibold", 24))
+        button_options = {"borderwidth": 0, "relief": "flat", "padding": (14, 10), "font": ("Segoe UI Semibold", 10)}
         self.style.configure("TButton", background=PANEL_LIGHT, foreground=TEXT, **button_options)
-        self.style.map("TButton", background=[("pressed", ACCENT), ("active", "#354452"), ("disabled", "#30353b")], foreground=[("pressed", "#081217")])
-        self.style.configure("RunAll.TButton", background="#b8e3c2", foreground="#10251a", bordercolor="#6d9f7a", lightcolor="#d9f0de", darkcolor="#6d9f7a", **button_options)
-        self.style.map("RunAll.TButton", background=[("active", "#ccebd2"), ("pressed", "#8fc99b"), ("disabled", "#68786d")])
-        self.style.configure("RunCurrent.TButton", background="#f2d19b", foreground="#35250d", bordercolor="#b08b45", lightcolor="#fae8c4", darkcolor="#b08b45", **button_options)
-        self.style.map("RunCurrent.TButton", background=[("active", "#f7dfb4"), ("pressed", "#dfb96f"), ("disabled", "#817664")])
-        self.style.configure("Cancel.TButton", background="#efb0b8", foreground="#3b1017", bordercolor="#b96a75", lightcolor="#f8d3d8", darkcolor="#b96a75", **button_options)
-        self.style.map("Cancel.TButton", background=[("active", "#f5c4ca"), ("pressed", "#df8994"), ("disabled", "#80696c")])
-        self.style.configure("Preprocess.TButton", background="#d5e7ec", foreground="#10252a", bordercolor="#7ba4ad", lightcolor="#eef8fa", darkcolor="#7ba4ad", padding=(4, 4), font=("Segoe UI Symbol", 12))
-        self.style.map("Preprocess.TButton", background=[("active", "#e6f4f6"), ("pressed", "#a9d0d7")])
-        self.style.configure("Apply.TButton", background="#79c99a", foreground="#10251a", bordercolor="#4d9a6d", lightcolor="#b9e8c8", darkcolor="#4d9a6d", padding=(10, 5), font=("Segoe UI Semibold", 9))
-        self.style.map("Apply.TButton", background=[("active", "#91d9aa"), ("pressed", "#5caf7d")])
-        self.style.configure("PreviewBadge.TLabel", background="#10252a", foreground="#d9f5f3", padding=(8, 4), font=("Consolas", 8))
-        self.style.configure("Review.TCheckbutton", background=PANEL, foreground=TEXT, padding=(8, 5), font=("Segoe UI Semibold", 9))
-        self.style.map("Review.TCheckbutton", foreground=[("active", TEXT), ("disabled", MUTED)], background=[("active", PANEL_LIGHT)])
+        self.style.map("TButton", background=[("pressed", "#404040"), ("active", "#333333"), ("disabled", "#252525")], foreground=[("pressed", TEXT), ("disabled", "#606060")])
+        self.style.configure("RunAll.TButton", background="#00d4aa", foreground="#0a0a0a", bordercolor="#008060", lightcolor="#00d4aa", darkcolor="#008060", **button_options)
+        self.style.map("RunAll.TButton", background=[("active", "#1ae5bb"), ("pressed", "#00b890"), ("disabled", "#4a7570")])
+        self.style.configure("RunCurrent.TButton", background="#ff6b35", foreground="#0a0a0a", bordercolor="#cc4400", lightcolor="#ff6b35", darkcolor="#cc4400", **button_options)
+        self.style.map("RunCurrent.TButton", background=[("active", "#ff8252"), ("pressed", "#e55a24"), ("disabled", "#8c5a4a")])
+        self.style.configure("Cancel.TButton", background="#ff5555", foreground="#0a0a0a", bordercolor="#cc0000", lightcolor="#ff5555", darkcolor="#cc0000", **button_options)
+        self.style.map("Cancel.TButton", background=[("active", "#ff7575"), ("pressed", "#dd2222"), ("disabled", "#8c5555")])
+        self.style.configure("Preprocess.TButton", background="#333333", foreground="#d4d4d4", bordercolor="#555555", lightcolor="#404040", darkcolor="#252525", padding=(6, 6), font=("Segoe UI Symbol", 12))
+        self.style.map("Preprocess.TButton", background=[("active", "#404040"), ("pressed", "#252525")])
+        self.style.configure("Apply.TButton", background="#00d4aa", foreground="#0a0a0a", bordercolor="#008060", lightcolor="#00d4aa", darkcolor="#008060", padding=(10, 8), font=("Segoe UI Semibold", 10))
+        self.style.map("Apply.TButton", background=[("active", "#1ae5bb"), ("pressed", "#00b890")])
+        self.style.configure("PreviewBadge.TLabel", background="#151515", foreground="#00d4aa", padding=(8, 6), font=("Consolas", 8))
+        self.style.configure("Review.TCheckbutton", background=PANEL, foreground=TEXT, padding=(8, 6), font=("Segoe UI Semibold", 9))
+        self.style.map("Review.TCheckbutton", foreground=[("active", ACCENT), ("disabled", MUTED)], background=[("active", PANEL_LIGHT)])
         self.style.configure("TNotebook", background=BACKGROUND, borderwidth=0, tabmargins=(0, 0, 0, 0), padding=0)
-        self.style.configure("TNotebook.Tab", background=PANEL_LIGHT, foreground=MUTED, padding=(14, 8), font=("Segoe UI Semibold", 10), borderwidth=2, relief="solid")
-        self.style.map("TNotebook.Tab", background=[("selected", ACCENT), ("active", "#354452")], foreground=[("selected", "#081217"), ("active", TEXT)], padding=[("selected", (22, 13)), ("!selected", (14, 8))])
-        self.style.configure("Horizontal.TScale", troughcolor="#0e1115", background="#5fc6d1", sliderlength=18, borderwidth=0)
-        self.style.configure("Horizontal.TProgressbar", troughcolor="#0e1115", background=ACCENT, borderwidth=0, thickness=12)
-        self.style.configure("Treeview", background=PANEL, fieldbackground=PANEL, foreground=TEXT, rowheight=28, borderwidth=0)
+        self.style.configure("TNotebook.Tab", background=PANEL_LIGHT, foreground=MUTED, padding=(16, 10), font=("Segoe UI Semibold", 10), borderwidth=0, relief="flat")
+        self.style.map("TNotebook.Tab", background=[("selected", ACCENT), ("active", "#333333")], foreground=[("selected", "#0a0a0a"), ("active", TEXT)], padding=[("selected", (24, 12)), ("!selected", (16, 10))])
+        self.style.configure("Horizontal.TScale", troughcolor="#1a1a1a", background=ACCENT, sliderlength=16, borderwidth=0)
+        self.style.configure("Horizontal.TProgressbar", troughcolor="#1a1a1a", background=ACCENT, borderwidth=0, thickness=14)
+        self.style.configure("Treeview", background=PANEL, fieldbackground=PANEL, foreground=TEXT, rowheight=30, borderwidth=0)
         self.style.configure("Treeview.Heading", background=PANEL_LIGHT, foreground=MUTED, font=("Segoe UI Semibold", 9))
-        self.style.map("Treeview", background=[("selected", "#2c6873")])
+        self.style.map("Treeview", background=[("selected", ACCENT)], foreground=[("selected", "#0a0a0a")])
+        self.style.configure("best.Treeview", background=ACCENT, foreground="#0a0a0a")
 
     def _build_ui(self) -> None:
         header = ttk.Frame(self)
-        header.pack(fill=X, padx=22, pady=(18, 8))
+        header.pack(fill=X, padx=24, pady=(20, 10))
         title_group = ttk.Frame(header)
         title_group.pack(side=LEFT)
         ttk.Label(title_group, text="EchoSight", style="Header.TLabel").pack(anchor="w")
-        ttk.Label(title_group, text="Model-agnostic image inference and inspection", style="Muted.TLabel").pack(anchor="w", pady=(2, 0))
         self.style.configure("AccentLine.TFrame", background=ACCENT)
-        ttk.Frame(self, height=2, style="AccentLine.TFrame").pack(fill=X, padx=22, pady=(0, 4))
+        ttk.Frame(self, height=3, style="AccentLine.TFrame").pack(fill=X, padx=24, pady=(0, 6))
         activity_group = ttk.Frame(header)
         activity_group.pack(side=RIGHT, pady=4)
         self.activity_label = ttk.Label(activity_group, text="", foreground=ACCENT, background=BACKGROUND, font=("Segoe UI Semibold", 10))
@@ -320,7 +319,7 @@ class EchoSightApp(tk.Tk):
         self.status_label.pack(side=LEFT)
 
         self.notebook = ttk.Notebook(self)
-        self.notebook.pack(fill=BOTH, expand=True, padx=16, pady=(0, 16))
+        self.notebook.pack(fill=BOTH, expand=True, padx=20, pady=(8, 20))
         self.notebook.pack_propagate(False)
         self.analyze_tab = ttk.Frame(self.notebook)
         self.results_tab = ttk.Frame(self.notebook)
@@ -340,8 +339,8 @@ class EchoSightApp(tk.Tk):
             self.attributes("-fullscreen", True)
 
     def _build_analyze_tab(self) -> None:
-        controls = ttk.Frame(self.analyze_tab, style="Panel.TFrame", padding=16)
-        controls.pack(fill=X, padx=8, pady=8)
+        controls = ttk.Frame(self.analyze_tab, style="Panel.TFrame", padding=18)
+        controls.pack(fill=X, padx=12, pady=12)
         for column in range(6):
             controls.columnconfigure(column, weight=1 if column == 2 else 0)
         self.load_model_button = RoundedButton(controls, "Load Model", self.load_model)
@@ -359,12 +358,12 @@ class EchoSightApp(tk.Tk):
         self._set_model_info("No model loaded")
 
         body = ttk.Frame(self.analyze_tab)
-        body.pack(fill=BOTH, expand=True, padx=8, pady=(0, 8))
+        body.pack(fill=BOTH, expand=True, padx=12, pady=(8, 12))
         body.columnconfigure(0, weight=1)
         body.columnconfigure(1, weight=3)
         body.rowconfigure(0, weight=1)
-        file_panel = ttk.Frame(body, style="Panel.TFrame", padding=12)
-        file_panel.grid(row=0, column=0, sticky="nsew", padx=(0, 8))
+        file_panel = ttk.Frame(body, style="Panel.TFrame", padding=14)
+        file_panel.grid(row=0, column=0, sticky="nsew", padx=(0, 12))
         ttk.Label(file_panel, text="Loaded images", style="PanelTitle.TLabel").pack(anchor="w", pady=(0, 8))
         self.image_list = tk.Listbox(file_panel, selectmode="extended", bg=PANEL, fg=TEXT, selectbackground="#2c6873", selectforeground=TEXT, relief="flat", highlightthickness=0, font=("Segoe UI", 9))
         self.image_list.pack(side=LEFT, fill=BOTH, expand=True)
@@ -373,11 +372,11 @@ class EchoSightApp(tk.Tk):
         self.image_list.configure(yscrollcommand=image_scroll.set)
         self.image_list.bind("<<ListboxSelect>>", self._on_image_selected)
 
-        preview_panel = ttk.Frame(body, style="Panel.TFrame", padding=12)
+        preview_panel = ttk.Frame(body, style="Panel.TFrame", padding=14)
         preview_panel.grid(row=0, column=1, sticky="nsew")
-        ttk.Label(preview_panel, text="Preview", style="PanelTitle.TLabel").pack(anchor="w", pady=(0, 8))
+        ttk.Label(preview_panel, text="Preview", style="PanelTitle.TLabel").pack(anchor="w", pady=(0, 10))
         preview_stage = ttk.Frame(preview_panel, style="Panel.TFrame")
-        preview_stage.pack(fill=BOTH, expand=True)
+        preview_stage.pack(fill=BOTH, expand=True, padx=0, pady=0)
         self.preview_canvas = ZoomPanCanvas(preview_stage)
         self.preview_canvas.pack(fill=BOTH, expand=True)
         self.preview_hint = ttk.Label(preview_stage, text="Import an image or TIFF to begin", style="Muted.TLabel")
@@ -431,8 +430,8 @@ class EchoSightApp(tk.Tk):
             self.preprocess_panel.place(relx=1.0, rely=1.0, anchor="se", x=-8, y=-8, width=365, height=245)
 
     def _build_results_tab(self) -> None:
-        toolbar = ttk.Frame(self.results_tab, style="Panel.TFrame", padding=12)
-        toolbar.pack(fill=X, padx=8, pady=8)
+        toolbar = ttk.Frame(self.results_tab, style="Panel.TFrame", padding=14)
+        toolbar.pack(fill=X, padx=12, pady=12)
         ttk.Label(toolbar, text="Confidence", style="PanelTitle.TLabel").pack(side=LEFT, padx=(0, 8))
         self.threshold = tk.DoubleVar(value=10.0)
         self.threshold_scale = ttk.Scale(toolbar, from_=1.0, to=100.0, variable=self.threshold, command=self._on_threshold_changed)
@@ -450,19 +449,30 @@ class EchoSightApp(tk.Tk):
         RoundedButton(toolbar, "Export All", self.export_all).pack(side=LEFT, padx=(8, 0))
 
         content = ttk.Frame(self.results_tab)
-        content.pack(fill=BOTH, expand=True, padx=8, pady=(0, 8))
+        content.pack(fill=BOTH, expand=True, padx=12, pady=(8, 12))
         content.columnconfigure(0, weight=1)
         content.columnconfigure(1, weight=3)
         content.columnconfigure(2, weight=1)
         content.rowconfigure(0, weight=1)
-        nav_panel = ttk.Frame(content, style="Panel.TFrame", padding=10)
-        nav_panel.grid(row=0, column=0, sticky="nsew", padx=(0, 8))
-        ttk.Label(nav_panel, text="Frame / highest score", style="PanelTitle.TLabel").pack(anchor="w", pady=(0, 8))
-        self.result_list = tk.Listbox(nav_panel, selectmode="extended", bg=PANEL, fg=TEXT, selectbackground="#2c6873", selectforeground=TEXT, relief="flat", highlightthickness=0, font=("Consolas", 9))
-        self.result_list.pack(fill=BOTH, expand=True)
-        self.result_list.bind("<<ListboxSelect>>", self._on_result_selected)
-        view_panel = ttk.Frame(content, style="Panel.TFrame", padding=12)
-        view_panel.grid(row=0, column=1, sticky="nsew", padx=(0, 8))
+        nav_panel = ttk.Frame(content, style="Panel.TFrame", padding=12)
+        nav_panel.grid(row=0, column=0, sticky="nsew", padx=(0, 12))
+        ttk.Label(nav_panel, text="Results", style="PanelTitle.TLabel").pack(anchor="w", pady=(0, 8))
+        self.result_tree = ttk.Treeview(nav_panel, columns=("Frame", "Confidence", "Annotations"), height=20, selectmode="extended")
+        self.result_tree.column("#0", width=0, stretch=False)
+        self.result_tree.column("Frame", anchor="w", width=250)
+        self.result_tree.column("Confidence", anchor="center", width=85)
+        self.result_tree.column("Annotations", anchor="center", width=75)
+        self.result_tree.heading("Frame", text="Frame")
+        self.result_tree.heading("Confidence", text="Confidence")
+        self.result_tree.heading("Annotations", text="Annotations")
+        self.result_tree.pack(fill=BOTH, expand=True)
+        self.result_tree.bind("<Button-1>", self._on_tree_click)
+        self.result_tree.bind("<<TreeviewSelect>>", self._on_result_selected)
+        self.sort_column = "Frame"
+        self.sort_reverse = False
+        self._update_tree_headings()
+        view_panel = ttk.Frame(content, style="Panel.TFrame", padding=14)
+        view_panel.grid(row=0, column=1, sticky="nsew", padx=(0, 12))
         self.result_canvas = ZoomPanCanvas(view_panel)
         self.result_canvas.pack(fill=BOTH, expand=True)
         self.result_hint = ttk.Label(view_panel, text="Run inference to see results", style="Muted.TLabel")
@@ -471,7 +481,7 @@ class EchoSightApp(tk.Tk):
         buttons.pack(fill=X, pady=(10, 0))
         RoundedButton(buttons, "Previous", self.previous_result).pack(side=LEFT)
         RoundedButton(buttons, "Next", self.next_result).pack(side=RIGHT)
-        detail_panel = ttk.Frame(content, style="Panel.TFrame", padding=12)
+        detail_panel = ttk.Frame(content, style="Panel.TFrame", padding=14)
         detail_panel.grid(row=0, column=2, sticky="nsew")
         ttk.Label(detail_panel, text="Detection details", style="PanelTitle.TLabel").pack(anchor="w", pady=(0, 8))
         self.details = tk.Text(detail_panel, bg=PANEL, fg=TEXT, insertbackground=TEXT, relief="flat", wrap="word", font=("Consolas", 9), state=DISABLED)
@@ -485,22 +495,6 @@ class EchoSightApp(tk.Tk):
         self.status_label.configure(text="Loading model...")
         self._start_activity("Loading model")
         threading.Thread(target=self._load_model_worker, args=(Path(folder),), daemon=True).start()
-
-    def _auto_load_default_model(self) -> None:
-        gui_root = Path(__file__).resolve().parent
-        candidates = [
-            Path(os.environ["GETI_DEFAULT_DEPLOYMENT"]) if os.environ.get("GETI_DEFAULT_DEPLOYMENT") else None,
-            gui_root.parent / "Test_Run_Detect",
-            gui_root / "portable" / "deployment",
-        ]
-        deployment_root = next((path for path in candidates if path and path.is_dir()), None)
-        if deployment_root is None:
-            self.status_label.configure(text="Ready - select a deployment model")
-            return
-        self._set_busy(True)
-        self.status_label.configure(text="Loading default model...")
-        self._start_activity("Loading model")
-        threading.Thread(target=self._load_model_worker, args=(deployment_root,), daemon=True).start()
 
     def _load_model_worker(self, folder: Path) -> None:
         try:
@@ -573,7 +567,9 @@ class EchoSightApp(tk.Tk):
         if self.worker and self.worker.is_alive():
             return
         self.results.clear()
-        self.result_list.delete(0, END)
+        self.results_display_mapping.clear()
+        for item in self.result_tree.get_children():
+            self.result_tree.delete(item)
         self.cancel_event.clear()
         self.progress.configure(value=0, maximum=len(frames))
         self.progress_label.configure(text=f"0 / {len(frames)}")
@@ -622,8 +618,10 @@ class EchoSightApp(tk.Tk):
                     self.preprocess_profiles.clear()
                     self._set_preprocess_controls(self._default_preprocess_settings())
                     self.results.clear()
+                    self.results_display_mapping.clear()
                     self.image_list.delete(0, END)
-                    self.result_list.delete(0, END)
+                    for item in self.result_tree.get_children():
+                        self.result_tree.delete(item)
                     for frame in frames:
                         suffix = f" [frame {frame.frame_number}]" if frame.frame_number > 1 else ""
                         self.image_list.insert(END, f"{frame.source.name}{suffix}")
@@ -652,15 +650,16 @@ class EchoSightApp(tk.Tk):
                     result, index, total = value
                     self._animate_progress(index, total)
                     self.results.append(result)
-                    self.result_list.insert(END, self._result_list_entry(result))
-                    self._highlight_best_result()
+                    self._populate_result_tree()
                     self.progress_label.configure(text=f"{index} / {total}")
                 elif event == "complete":
                     total = value
                     self._animate_progress(len(self.results), max(1, total))
                     if self.results:
-                        self.current_result_index = 0
-                        self.result_list.selection_set(0)
+                        self.current_result_index = self.results_display_mapping[0] if self.results_display_mapping else 0
+                        children = self.result_tree.get_children()
+                        if children:
+                            self.result_tree.selection_set(children[0])
                         self.notebook.select(self.results_tab)
                         self._refresh_result()
                     if self.cancel_event.is_set():
@@ -770,13 +769,48 @@ class EchoSightApp(tk.Tk):
         name = result.frame.source.name
         return f"{name} [frame {result.frame.frame_number}]" if result.frame.frame_number > 1 else name
 
-    def _result_list_entry(self, result: InferenceResult) -> str:
-        title = self._result_title(result)
-        if len(title) > 34:
-            title = f"{title[:31]}..."
-        score = self._result_confidence(result)
-        score_text = f"{score:.1%}" if result.prediction is not None and not result.error else "--"
-        return f"{title:<34}  Max {score_text:>6}"
+    def _on_tree_click(self, event: object) -> None:
+        region = self.result_tree.identify_region(event.x, event.y)
+        column = self.result_tree.identify_column(event.x)
+        if region == "heading" and column:
+            heading_text = self.result_tree.heading(column)["text"]
+            # Strip triangle indicators from heading to get pure column name
+            column_name = heading_text.replace(" ▲", "").replace(" ▼", "")
+            if self.sort_column == column_name:
+                self.sort_reverse = not self.sort_reverse
+            else:
+                self.sort_column = column_name
+                self.sort_reverse = False
+            self._update_tree_headings()
+            self._populate_result_tree()
+
+    def _update_tree_headings(self) -> None:
+        """Update column headings with sort direction indicators (▲ ascending, ▼ descending)."""
+        columns = ["Frame", "Confidence", "Annotations"]
+        for column in columns:
+            if column == self.sort_column:
+                indicator = " ▼" if self.sort_reverse else " ▲"
+                text = f"{column}{indicator}"
+            else:
+                text = column
+            self.result_tree.heading(column, text=text)
+
+    def _populate_result_tree(self) -> None:
+        if not self.results:
+            return
+        for item in self.result_tree.get_children():
+            self.result_tree.delete(item)
+        sort_map = {"Frame": lambda i: self.results[i].frame.source.name, "Confidence": lambda i: self._result_confidence(self.results[i]), "Annotations": lambda i: self._count_annotations(self.results[i])}
+        sorted_indices = sorted(range(len(self.results)), key=sort_map.get(self.sort_column, sort_map["Frame"]), reverse=(self.sort_reverse if self.sort_column in ("Confidence", "Annotations") else False))
+        self.results_display_mapping = sorted_indices
+        for display_idx, result_idx in enumerate(sorted_indices):
+            result = self.results[result_idx]
+            frame_name = self._result_title(result)
+            confidence = self._result_confidence(result)
+            annotations = self._count_annotations(result)
+            conf_text = f"{confidence:.1%}" if result.prediction is not None and not result.error else "--"
+            self.result_tree.insert("", "end", values=(frame_name, conf_text, annotations))
+        self._highlight_best_result()
 
     def _on_image_selected(self, _event: object) -> None:
         selection = self.image_list.curselection()
@@ -791,6 +825,7 @@ class EchoSightApp(tk.Tk):
     def _on_preprocess_changed(self) -> None:
         for name in self.preprocess_values:
             getattr(self, f"{name.lower()}_value_label").configure(text=self._preprocess_value_text(name))
+        self._refresh_preprocess_preview()
 
     def _apply_preprocessing(self) -> None:
         settings = self._current_preprocess_settings()
@@ -882,24 +917,47 @@ class EchoSightApp(tk.Tk):
         return f"PROCESSED  |  Bright {brightness:+.0f}  Contrast {contrast:.0f}%  Sharp {sharpness:.0f}%  Denoise {denoiser:.0f}%"
 
     def _on_result_selected(self, _event: object) -> None:
-        selection = self.result_list.curselection()
+        selection = self.result_tree.selection()
         if selection:
-            self.current_result_index = selection[0]
-            self._refresh_result()
+            item = selection[0]
+            display_index = list(self.result_tree.get_children()).index(item)
+            if display_index < len(self.results_display_mapping):
+                self.current_result_index = self.results_display_mapping[display_index]
+                self._refresh_result()
 
     def previous_result(self) -> None:
-        if self.results:
-            self.current_result_index = (self.current_result_index - 1) % len(self.results)
-            self.result_list.selection_clear(0, END)
-            self.result_list.selection_set(self.current_result_index)
-            self._refresh_result()
+        if not self.results or not self.results_display_mapping:
+            return
+        children = self.result_tree.get_children()
+        current_selection = self.result_tree.selection()
+        if current_selection:
+            current_item = current_selection[0]
+            display_index = list(children).index(current_item)
+        else:
+            display_index = 0
+        display_index = (display_index - 1) % len(children)
+        item = children[display_index]
+        self.result_tree.selection_set(item)
+        self.result_tree.see(item)
+        self.current_result_index = self.results_display_mapping[display_index]
+        self._refresh_result()
 
     def next_result(self) -> None:
-        if self.results:
-            self.current_result_index = (self.current_result_index + 1) % len(self.results)
-            self.result_list.selection_clear(0, END)
-            self.result_list.selection_set(self.current_result_index)
-            self._refresh_result()
+        if not self.results or not self.results_display_mapping:
+            return
+        children = self.result_tree.get_children()
+        current_selection = self.result_tree.selection()
+        if current_selection:
+            current_item = current_selection[0]
+            display_index = list(children).index(current_item)
+        else:
+            display_index = 0
+        display_index = (display_index + 1) % len(children)
+        item = children[display_index]
+        self.result_tree.selection_set(item)
+        self.result_tree.see(item)
+        self.current_result_index = self.results_display_mapping[display_index]
+        self._refresh_result()
 
     def _refresh_result(self) -> None:
         if not self.results:
@@ -915,11 +973,12 @@ class EchoSightApp(tk.Tk):
             self.details.configure(state=DISABLED)
 
     def _highlight_best_result(self) -> None:
-        if not self.results:
+        if not self.results or not self.results_display_mapping:
             return
-        best_index = max(range(len(self.results)), key=lambda index: self._result_confidence(self.results[index]))
-        for index in range(self.result_list.size()):
-            self.result_list.itemconfigure(index, background="#b8e3c2" if index == best_index else PANEL, foreground="#10251a" if index == best_index else TEXT)
+        best_result_index = max(range(len(self.results)), key=lambda index: self._result_confidence(self.results[index]))
+        for display_idx, item in enumerate(self.result_tree.get_children()):
+            is_best = self.results_display_mapping[display_idx] == best_result_index
+            self.result_tree.item(item, tags=("best" if is_best else "",))
 
     @staticmethod
     def _result_confidence(result: InferenceResult) -> float:
@@ -931,6 +990,29 @@ class EchoSightApp(tk.Tk):
             return float(anomaly_score)
         scores = np.asarray(getattr(result.prediction, "scores", [])) if result.prediction is not None else np.array([])
         return float(scores.max()) if scores.size else 0.0
+
+    @staticmethod
+    def _count_annotations(result: InferenceResult) -> int:
+        if result.error or result.prediction is None:
+            return 0
+        objects = getattr(result.prediction, "objects", None)
+        if objects is not None:
+            return len(objects)
+        masks = getattr(result.prediction, "masks", None)
+        if masks is not None:
+            return len(np.asarray(masks))
+        anomaly_mask = getattr(result.prediction, "pred_mask", None)
+        if anomaly_mask is not None:
+            return 1
+        top_labels = getattr(result.prediction, "top_labels", None)
+        if top_labels is not None:
+            return len(top_labels)
+        bboxes = getattr(result.prediction, "bboxes", None)
+        if bboxes is not None:
+            return len(np.asarray(bboxes))
+        return 0
+
+
 
     def _on_threshold_changed(self, _value: str) -> None:
         self.threshold_value.configure(text=f"{self.threshold.get():.0f}%")
@@ -1042,13 +1124,16 @@ class EchoSightApp(tk.Tk):
             self._export_results(Path(folder), self.results[self.current_result_index:self.current_result_index + 1])
 
     def export_selected(self) -> None:
-        selected = self.result_list.curselection()
-        if not selected:
+        selected_items = self.result_tree.selection()
+        if not selected_items:
             messagebox.showinfo("Select results", "Select one or more result images first.")
             return
         folder = filedialog.askdirectory(title="Select output folder")
         if folder:
-            self._export_results(Path(folder), [self.results[index] for index in selected])
+            children = self.result_tree.get_children()
+            selected_display_indices = [list(children).index(item) for item in selected_items if item in children]
+            result_indices = [self.results_display_mapping[display_index] for display_index in selected_display_indices if display_index < len(self.results_display_mapping)]
+            self._export_results(Path(folder), [self.results[index] for index in result_indices])
 
     def export_all(self) -> None:
         if not self.results:
@@ -1076,10 +1161,6 @@ class EchoSightApp(tk.Tk):
         messagebox.showinfo("Export complete", f"Saved results to:\n{run_folder}")
 
 
-def main() -> None:
+if __name__ == "__main__":
     app = EchoSightApp()
     app.mainloop()
-
-
-if __name__ == "__main__":
-    main()

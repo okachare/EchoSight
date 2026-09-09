@@ -1,0 +1,77 @@
+{
+   "id": "6a874983a636f2d7061ed646",
+   "name": "NVL_S_28C_Detection",
+   "creation_time": "2026-08-20T18:37:55.344000+00:00",
+   "creator_id": "fac4c3db-b454-4258-b023-e3cdfebd1287",
+   "pipeline": {
+      "tasks": [
+         {
+            "id": "6a874983a636f2d7061ed647",
+            "title": "Dataset",
+            "task_type": "dataset"
+         },
+         {
+            "id": "6a874983a636f2d7061ed649",
+            "title": "Detection",
+            "task_type": "detection",
+            "labels": [
+               {
+                  "id": "6a874983a636f2d7061ed64b",
+                  "name": "Delamination",
+                  "is_anomalous": false,
+                  "color": "#9d3b1aff",
+                  "hotkey": "",
+                  "is_empty": false,
+                  "group": "Detection labels",
+                  "parent_id": null
+               },
+               {
+                  "id": "6a874983a636f2d7061ed64f",
+                  "name": "No object",
+                  "is_anomalous": false,
+                  "color": "#000000ff",
+                  "hotkey": "",
+                  "is_empty": true,
+                  "group": "No object",
+                  "parent_id": null
+               }
+            ],
+            "label_schema_id": "6a874983a636f2d7061ed651"
+         }
+      ],
+      "connections": [
+         {
+            "from": "6a874983a636f2d7061ed647",
+            "to": "6a874983a636f2d7061ed649"
+         }
+      ]
+   },
+   "thumbnail": "/api/v1/organizations/745ff1f4-b3dd-4aa9-9d25-fb2e96c6c9a2/workspaces/abb5be84-4fbd-44db-b307-f9b67d8f3a2e/projects/6a874983a636f2d7061ed646/thumbnail",
+   "performance": {
+      "score": 0.16666666666666657,
+      "task_performances": [
+         {
+            "task_id": "6a874983a636f2d7061ed649",
+            "score": {
+               "value": 0.16666666666666657,
+               "metric_type": "F-Measure"
+            }
+         }
+      ]
+   },
+   "storage_info": {},
+   "datasets": [
+      {
+         "id": "6a874983a636f2d7061ed64c",
+         "name": "Dataset",
+         "use_for_training": true,
+         "creation_time": "2026-08-20T18:37:55.344000+00:00"
+      },
+      {
+         "id": "6aa08d7da636f2d706232eae",
+         "name": "Testing set 1",
+         "use_for_training": false,
+         "creation_time": "2026-09-08T22:34:37.560000+00:00"
+      }
+   ]
+}

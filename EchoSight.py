@@ -265,7 +265,6 @@ class EchoSightApp(tk.Tk):
         self.details: tk.Text | None = None
         self.progress_animation_id: str | None = None
         self.preprocess_profiles: dict[int, tuple[float, float, float, float]] = {}
-        self.sort_order = tk.StringVar(value="Frame")
         self.results_display_mapping: list[int] = []
         self._build_ui()
         self.after(100, self._poll_worker)
@@ -303,6 +302,7 @@ class EchoSightApp(tk.Tk):
         self.style.configure("Treeview", background=PANEL, fieldbackground=PANEL, foreground=TEXT, rowheight=30, borderwidth=0)
         self.style.configure("Treeview.Heading", background=PANEL_LIGHT, foreground=MUTED, font=("Segoe UI Semibold", 9))
         self.style.map("Treeview", background=[("selected", ACCENT)], foreground=[("selected", "#0a0a0a")])
+        self.style.configure("best.Treeview", background=ACCENT, foreground="#0a0a0a")
 
     def _build_ui(self) -> None:
         header = ttk.Frame(self)
@@ -457,17 +457,20 @@ class EchoSightApp(tk.Tk):
         content.rowconfigure(0, weight=1)
         nav_panel = ttk.Frame(content, style="Panel.TFrame", padding=12)
         nav_panel.grid(row=0, column=0, sticky="nsew", padx=(0, 12))
-        nav_header = ttk.Frame(nav_panel)
-        nav_header.pack(fill=X, pady=(0, 8))
-        ttk.Label(nav_header, text="Sort by:", style="Muted.TLabel").pack(side=LEFT, padx=(0, 6))
-        sort_options = ["Frame", "Confidence", "Annotations"]
-        sort_combo = ttk.Combobox(nav_header, textvariable=self.sort_order, values=sort_options, state="readonly", width=14)
-        sort_combo.pack(side=LEFT, padx=(0, 14))
-        sort_combo.bind("<<ComboboxSelected>>", lambda e: self._on_sort_changed())
-        ttk.Label(nav_header, text="Results", style="PanelTitle.TLabel").pack(side=LEFT)
-        self.result_list = tk.Listbox(nav_panel, selectmode="extended", bg=PANEL, fg=TEXT, selectbackground="#2c6873", selectforeground=TEXT, relief="flat", highlightthickness=0, font=("Consolas", 9))
-        self.result_list.pack(fill=BOTH, expand=True)
-        self.result_list.bind("<<ListboxSelect>>", self._on_result_selected)
+        ttk.Label(nav_panel, text="Results", style="PanelTitle.TLabel").pack(anchor="w", pady=(0, 8))
+        self.result_tree = ttk.Treeview(nav_panel, columns=("Frame", "Confidence", "Annotations"), height=20, selectmode="extended")
+        self.result_tree.column("#0", width=0, stretch=False)
+        self.result_tree.column("Frame", anchor="w", width=250)
+        self.result_tree.column("Confidence", anchor="center", width=85)
+        self.result_tree.column("Annotations", anchor="center", width=75)
+        self.result_tree.heading("Frame", text="Frame")
+        self.result_tree.heading("Confidence", text="Confidence")
+        self.result_tree.heading("Annotations", text="Annotations")
+        self.result_tree.pack(fill=BOTH, expand=True)
+        self.result_tree.bind("<Button-1>", self._on_tree_click)
+        self.result_tree.bind("<<TreeviewSelect>>", self._on_result_selected)
+        self.sort_column = "Frame"
+        self.sort_reverse = False
         view_panel = ttk.Frame(content, style="Panel.TFrame", padding=14)
         view_panel.grid(row=0, column=1, sticky="nsew", padx=(0, 12))
         self.result_canvas = ZoomPanCanvas(view_panel)
@@ -581,7 +584,8 @@ class EchoSightApp(tk.Tk):
             return
         self.results.clear()
         self.results_display_mapping.clear()
-        self.result_list.delete(0, END)
+        for item in self.result_tree.get_children():
+            self.result_tree.delete(item)
         self.cancel_event.clear()
         self.progress.configure(value=0, maximum=len(frames))
         self.progress_label.configure(text=f"0 / {len(frames)}")
@@ -632,7 +636,8 @@ class EchoSightApp(tk.Tk):
                     self.results.clear()
                     self.results_display_mapping.clear()
                     self.image_list.delete(0, END)
-                    self.result_list.delete(0, END)
+                    for item in self.result_tree.get_children():
+                        self.result_tree.delete(item)
                     for frame in frames:
                         suffix = f" [frame {frame.frame_number}]" if frame.frame_number > 1 else ""
                         self.image_list.insert(END, f"{frame.source.name}{suffix}")
@@ -661,14 +666,16 @@ class EchoSightApp(tk.Tk):
                     result, index, total = value
                     self._animate_progress(index, total)
                     self.results.append(result)
-                    self._sort_results()
+                    self._populate_result_tree()
                     self.progress_label.configure(text=f"{index} / {total}")
                 elif event == "complete":
                     total = value
                     self._animate_progress(len(self.results), max(1, total))
                     if self.results:
                         self.current_result_index = self.results_display_mapping[0] if self.results_display_mapping else 0
-                        self.result_list.selection_set(0)
+                        children = self.result_tree.get_children()
+                        if children:
+                            self.result_tree.selection_set(children[0])
                         self.notebook.select(self.results_tab)
                         self._refresh_result()
                     if self.cancel_event.is_set():
@@ -778,14 +785,34 @@ class EchoSightApp(tk.Tk):
         name = result.frame.source.name
         return f"{name} [frame {result.frame.frame_number}]" if result.frame.frame_number > 1 else name
 
-    def _result_list_entry(self, result: InferenceResult) -> str:
-        title = self._result_title(result)
-        if len(title) > 28:
-            title = f"{title[:25]}..."
-        score = self._result_confidence(result)
-        score_text = f"{score:.1%}" if result.prediction is not None and not result.error else "--"
-        annotations = self._count_annotations(result)
-        return f"{title:<28}  {score_text:>6}  {annotations:>3}"
+    def _on_tree_click(self, event: object) -> None:
+        region = self.result_tree.identify_region(event.x, event.y)
+        column = self.result_tree.identify_column(event.x)
+        if region == "heading" and column:
+            column_name = self.result_tree.heading(column)["text"]
+            if self.sort_column == column_name:
+                self.sort_reverse = not self.sort_reverse
+            else:
+                self.sort_column = column_name
+                self.sort_reverse = False
+            self._populate_result_tree()
+
+    def _populate_result_tree(self) -> None:
+        if not self.results:
+            return
+        for item in self.result_tree.get_children():
+            self.result_tree.delete(item)
+        sort_map = {"Frame": lambda i: self.results[i].frame.source.name, "Confidence": lambda i: self._result_confidence(self.results[i]), "Annotations": lambda i: self._count_annotations(self.results[i])}
+        sorted_indices = sorted(range(len(self.results)), key=sort_map.get(self.sort_column, sort_map["Frame"]), reverse=(self.sort_reverse if self.sort_column in ("Confidence", "Annotations") else False))
+        self.results_display_mapping = sorted_indices
+        for display_idx, result_idx in enumerate(sorted_indices):
+            result = self.results[result_idx]
+            frame_name = self._result_title(result)
+            confidence = self._result_confidence(result)
+            annotations = self._count_annotations(result)
+            conf_text = f"{confidence:.1%}" if result.prediction is not None and not result.error else "--"
+            self.result_tree.insert("", "end", values=(frame_name, conf_text, annotations))
+        self._highlight_best_result()
 
     def _on_image_selected(self, _event: object) -> None:
         selection = self.image_list.curselection()
@@ -892,9 +919,10 @@ class EchoSightApp(tk.Tk):
         return f"PROCESSED  |  Bright {brightness:+.0f}  Contrast {contrast:.0f}%  Sharp {sharpness:.0f}%  Denoise {denoiser:.0f}%"
 
     def _on_result_selected(self, _event: object) -> None:
-        selection = self.result_list.curselection()
+        selection = self.result_tree.selection()
         if selection:
-            display_index = selection[0]
+            item = selection[0]
+            display_index = list(self.result_tree.get_children()).index(item)
             if display_index < len(self.results_display_mapping):
                 self.current_result_index = self.results_display_mapping[display_index]
                 self._refresh_result()
@@ -902,30 +930,34 @@ class EchoSightApp(tk.Tk):
     def previous_result(self) -> None:
         if not self.results or not self.results_display_mapping:
             return
-        current_display_index = self.result_list.curselection()
-        if current_display_index:
-            display_index = current_display_index[0]
+        children = self.result_tree.get_children()
+        current_selection = self.result_tree.selection()
+        if current_selection:
+            current_item = current_selection[0]
+            display_index = list(children).index(current_item)
         else:
             display_index = 0
-        display_index = (display_index - 1) % len(self.results_display_mapping)
-        self.result_list.selection_clear(0, END)
-        self.result_list.selection_set(display_index)
-        self.result_list.see(display_index)
+        display_index = (display_index - 1) % len(children)
+        item = children[display_index]
+        self.result_tree.selection_set(item)
+        self.result_tree.see(item)
         self.current_result_index = self.results_display_mapping[display_index]
         self._refresh_result()
 
     def next_result(self) -> None:
         if not self.results or not self.results_display_mapping:
             return
-        current_display_index = self.result_list.curselection()
-        if current_display_index:
-            display_index = current_display_index[0]
+        children = self.result_tree.get_children()
+        current_selection = self.result_tree.selection()
+        if current_selection:
+            current_item = current_selection[0]
+            display_index = list(children).index(current_item)
         else:
             display_index = 0
-        display_index = (display_index + 1) % len(self.results_display_mapping)
-        self.result_list.selection_clear(0, END)
-        self.result_list.selection_set(display_index)
-        self.result_list.see(display_index)
+        display_index = (display_index + 1) % len(children)
+        item = children[display_index]
+        self.result_tree.selection_set(item)
+        self.result_tree.see(item)
         self.current_result_index = self.results_display_mapping[display_index]
         self._refresh_result()
 
@@ -946,9 +978,9 @@ class EchoSightApp(tk.Tk):
         if not self.results or not self.results_display_mapping:
             return
         best_result_index = max(range(len(self.results)), key=lambda index: self._result_confidence(self.results[index]))
-        for display_index, result_index in enumerate(self.results_display_mapping):
-            is_best = result_index == best_result_index
-            self.result_list.itemconfigure(display_index, background=ACCENT if is_best else PANEL, foreground="#0a0a0a" if is_best else TEXT)
+        for display_idx, item in enumerate(self.result_tree.get_children()):
+            is_best = self.results_display_mapping[display_idx] == best_result_index
+            self.result_tree.item(item, tags=("best" if is_best else "",))
 
     @staticmethod
     def _result_confidence(result: InferenceResult) -> float:
@@ -982,24 +1014,7 @@ class EchoSightApp(tk.Tk):
             return len(np.asarray(bboxes))
         return 0
 
-    def _sort_results(self) -> None:
-        if not self.results:
-            return
-        sort_by = self.sort_order.get()
-        if sort_by == "Frame":
-            sorted_indices = sorted(range(len(self.results)), key=lambda i: self.results[i].frame.frame_number)
-        elif sort_by == "Confidence":
-            sorted_indices = sorted(range(len(self.results)), key=lambda i: self._result_confidence(self.results[i]), reverse=True)
-        else:
-            sorted_indices = sorted(range(len(self.results)), key=lambda i: self._count_annotations(self.results[i]), reverse=True)
-        self.results_display_mapping = sorted_indices
-        self.result_list.delete(0, END)
-        for result_index in sorted_indices:
-            self.result_list.insert(END, self._result_list_entry(self.results[result_index]))
-        self._highlight_best_result()
 
-    def _on_sort_changed(self) -> None:
-        self._sort_results()
 
     def _on_threshold_changed(self, _value: str) -> None:
         self.threshold_value.configure(text=f"{self.threshold.get():.0f}%")
@@ -1111,13 +1126,15 @@ class EchoSightApp(tk.Tk):
             self._export_results(Path(folder), self.results[self.current_result_index:self.current_result_index + 1])
 
     def export_selected(self) -> None:
-        selected = self.result_list.curselection()
-        if not selected:
+        selected_items = self.result_tree.selection()
+        if not selected_items:
             messagebox.showinfo("Select results", "Select one or more result images first.")
             return
         folder = filedialog.askdirectory(title="Select output folder")
         if folder:
-            result_indices = [self.results_display_mapping[display_index] for display_index in selected if display_index < len(self.results_display_mapping)]
+            children = self.result_tree.get_children()
+            selected_display_indices = [list(children).index(item) for item in selected_items if item in children]
+            result_indices = [self.results_display_mapping[display_index] for display_index in selected_display_indices if display_index < len(self.results_display_mapping)]
             self._export_results(Path(folder), [self.results[index] for index in result_indices])
 
     def export_all(self) -> None:

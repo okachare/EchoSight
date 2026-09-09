@@ -4,7 +4,7 @@
 **Owner:** Omkar
 **Project Start:** July 14, 2026
 **Target Deadline:** End of Q3 2026 (September 30, 2026)
-**Report Last Updated:** 2026-09-08
+**Report Last Updated:** 2026-09-09
 
 > **Platform transition:** The Windows Geti/MSIX effort is closed as a completed historical track. Intel Geti Web is now the active platform for all future training, inference, evaluation, and deployment work. Windows artifacts remain preserved and are not discarded.
 
@@ -36,6 +36,21 @@ EchoSight has been published as a standalone GitHub repository (https://github.c
 **Status:** ✅ EchoSight is ready for immediate team distribution and multi-system deployment.
 
 **Next priorities:** Team training integration with Geti CSAM Helper agent, model fine-tuning for production accuracy, WIP deployment preparation, and cross-product evaluation.
+
+## Management Update — 2026-09-09
+
+EchoSight results navigation has been enhanced with professional **Excel-style Treeview column sorting** to improve result review workflows.
+
+**Key feature improvements:**
+- **Clickable column headers:** Users now click any column header (Frame Name | Confidence % | Annotation Count) to sort results. Click again to reverse sort direction.
+- **Frame display:** Full source filename with frame number suffix (e.g., `image.png [frame 2]`) now displayed in Frame column instead of numeric ID only, making results human-readable.
+- **Multi-select and export:** Results can be selected individually or in batches (Shift+Click, Ctrl+Click), then exported together for group analysis.
+- **Best result highlighting:** Automatically highlights the result with highest confidence in accent color for quick visual scanning.
+- **Sort behavior:** Frame column sorts alphabetically by source name; Confidence sorts by highest percentage first; Annotations sorts by count descending.
+
+**Implementation:** New `_on_tree_click()` handler detects header clicks and toggles sort direction. `_populate_result_tree()` dynamically rebuilds tree with sorted results while maintaining proper index mapping for navigation and export. Published to both okachare/GeTi_CSAM_PVA and okachare/EchoSight repositories.
+
+**User impact:** Result review workflows now mirror familiar spreadsheet paradigms, reducing cognitive load during batch inference analysis and supporting teams familiar with Excel-style data exploration.
 
 ### Historical Update — 2026-09-03
 
@@ -91,6 +106,7 @@ A successful demo will show:
 | 10. Upstream Geti Source Integration | Add official repository literature, source navigation, release-aware debugging guidance, and MCP source links | ✅ Complete |
 | 11. Local Inference GUI Deployment | Load exported Geti model, process multi-frame TIFFs, run offline inference, display results, and validate deployment behavior | ✅ Complete |
 | 12. EchoSight GUI and UI Polish | Implement dark desktop GUI with rounded-button controls, model discovery, TIFF/image import, preprocessing, result review, export, and professional visual appearance | ✅ Complete |
+| 12a. EchoSight Results Navigation — Treeview Sorting | Replace dropdown-based sort with Excel-style clickable column headers in Treeview widget; click to sort Frame (by name), Confidence (descending), Annotations (descending); multi-select for batch export; visual highlighting of best result | ✅ Complete |
 | 13. GUI Responsiveness and Metadata | Stabilize tab layout, move blocking work to workers, add activity feedback, and display model metadata | ✅ Complete |
 | 14. Portable standalone installer | Bundle all dependencies (OpenVINO, OpenCV, NumPy, PIL) into PyInstaller executable; users download, build, copy folder, and double-click to launch; no external dependencies required | ✅ Complete |
 | 4e. NVL Test Run — Web fine-tuning | Improve the selected finalist with additional data | 📅 Planned for Q4 |

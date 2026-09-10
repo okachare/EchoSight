@@ -1020,6 +1020,62 @@ class EchoSightApp(tk.Tk):
             return len(np.asarray(bboxes))
         return 0
 
+    def _get_annotations_with_indices(self, result: InferenceResult) -> list[tuple[int, str, str, object]]:
+        """Extract all annotations with consistent indices for both checkbox building and rendering.
+        Returns list of (index, display_text, type, data) tuples.
+        Type can be: "anomaly", "classification", "detection"
+        Data contains the actual annotation data needed for rendering.
+        """
+        annotations = []
+        ann_idx = 0
+        prediction = result.prediction
+        
+        # Anomaly
+        anomaly_mask = getattr(prediction, "pred_mask", None)
+        if anomaly_mask is not None:
+            anomaly_label = getattr(prediction, "pred_label", None)
+            anomaly_score = getattr(prediction, "pred_score", None)
+            score = float(anomaly_score) if anomaly_score is not None else 0.0
+            annotations.append((ann_idx, f"Anomaly: {anomaly_label or 'unknown'} ({score:.1%})", "anomaly", anomaly_mask))
+            ann_idx += 1
+        
+        # Classifications
+        classifications = getattr(prediction, "top_labels", None)
+        if classifications:
+            for item in classifications:
+                if len(item) >= 3:
+                    _, label, score = item[:3]
+                else:
+                    label, score = item[0], item[1]
+                score = float(score)
+                annotations.append((ann_idx, f"{label}: {score:.1%}", "classification", (label, score)))
+                ann_idx += 1
+        
+        # Detections
+        objects = getattr(prediction, "objects", None)
+        detections = []
+        if objects is not None:
+            detections = [(item.xmin, item.ymin, item.xmax, item.ymax, item.score, item.str_label) for item in objects]
+        else:
+            boxes = np.asarray(getattr(prediction, "bboxes", []))
+            scores = np.asarray(getattr(prediction, "scores", []))
+            labels = list(getattr(prediction, "label_names", []))
+            if not labels and hasattr(prediction, "labels"):
+                numeric = np.asarray(prediction.labels)
+                labels = [self.deployment.labels[int(item)] if self.deployment and int(item) < len(self.deployment.labels) else str(item) for item in numeric]
+            if len(boxes) > 0 and len(scores) > 0:
+                for box, score in zip(boxes, scores):
+                    x_min, y_min, x_max, y_max = [int(v) for v in box]
+                    label_idx = len(labels) - 1 if labels else 0
+                    label = labels[min(label_idx, len(labels)-1)] if labels else "unknown"
+                    detections.append((x_min, y_min, x_max, y_max, float(score), label))
+        
+        for x_min, y_min, x_max, y_max, score, label in detections:
+            annotations.append((ann_idx, f"{label}: {score:.1%} [{x_min},{y_min}-{x_max},{y_max}]", "detection", (x_min, y_min, x_max, y_max, score, label)))
+            ann_idx += 1
+        
+        return annotations
+
     def _build_annotation_checkboxes(self, result: InferenceResult, result_index: int) -> None:
         """Build checkboxes for all annotations in the current result frame."""
         # Clear existing checkboxes
@@ -1031,50 +1087,8 @@ class EchoSightApp(tk.Tk):
             ttk.Label(self.annotations_frame, text="No predictions", style="Muted.TLabel").pack(anchor="w")
             return
         
-        # Collect all annotations (anomaly, classifications, detections)
-        annotations = []
-        
-        # Anomaly mask
-        anomaly_mask = getattr(result.prediction, "pred_mask", None)
-        if anomaly_mask is not None:
-            anomaly_label = getattr(result.prediction, "pred_label", None)
-            anomaly_score = getattr(result.prediction, "pred_score", None)
-            score = float(anomaly_score) if anomaly_score is not None else 0.0
-            annotations.append((0, f"Anomaly: {anomaly_label or 'unknown'} ({score:.1%})", "anomaly"))
-        
-        # Classifications
-        classifications = getattr(result.prediction, "top_labels", None)
-        if classifications:
-            for idx, item in enumerate(classifications, start=1):
-                if len(item) >= 3:
-                    _, label, score = item[:3]
-                else:
-                    label, score = item[0], item[1]
-                score = float(score)
-                annotations.append((idx, f"{label}: {score:.1%}", "classification"))
-        
-        # Detections
-        objects = getattr(result.prediction, "objects", None)
-        detections = []
-        if objects is not None:
-            detections = [(item.xmin, item.ymin, item.xmax, item.ymax, item.score, item.str_label) for item in objects]
-        else:
-            boxes = np.asarray(getattr(result.prediction, "bboxes", []))
-            scores = np.asarray(getattr(result.prediction, "scores", []))
-            labels = list(getattr(result.prediction, "label_names", []))
-            if not labels and hasattr(result.prediction, "labels"):
-                numeric = np.asarray(result.prediction.labels)
-                labels = [self.deployment.labels[int(item)] if self.deployment and int(item) < len(self.deployment.labels) else str(item) for item in numeric]
-            if len(boxes) > 0 and len(scores) > 0:
-                for box, score in zip(boxes, scores):
-                    x_min, y_min, x_max, y_max = [int(v) for v in box]
-                    label_idx = len(labels) - 1 if labels else 0
-                    label = labels[min(label_idx, len(labels)-1)] if labels else "unknown"
-                    detections.append((x_min, y_min, x_max, y_max, float(score), label))
-        
-        ann_idx = len(annotations)
-        for det_idx, (x_min, y_min, x_max, y_max, score, label) in enumerate(detections):
-            annotations.append((ann_idx + det_idx, f"{label}: {score:.1%} [{x_min},{y_min}-{x_max},{y_max}]", "detection"))
+        # Get annotations with consistent indexing (matches _render_result indexing)
+        annotations = self._get_annotations_with_indices(result)
         
         # Get hidden set for this result
         hidden_set = self.hidden_annotations.get(result_index, set())
@@ -1084,7 +1098,7 @@ class EchoSightApp(tk.Tk):
             ttk.Label(self.annotations_frame, text="No annotations", style="Muted.TLabel").pack(anchor="w")
             return
         
-        for ann_idx, text, ann_type in annotations:
+        for ann_idx, text, ann_type, data in annotations:
             var = tk.BooleanVar(value=(ann_idx not in hidden_set))
             self.annotation_checkboxes[ann_idx] = var
             
@@ -1115,97 +1129,78 @@ class EchoSightApp(tk.Tk):
         image = cv2.cvtColor(source_image.copy(), cv2.COLOR_RGB2BGR)
         if result.error:
             return result.frame.image_rgb, f"Error\n{result.error}"
-        prediction = result.prediction
+        
         hidden_set = self.hidden_annotations.get(self.current_result_index, set())
         
-        # Handle anomaly mask
-        anomaly_mask = getattr(prediction, "pred_mask", None)
-        anomaly_score = getattr(prediction, "pred_score", None)
-        anomaly_label = getattr(prediction, "pred_label", None)
-        if anomaly_mask is not None and anomaly_score is not None:
-            score = float(anomaly_score)
-            mask = np.asarray(anomaly_mask > 0, dtype=np.uint8)
-            # Anomaly annotations use index 0
-            if self.show_annotations.get() and mask.shape == image.shape[:2] and 0 not in hidden_set:
-                overlay = image.copy()
-                overlay[mask.astype(bool)] = (80, 170, 220)
-                image = cv2.addWeighted(image, 0.65, overlay, 0.35, 0)
-            if self.show_annotations.get() and self.show_labels.get() and 0 not in hidden_set:
-                text = f"{anomaly_label or 'Anomaly'} {score:.1%}"
-                cv2.putText(image, text, (8, 28), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (220, 245, 248), 1, cv2.LINE_AA)
-            return cv2.cvtColor(image, cv2.COLOR_BGR2RGB), f"Source: {result.frame.source.name}\nFrame: {result.frame.frame_number}\nClassification: {anomaly_label or 'unknown'}\nScore: {score:.1%}"
+        # Get annotations with consistent indexing
+        annotations = self._get_annotations_with_indices(result)
         
-        # Handle classifications
-        classifications = getattr(prediction, "top_labels", None)
-        if classifications:
-            for index, item in enumerate(classifications, start=1):
-                if index in hidden_set:
-                    continue
-                if len(item) >= 3:
-                    _, label, score = item[:3]
-                else:
-                    label, score = item[0], item[1]
-                score = float(score)
-                if self.show_annotations.get() and self.show_labels.get():
-                    text = f"{label} {score:.1%}"
-                    cv2.putText(image, text, (8, 28 + index * 24), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (220, 245, 248), 1, cv2.LINE_AA)
-            return cv2.cvtColor(image, cv2.COLOR_BGR2RGB), f"Source: {result.frame.source.name}\nFrame: {result.frame.frame_number}\nClassifications visible"
+        # Build details text
+        lines = [f"Source: {result.frame.source.name}", f"Frame: {result.frame.frame_number}"]
         
-        # Handle detections (both instance segmentation and object detection)
-        objects = getattr(prediction, "objects", None)
-        masks = getattr(prediction, "masks", None)
-        if self.show_annotations.get() and masks is not None:
-            mask_array = np.asarray(masks)
-            if mask_array.ndim == 3:
-                overlay = image.copy()
-                for mask in mask_array:
-                    binary_mask = np.asarray(mask > 0, dtype=np.uint8)
-                    if binary_mask.shape == image.shape[:2]:
-                        overlay[binary_mask.astype(bool)] = (80, 170, 220)
-                image = cv2.addWeighted(image, 0.65, overlay, 0.35, 0)
-        
-        if objects is not None:
-            detections = [(item.xmin, item.ymin, item.xmax, item.ymax, item.score, item.str_label) for item in objects]
-        else:
-            boxes = np.asarray(getattr(prediction, "bboxes", []))
-            scores = np.asarray(getattr(prediction, "scores", []))
-            labels = list(getattr(prediction, "label_names", []))
-            if not labels:
-                numeric = np.asarray(getattr(prediction, "labels", []))
-                labels = [self.deployment.labels[int(item)] if self.deployment and int(item) < len(self.deployment.labels) else str(item) for item in numeric]
-            detections = [(box[0], box[1], box[2], box[3], float(score), label) for box, score, label in zip(boxes, scores, labels)]
-        
-        lines = [f"Source: {result.frame.source.name}", f"Frame: {result.frame.frame_number}", f"Detections: {len(detections)}", ""]
-        visible = 0
-        # Anomalies use index 0, classifications use 1+, detections use later indices
-        ann_idx_offset = len(getattr(prediction, "top_labels", [])) + 1
-        
-        for det_idx, (x_min, y_min, x_max, y_max, score, label) in enumerate(detections):
-            ann_idx = ann_idx_offset + det_idx
+        visible_count = 0
+        for ann_idx, text, ann_type, data in annotations:
+            # Skip if annotation is hidden per-frame
             if ann_idx in hidden_set:
                 continue
-            visible += 1
-            x_min, y_min, x_max, y_max = [int(value) for value in (x_min, y_min, x_max, y_max)]
-            if self.show_annotations.get():
-                cv2.rectangle(image, (x_min, y_min), (x_max, y_max), (41, 182, 199), 2)
-            text = f"{label} {score:.1%}"
-            font = cv2.FONT_HERSHEY_SIMPLEX
-            font_scale = 0.6
-            thickness = 1
-            (text_width, text_height), baseline = cv2.getTextSize(text, font, font_scale, thickness)
-            image_height, image_width = image.shape[:2]
-            label_width = text_width + 8
-            label_height = text_height + baseline + 8
-            label_x = min(max(0, x_min), max(0, image_width - label_width))
-            label_y = y_min - label_height if y_min >= label_height else min(image_height - label_height, y_max)
-            label_y = max(0, label_y)
-            text_x = label_x + 4
-            text_y = label_y + text_height + 4
-            if self.show_annotations.get() and self.show_labels.get():
-                cv2.rectangle(image, (label_x, label_y), (label_x + label_width, label_y + label_height), (20, 24, 29), -1)
-                cv2.putText(image, text, (text_x, text_y), font, font_scale, (220, 245, 248), thickness, cv2.LINE_AA)
-            lines.append(f"{visible}. {label}: {score:.1%}\n   box: ({x_min}, {y_min}) - ({x_max}, {y_max})")
-        lines[2] = f"Detections shown: {visible}"
+            
+            if ann_type == "anomaly":
+                # Render anomaly mask
+                if self.show_annotations.get():
+                    mask = np.asarray(data > 0, dtype=np.uint8)
+                    if mask.shape == image.shape[:2]:
+                        overlay = image.copy()
+                        overlay[mask.astype(bool)] = (80, 170, 220)
+                        image = cv2.addWeighted(image, 0.65, overlay, 0.35, 0)
+                # Render anomaly label
+                if self.show_annotations.get() and self.show_labels.get():
+                    label, score = data[1], data[2] if len(data) > 2 else 0
+                    anomaly_label = getattr(result.prediction, "pred_label", None)
+                    text_label = f"{anomaly_label or 'Anomaly'} {float(getattr(result.prediction, 'pred_score', 0)):.1%}"
+                    cv2.putText(image, text_label, (8, 28), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (220, 245, 248), 1, cv2.LINE_AA)
+                visible_count += 1
+                lines.append(f"{text}")
+                
+            elif ann_type == "classification":
+                # Classifications are text-only
+                if self.show_annotations.get() and self.show_labels.get():
+                    label, score = data
+                    cv2.putText(image, text, (8, 28 + visible_count * 24), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (220, 245, 248), 1, cv2.LINE_AA)
+                visible_count += 1
+                lines.append(f"{text}")
+                
+            elif ann_type == "detection":
+                # Render detection box and label
+                x_min, y_min, x_max, y_max, score, label = data
+                if self.show_annotations.get():
+                    cv2.rectangle(image, (x_min, y_min), (x_max, y_max), (41, 182, 199), 2)
+                
+                # Draw label background and text
+                if self.show_annotations.get() and self.show_labels.get():
+                    text_label = f"{label} {score:.1%}"
+                    font = cv2.FONT_HERSHEY_SIMPLEX
+                    font_scale = 0.6
+                    thickness = 1
+                    (text_width, text_height), baseline = cv2.getTextSize(text_label, font, font_scale, thickness)
+                    image_height, image_width = image.shape[:2]
+                    label_width = text_width + 8
+                    label_height = text_height + baseline + 8
+                    label_x = min(max(0, x_min), max(0, image_width - label_width))
+                    label_y = y_min - label_height if y_min >= label_height else min(image_height - label_height, y_max)
+                    label_y = max(0, label_y)
+                    text_x = label_x + 4
+                    text_y = label_y + text_height + 4
+                    cv2.rectangle(image, (label_x, label_y), (label_x + label_width, label_y + label_height), (20, 24, 29), -1)
+                    cv2.putText(image, text_label, (text_x, text_y), font, font_scale, (220, 245, 248), thickness, cv2.LINE_AA)
+                
+                visible_count += 1
+                lines.append(f"{visible_count}. {label}: {score:.1%}\n   box: ({x_min}, {y_min}) - ({x_max}, {y_max})")
+        
+        if visible_count == 0:
+            lines.append("(all annotations hidden)")
+        else:
+            lines.insert(2, f"Annotations shown: {visible_count}")
+        
         return cv2.cvtColor(image, cv2.COLOR_BGR2RGB), "\n".join(lines)
 
     def _show_image(self, image_rgb: np.ndarray, target: ZoomPanCanvas, hint: ttk.Label, reset_zoom: bool = True) -> None:

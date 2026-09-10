@@ -434,10 +434,6 @@ class EchoSightApp(tk.Tk):
     def _build_results_tab(self) -> None:
         toolbar = ttk.Frame(self.results_tab, style="Panel.TFrame", padding=14)
         toolbar.pack(fill=X, padx=12, pady=12)
-        self.show_labels = tk.BooleanVar(value=True)
-        ttk.Checkbutton(toolbar, text="Show labels", style="Review.TCheckbutton", variable=self.show_labels, command=self._refresh_result).pack(side=LEFT, padx=4)
-        self.show_annotations = tk.BooleanVar(value=True)
-        ttk.Checkbutton(toolbar, text="Show annotations", style="Review.TCheckbutton", variable=self.show_annotations, command=self._refresh_result).pack(side=LEFT, padx=4)
         RoundedButton(toolbar, "Export Current", self.export_current).pack(side=LEFT, padx=8)
         RoundedButton(toolbar, "Export Selected", self.export_selected).pack(side=LEFT, padx=8)
         RoundedButton(toolbar, "Export All", self.export_all).pack(side=LEFT, padx=(8, 0))
@@ -475,10 +471,25 @@ class EchoSightApp(tk.Tk):
         buttons.pack(fill=X, pady=(10, 0))
         RoundedButton(buttons, "Previous", self.previous_result).pack(side=LEFT)
         RoundedButton(buttons, "Next", self.next_result).pack(side=RIGHT)
+        
+        # Detail panel with two-tier annotation control
         detail_panel = ttk.Frame(content, style="Panel.TFrame", padding=14)
         detail_panel.grid(row=0, column=2, sticky="nsew")
-        detail_label = ttk.Label(detail_panel, text="Annotations", style="PanelTitle.TLabel")
-        detail_label.pack(anchor="w", pady=(0, 8))
+        
+        # Section 1: Global Settings
+        global_label = ttk.Label(detail_panel, text="Global Settings", style="PanelTitle.TLabel")
+        global_label.pack(anchor="w", pady=(0, 8))
+        global_frame = ttk.Frame(detail_panel, style="Panel.TFrame")
+        global_frame.pack(fill=X, padx=4, pady=(0, 12))
+        self.show_annotations = tk.BooleanVar(value=True)
+        ttk.Checkbutton(global_frame, text="Show annotations", style="Review.TCheckbutton", variable=self.show_annotations, command=self._refresh_result).pack(anchor="w", pady=2)
+        self.show_labels = tk.BooleanVar(value=True)
+        ttk.Checkbutton(global_frame, text="Show labels", style="Review.TCheckbutton", variable=self.show_labels, command=self._refresh_result).pack(anchor="w", pady=2)
+        
+        # Section 2: Frame-Level Overrides
+        ttk.Separator(detail_panel, orient=HORIZONTAL).pack(fill=X, pady=8)
+        override_label = ttk.Label(detail_panel, text="Frame-Level Overrides", style="PanelTitle.TLabel")
+        override_label.pack(anchor="w", pady=(0, 8))
         self.annotations_canvas = tk.Canvas(detail_panel, bg=PANEL, highlightthickness=0, highlightcolor=PANEL)
         self.annotations_scrollbar = ttk.Scrollbar(detail_panel, orient=VERTICAL, command=self.annotations_canvas.yview)
         self.annotations_frame = ttk.Frame(self.annotations_canvas, style="Panel.TFrame")

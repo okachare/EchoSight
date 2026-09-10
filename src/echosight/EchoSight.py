@@ -1090,8 +1090,10 @@ class EchoSightApp(tk.Tk):
             
             def on_toggle(idx=ann_idx, result_idx=result_index, v=var):
                 if v.get():
-                    self.hidden_annotations.get(result_idx, set()).discard(idx)
+                    # Checkbox is checked (True) → show annotation → remove from hidden set
+                    self.hidden_annotations.setdefault(result_idx, set()).discard(idx)
                 else:
+                    # Checkbox is unchecked (False) → hide annotation → add to hidden set
                     self.hidden_annotations.setdefault(result_idx, set()).add(idx)
                 self._refresh_result()
             

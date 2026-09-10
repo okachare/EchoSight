@@ -1117,7 +1117,7 @@ class EchoSightApp(tk.Tk):
                 overlay = image.copy()
                 overlay[mask.astype(bool)] = (80, 170, 220)
                 image = cv2.addWeighted(image, 0.65, overlay, 0.35, 0)
-            if self.show_labels.get() and 0 not in hidden_set:
+            if self.show_annotations.get() and self.show_labels.get() and 0 not in hidden_set:
                 text = f"{anomaly_label or 'Anomaly'} {score:.1%}"
                 cv2.putText(image, text, (8, 28), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (220, 245, 248), 1, cv2.LINE_AA)
             return cv2.cvtColor(image, cv2.COLOR_BGR2RGB), f"Source: {result.frame.source.name}\nFrame: {result.frame.frame_number}\nClassification: {anomaly_label or 'unknown'}\nScore: {score:.1%}"
@@ -1133,7 +1133,7 @@ class EchoSightApp(tk.Tk):
                 else:
                     label, score = item[0], item[1]
                 score = float(score)
-                if self.show_labels.get():
+                if self.show_annotations.get() and self.show_labels.get():
                     text = f"{label} {score:.1%}"
                     cv2.putText(image, text, (8, 28 + index * 24), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (220, 245, 248), 1, cv2.LINE_AA)
             return cv2.cvtColor(image, cv2.COLOR_BGR2RGB), f"Source: {result.frame.source.name}\nFrame: {result.frame.frame_number}\nClassifications visible"
@@ -1188,7 +1188,7 @@ class EchoSightApp(tk.Tk):
             label_y = max(0, label_y)
             text_x = label_x + 4
             text_y = label_y + text_height + 4
-            if self.show_labels.get():
+            if self.show_annotations.get() and self.show_labels.get():
                 cv2.rectangle(image, (label_x, label_y), (label_x + label_width, label_y + label_height), (20, 24, 29), -1)
                 cv2.putText(image, text, (text_x, text_y), font, font_scale, (220, 245, 248), thickness, cv2.LINE_AA)
             lines.append(f"{visible}. {label}: {score:.1%}\n   box: ({x_min}, {y_min}) - ({x_max}, {y_max})")

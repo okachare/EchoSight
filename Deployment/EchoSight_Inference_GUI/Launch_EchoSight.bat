@@ -2,7 +2,9 @@
 setlocal
 
 set "GUI_DIR=%~dp0"
-set "APP=%GUI_DIR%EchoSight.py"
+set "APP_PYQT6=%GUI_DIR%EchoSight_PyQt6.py"
+set "APP_TKINTER=%GUI_DIR%EchoSight.py"
+set "APP=%APP_PYQT6%"
 
 if exist "%GUI_DIR%runtime\pythonw.exe" if exist "%GUI_DIR%runtime\Lib\site-packages\openvino\__init__.py" if exist "%GUI_DIR%deployment\Detection\model\model.xml" goto portable_root
 if exist "%GUI_DIR%portable\runtime\pythonw.exe" if exist "%GUI_DIR%portable\runtime\Lib\site-packages\openvino\__init__.py" if exist "%GUI_DIR%portable\deployment\Detection\model\model.xml" goto portable_nested
@@ -48,9 +50,20 @@ set "PYTHONPATH=%RUNTIME%;%DEPLOYMENT%"
 echo Starting EchoSight...
 echo Runtime: %RUNTIME%
 echo Deployment: %GETI_DEFAULT_DEPLOYMENT%
-"%PYTHON%" "%APP%"
+echo.
+echo Attempting to launch PyQt6 version (modern UI with Apple-like polish)...
+"%PYTHON%" "%APP_PYQT6%"
 if errorlevel 1 (
-    echo.
-    echo The GUI closed with an error. Review the message above.
-    pause
+    echo PyQt6 version unavailable. Falling back to Tkinter...
+    "%PYTHON%" "%APP_TKINTER%"
+    if errorlevel 1 (
+        echo.
+        echo Both versions failed to launch. Review the message above.
+        pause
+    )
+) else (
+    goto end
 )
+
+:end
+exit /b 0

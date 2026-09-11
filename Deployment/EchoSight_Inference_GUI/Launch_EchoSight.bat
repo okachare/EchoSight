@@ -51,27 +51,13 @@ echo Starting EchoSight...
 echo Runtime: %RUNTIME%
 echo Deployment: %GETI_DEFAULT_DEPLOYMENT%
 echo.
-echo Attempting to launch PyQt6 version (modern UI with Apple-like polish)...
-
-REM Try PyQt6 with output capture to see any errors
-"%PYTHON%" "%APP_PYQT6%" 2>nul
-if not errorlevel 1 goto end
-
-echo.
-echo PyQt6 version unavailable or failed. Falling back to Tkinter...
+echo Launching PyQt6 version (modern UI with Apple-like polish)...
 echo.
 
-REM Fall back to Tkinter
-"%PYTHON%" "%APP_TKINTER%"
-if errorlevel 1 (
-    echo.
-    echo ERROR: Both versions failed to launch.
-    echo Python: %PYTHON%
-    echo PyQt6 app: %APP_PYQT6%
-    echo Tkinter app: %APP_TKINTER%
-    echo.
-    pause
-)
+REM Use 'start' to launch GUI in separate window without blocking
+start "" "%PYTHON%" "%APP_PYQT6%"
 
-:end
+REM Small delay to allow GUI to start before batch closes
+timeout /t 2 /nobreak
+
 exit /b 0

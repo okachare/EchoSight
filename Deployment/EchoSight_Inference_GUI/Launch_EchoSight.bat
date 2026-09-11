@@ -52,17 +52,25 @@ echo Runtime: %RUNTIME%
 echo Deployment: %GETI_DEFAULT_DEPLOYMENT%
 echo.
 echo Attempting to launch PyQt6 version (modern UI with Apple-like polish)...
-"%PYTHON%" "%APP_PYQT6%"
+
+REM Try PyQt6 with output capture to see any errors
+"%PYTHON%" "%APP_PYQT6%" 2>nul
+if not errorlevel 1 goto end
+
+echo.
+echo PyQt6 version unavailable or failed. Falling back to Tkinter...
+echo.
+
+REM Fall back to Tkinter
+"%PYTHON%" "%APP_TKINTER%"
 if errorlevel 1 (
-    echo PyQt6 version unavailable. Falling back to Tkinter...
-    "%PYTHON%" "%APP_TKINTER%"
-    if errorlevel 1 (
-        echo.
-        echo Both versions failed to launch. Review the message above.
-        pause
-    )
-) else (
-    goto end
+    echo.
+    echo ERROR: Both versions failed to launch.
+    echo Python: %PYTHON%
+    echo PyQt6 app: %APP_PYQT6%
+    echo Tkinter app: %APP_TKINTER%
+    echo.
+    pause
 )
 
 :end

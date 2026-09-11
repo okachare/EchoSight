@@ -82,9 +82,20 @@ class Theme:
     SHADOW_MD = "0 4px 12px rgba(0, 0, 0, 0.4)"
     SHADOW_LG = "0 8px 24px rgba(0, 0, 0, 0.5)"
     
-    # Transparency
+    # Transparency & Translucency
     ALPHA_HOVER = 0.85
     ALPHA_PRESSED = 0.75
+    
+    # Scroll Bar Translucent Colors
+    SCROLLBAR_HANDLE = "rgba(128, 135, 155, 0.45)"
+    SCROLLBAR_HANDLE_HOVER = "rgba(95, 143, 230, 0.65)"
+    SCROLLBAR_TRACK = "rgba(0, 0, 0, 0.0)"
+    
+    # Rounded Corner Sizes (Apple-like symmetry)
+    RADIUS_SMALL = "4px"        # Checkboxes, minor elements
+    RADIUS_MEDIUM = "8px"       # Buttons, inputs, lists
+    RADIUS_LARGE = "12px"       # Tabs, groups, panes
+    RADIUS_XL = "16px"          # Main containers
 
 
 class TaskType(Enum):
@@ -202,19 +213,29 @@ class EchoSightApp(QMainWindow):
         QTabWidget::pane {{
             border: 1px solid {Theme.BORDER};
             background: {Theme.BG_PRIMARY};
-            border-radius: 8px;
+            border-radius: {Theme.RADIUS_LARGE};
+            margin-top: -1px;
+        }}
+        
+        QTabBar {{
+            background-color: transparent;
+            border: none;
         }}
         
         QTabBar::tab {{
             background: {Theme.BG_SECONDARY};
             color: {Theme.TEXT_SECONDARY};
-            padding: 10px 18px;
-            margin-right: 2px;
-            border-top-left-radius: 8px;
-            border-top-right-radius: 8px;
-            border: 1px solid {Theme.BORDER_LIGHT};
+            padding: 9px 20px;
+            margin-right: 4px;
+            margin-bottom: 0px;
+            border-top-left-radius: {Theme.RADIUS_LARGE};
+            border-top-right-radius: {Theme.RADIUS_LARGE};
+            border: 1px solid {Theme.BORDER};
+            border-bottom: 1px solid {Theme.BORDER};
             font-weight: 500;
             font-size: 11px;
+            min-width: 80px;
+            transition: all 200ms ease-in-out;
         }}
         
         QTabBar::tab:hover {{
@@ -226,14 +247,16 @@ class EchoSightApp(QMainWindow):
         QTabBar::tab:selected {{
             background: {Theme.BG_TERTIARY};
             color: {Theme.TEXT_PRIMARY};
+            border: 1px solid {Theme.BORDER};
             border-bottom: 3px solid {Theme.INFO};
-            font-weight: 600;
+            font-weight: 700;
+            padding: 9px 20px;
         }}
         
         /* ========== GROUPS & FRAMES ========== */
         QGroupBox {{
             border: 1px solid {Theme.BORDER};
-            border-radius: 10px;
+            border-radius: {Theme.RADIUS_LARGE};
             margin-top: 12px;
             padding-top: 12px;
             padding: 12px;
@@ -244,9 +267,11 @@ class EchoSightApp(QMainWindow):
         
         QGroupBox::title {{
             subcontrol-origin: margin;
-            left: 12px;
+            left: 10px;
             padding: 0 6px;
             color: {Theme.TEXT_PRIMARY};
+            font-weight: 700;
+            font-size: 12px;
         }}
         
         QFrame {{
@@ -258,8 +283,8 @@ class EchoSightApp(QMainWindow):
             background-color: {Theme.BG_SECONDARY_ALT};
             color: {Theme.TEXT_PRIMARY};
             border: 1px solid {Theme.BORDER};
-            border-radius: 7px;
-            padding: 7px 10px;
+            border-radius: {Theme.RADIUS_MEDIUM};
+            padding: 8px 12px;
             selection-background-color: {Theme.INFO};
             selection-color: #ffffff;
             font-size: 11px;
@@ -286,18 +311,18 @@ class EchoSightApp(QMainWindow):
             background-color: {Theme.BG_SECONDARY_ALT};
             color: {Theme.TEXT_PRIMARY};
             border: 1px solid {Theme.BORDER};
-            border-radius: 7px;
+            border-radius: {Theme.RADIUS_MEDIUM};
             text-align: center;
             font-weight: 700;
             font-size: 10px;
-            padding: 3px;
-            height: 24px;
+            padding: 2px;
+            height: 28px;
         }}
         
         QProgressBar::chunk {{
             background-color: {Theme.INFO};
-            border-radius: 5px;
-            margin: 1px;
+            border-radius: 6px;
+            margin: 2px;
         }}
         
         QProgressBar[complete="true"]::chunk {{
@@ -309,12 +334,14 @@ class EchoSightApp(QMainWindow):
             background-color: {Theme.BG_SECONDARY};
             color: {Theme.TEXT_PRIMARY};
             border: 1px solid {Theme.BORDER};
-            border-radius: 8px;
+            border-radius: {Theme.RADIUS_MEDIUM};
             padding: 8px 16px;
             font-weight: 600;
             font-size: 11px;
-            min-height: 32px;
+            min-height: 34px;
+            min-width: 60px;
             outline: none;
+            transition: all 150ms ease-in-out;
         }}
         
         QPushButton:hover {{
@@ -326,7 +353,7 @@ class EchoSightApp(QMainWindow):
         QPushButton:pressed {{
             background-color: {Theme.BG_PRIMARY};
             border: 1px solid {Theme.INFO_BORDER};
-            padding: 9px 16px 7px 16px;
+            padding: 8px 16px;
         }}
         
         QPushButton:disabled {{
@@ -341,6 +368,7 @@ class EchoSightApp(QMainWindow):
             color: #0f2416;
             border: 1px solid {Theme.SUCCESS_BORDER};
             font-weight: 700;
+            border-radius: {Theme.RADIUS_MEDIUM};
         }}
         
         QPushButton[role="start"]:hover {{
@@ -351,7 +379,7 @@ class EchoSightApp(QMainWindow):
         QPushButton[role="start"]:pressed {{
             background-color: {Theme.SUCCESS};
             color: #0a1610;
-            padding: 9px 16px 7px 16px;
+            padding: 8px 16px;
         }}
         
         /* Role-based Button: WARNING (Orange) */
@@ -360,6 +388,7 @@ class EchoSightApp(QMainWindow):
             color: #33210a;
             border: 1px solid {Theme.WARNING_BORDER};
             font-weight: 700;
+            border-radius: {Theme.RADIUS_MEDIUM};
         }}
         
         QPushButton[role="warn"]:hover {{
@@ -369,7 +398,7 @@ class EchoSightApp(QMainWindow):
         
         QPushButton[role="warn"]:pressed {{
             background-color: {Theme.WARNING};
-            padding: 9px 16px 7px 16px;
+            padding: 8px 16px;
         }}
         
         /* Role-based Button: STOP (Red) */
@@ -378,6 +407,7 @@ class EchoSightApp(QMainWindow):
             color: #3d1113;
             border: 1px solid {Theme.DANGER_BORDER};
             font-weight: 700;
+            border-radius: {Theme.RADIUS_MEDIUM};
         }}
         
         QPushButton[role="stop"]:hover {{
@@ -387,7 +417,7 @@ class EchoSightApp(QMainWindow):
         
         QPushButton[role="stop"]:pressed {{
             background-color: {Theme.DANGER};
-            padding: 9px 16px 7px 16px;
+            padding: 8px 16px;
         }}
         
         /* ========== TABLES & LISTS ========== */
@@ -396,30 +426,33 @@ class EchoSightApp(QMainWindow):
             alternate-background-color: {Theme.BG_SECONDARY};
             color: {Theme.TEXT_PRIMARY};
             border: 1px solid {Theme.BORDER};
-            border-radius: 8px;
+            border-radius: {Theme.RADIUS_MEDIUM};
             gridline-color: {Theme.BORDER_LIGHT};
             outline: none;
         }}
         
         QTableWidget::item, QListWidget::item {{
-            padding: 4px;
-            border-radius: 4px;
+            padding: 6px 8px;
+            border-radius: {Theme.RADIUS_SMALL};
+            margin: 1px;
         }}
         
         QTableWidget::item:hover, QListWidget::item:hover {{
             background-color: {Theme.BG_TERTIARY};
+            border-radius: {Theme.RADIUS_SMALL};
         }}
         
         QTableWidget::item:selected, QListWidget::item:selected {{
             background-color: {Theme.INFO};
             color: #ffffff;
             font-weight: 600;
+            border-radius: {Theme.RADIUS_SMALL};
         }}
         
         QHeaderView::section {{
             background-color: {Theme.BG_TERTIARY};
             color: {Theme.TEXT_PRIMARY};
-            padding: 6px;
+            padding: 8px 10px;
             border: none;
             border-right: 1px solid {Theme.BORDER};
             border-bottom: 1px solid {Theme.BORDER};
@@ -440,14 +473,14 @@ class EchoSightApp(QMainWindow):
         /* ========== CHECKBOXES ========== */
         QCheckBox {{
             color: {Theme.TEXT_PRIMARY};
-            spacing: 8px;
+            spacing: 10px;
             font-size: 11px;
         }}
         
         QCheckBox::indicator {{
             width: 18px;
             height: 18px;
-            border-radius: 4px;
+            border-radius: {Theme.RADIUS_SMALL};
             border: 1px solid {Theme.BORDER};
             background-color: {Theme.BG_SECONDARY};
         }}
@@ -462,27 +495,57 @@ class EchoSightApp(QMainWindow):
             border: 1px solid {Theme.INFO_BORDER};
         }}
         
-        /* ========== SCROLLBARS ========== */
+        /* ========== SCROLLBARS - Modern Translucent Apple-like ========== */
         QScrollBar:vertical {{
-            background-color: {Theme.BG_SECONDARY_ALT};
+            background-color: transparent;
             width: 12px;
-            border-radius: 6px;
+            border-radius: {Theme.RADIUS_MEDIUM};
+            margin: 0px 0px 0px 0px;
         }}
         
         QScrollBar::handle:vertical {{
-            background-color: {Theme.BORDER};
+            background-color: {Theme.SCROLLBAR_HANDLE};
             border-radius: 6px;
-            min-height: 20px;
-            margin: 2px;
+            min-height: 24px;
+            margin: 0px 2px 0px 2px;
+            border: none;
         }}
         
         QScrollBar::handle:vertical:hover {{
-            background-color: {Theme.INFO};
+            background-color: {Theme.SCROLLBAR_HANDLE_HOVER};
+            border-radius: 6px;
         }}
         
         QScrollBar::sub-line:vertical, QScrollBar::add-line:vertical {{
             border: none;
             background: none;
+            width: 0px;
+            height: 0px;
+        }}
+        
+        QScrollBar:horizontal {{
+            background-color: transparent;
+            height: 12px;
+            border-radius: {Theme.RADIUS_MEDIUM};
+        }}
+        
+        QScrollBar::handle:horizontal {{
+            background-color: {Theme.SCROLLBAR_HANDLE};
+            border-radius: 6px;
+            min-width: 24px;
+            margin: 2px 0px 2px 0px;
+            border: none;
+        }}
+        
+        QScrollBar::handle:horizontal:hover {{
+            background-color: {Theme.SCROLLBAR_HANDLE_HOVER};
+        }}
+        
+        QScrollBar::sub-line:horizontal, QScrollBar::add-line:horizontal {{
+            border: none;
+            background: none;
+            width: 0px;
+            height: 0px;
         }}
         """
         self.setStyleSheet(stylesheet)
